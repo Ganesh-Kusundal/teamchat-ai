@@ -10,6 +10,16 @@
 
 ---
 
+## 📋 Assessment Submission Deliverables
+
+- **Repository**: [https://github.com/Ganesh-Kusundal/teamchat-ai](https://github.com/Ganesh-Kusundal/teamchat-ai)
+- **Role**: Staff/Principal Full-Stack Engineer Technical Assessment
+- **Tech Stack**: Python 3.11+ (FastAPI), React 19 (TypeScript), Vertex AI (Gemini), Cloud Run, Server-Sent Events (SSE)
+- **Automated Tests**: 11/11 Pytest tests passing (`pytest backend/tests/ -q`)
+- **Evaluation Guide**: Pre-seeded with 3 organizations, 8 users, and 1-click test credentials switcher.
+
+---
+
 ## 🏛️ System Architecture
 
 ```mermaid
