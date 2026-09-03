@@ -1,0 +1,1004 @@
+{
+  "note": "Synthetic patients. Records are tenant-scoped by org_slug.",
+  "patients": [
+    {
+      "patient_id": "PT-4001",
+      "org_slug": "northside-health",
+      "name": "Margaret Okafor",
+      "age": 66,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_fbdual_aged",
+        "medicaid_dual": true,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-01-10",
+      "attending_provider": "Dr. Delgado",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "E10.8",
+          "description": "Type 1 diabetes mellitus with unspecified complications",
+          "hcc_v28_code": "37",
+          "last_documented": "2026-01-01",
+          "encounter_id": "ENC-NOR-4001-1"
+        },
+        {
+          "icd10_code": "J44.89",
+          "description": "Other specified chronic obstructive pulmonary disease",
+          "hcc_v28_code": "277",
+          "last_documented": "2026-01-01",
+          "encounter_id": "ENC-NOR-4001-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "N18.32",
+          "description": "Chronic kidney disease, stage 3b",
+          "hcc_v28_code": "329",
+          "last_documented": "2025-01-10",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        },
+        {
+          "icd10_code": "F02.B18",
+          "description": "Dementia in other diseases classified elsewhere, moderate, with other behavioral disturbance",
+          "hcc_v28_code": "125",
+          "last_documented": "2025-01-10",
+          "evidence": "abnormal lab in 2026, no assessment documented"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4002",
+      "org_slug": "northside-health",
+      "name": "Walter Whitfield",
+      "age": 73,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-02-11",
+      "attending_provider": "Dr. Brennan",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "I50.22",
+          "description": "Chronic systolic (congestive) heart failure",
+          "hcc_v28_code": "226",
+          "last_documented": "2026-02-02",
+          "encounter_id": "ENC-NOR-4002-1"
+        },
+        {
+          "icd10_code": "I49.02",
+          "description": "Ventricular flutter",
+          "hcc_v28_code": "238",
+          "last_documented": "2026-02-02",
+          "encounter_id": "ENC-NOR-4002-2"
+        },
+        {
+          "icd10_code": "E11.610",
+          "description": "Type 2 diabetes mellitus with diabetic neuropathic arthropathy",
+          "hcc_v28_code": "36",
+          "last_documented": "2026-02-02",
+          "encounter_id": "ENC-NOR-4002-3"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "E11.59",
+          "description": "Type 2 diabetes mellitus with other circulatory complications",
+          "hcc_v28_code": "36",
+          "last_documented": "2025-02-11",
+          "evidence": "problem list only, no MEAT in 2026 encounters"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4003",
+      "org_slug": "northside-health",
+      "name": "Yolanda Nakamura",
+      "age": 80,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-03-12",
+      "attending_provider": "Dr. Iyer",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "E11.22",
+          "description": "Type 2 diabetes mellitus with diabetic chronic kidney disease",
+          "hcc_v28_code": "36",
+          "last_documented": "2026-02-04",
+          "encounter_id": "ENC-NOR-4003-1"
+        },
+        {
+          "icd10_code": "E11.9",
+          "description": "Type 2 diabetes mellitus without complications",
+          "hcc_v28_code": "37",
+          "last_documented": "2026-01-12",
+          "encounter_id": "ENC-NOR-4003-2"
+        },
+        {
+          "icd10_code": "N18.4",
+          "description": "Chronic kidney disease, stage 4 (severe)",
+          "hcc_v28_code": "327",
+          "last_documented": "2026-02-04",
+          "encounter_id": "ENC-NOR-4003-3"
+        },
+        {
+          "icd10_code": "I10",
+          "description": "Essential (primary) hypertension",
+          "hcc_v28_code": "",
+          "last_documented": "2026-02-04",
+          "encounter_id": "ENC-NOR-4003-4"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "I50.32",
+          "description": "Chronic diastolic (congestive) heart failure",
+          "hcc_v28_code": "226",
+          "last_documented": "2025-11-08",
+          "evidence": "echo in 2025 showed preserved EF with diastolic dysfunction; on furosemide, not addressed in 2026"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4004",
+      "org_slug": "northside-health",
+      "name": "Rajesh Delgado",
+      "age": 87,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-04-13",
+      "attending_provider": "Dr. Kowalski",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "C79.11",
+          "description": "Secondary malignant neoplasm of bladder",
+          "hcc_v28_code": "17",
+          "last_documented": "2026-04-04",
+          "encounter_id": "ENC-NOR-4004-1"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "E43",
+          "description": "Unspecified severe protein-calorie malnutrition",
+          "hcc_v28_code": "63",
+          "last_documented": "2025-04-13",
+          "evidence": "abnormal lab in 2026, no assessment documented"
+        },
+        {
+          "icd10_code": "M05.631",
+          "description": "Rheumatoid arthritis of right wrist with involvement of other organs and systems",
+          "hcc_v28_code": "105",
+          "last_documented": "2025-04-13",
+          "evidence": "active medication on file, condition not addressed in 2026"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4005",
+      "org_slug": "northside-health",
+      "name": "Ana Brennan",
+      "age": 67,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_fbdual_aged",
+        "medicaid_dual": true,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-05-14",
+      "attending_provider": "Dr. Mbeki",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "F02.A0",
+          "description": "Dementia in other diseases classified elsewhere, mild, without behavioral disturbance, psychotic disturbance, mood disturbance, and anxiety",
+          "hcc_v28_code": "125",
+          "last_documented": "2026-05-05",
+          "encounter_id": "ENC-NOR-4005-1"
+        },
+        {
+          "icd10_code": "L89.611",
+          "description": "Pressure ulcer of right heel, stage 1",
+          "hcc_v28_code": "379",
+          "last_documented": "2026-05-05",
+          "encounter_id": "ENC-NOR-4005-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "C50.A0",
+          "description": "Malignant inflammatory neoplasm of unspecified breast",
+          "hcc_v28_code": "20",
+          "last_documented": "2025-05-14",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4006",
+      "org_slug": "northside-health",
+      "name": "Otis Iyer",
+      "age": 74,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-06-15",
+      "attending_provider": "Dr. Salazar",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "E11.3392",
+          "description": "Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema, left eye",
+          "hcc_v28_code": "36",
+          "last_documented": "2026-06-06",
+          "encounter_id": "ENC-NOR-4006-1"
+        },
+        {
+          "icd10_code": "N18.4",
+          "description": "Chronic kidney disease, stage 4 (severe)",
+          "hcc_v28_code": "327",
+          "last_documented": "2026-06-06",
+          "encounter_id": "ENC-NOR-4006-2"
+        },
+        {
+          "icd10_code": "I71.12",
+          "description": "Aneurysm of the aortic arch, ruptured",
+          "hcc_v28_code": "267",
+          "last_documented": "2026-06-06",
+          "encounter_id": "ENC-NOR-4006-3"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "Z99.2",
+          "description": "Dependence on renal dialysis",
+          "hcc_v28_code": "326",
+          "last_documented": "2025-06-15",
+          "evidence": "problem list only, no MEAT in 2026 encounters"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4007",
+      "org_slug": "northside-health",
+      "name": "Carmen Kowalski",
+      "age": 81,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-07-16",
+      "attending_provider": "Dr. Thornton",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "N18.9",
+          "description": "Chronic kidney disease, unspecified",
+          "hcc_v28_code": "",
+          "last_documented": "2026-03-02",
+          "encounter_id": "ENC-NOR-4007-1"
+        },
+        {
+          "icd10_code": "J44.9",
+          "description": "Chronic obstructive pulmonary disease, unspecified",
+          "hcc_v28_code": "277",
+          "last_documented": "2026-03-02",
+          "encounter_id": "ENC-NOR-4007-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "N18.32",
+          "description": "Chronic kidney disease, stage 3b",
+          "hcc_v28_code": "329",
+          "last_documented": "2025-09-15",
+          "evidence": "two eGFR results of 38 and 41 in 2026, stage never documented"
+        },
+        {
+          "icd10_code": "E11.22",
+          "description": "Type 2 diabetes mellitus with diabetic chronic kidney disease",
+          "hcc_v28_code": "36",
+          "last_documented": "2025-10-20",
+          "evidence": "on insulin with albuminuria, diabetes not linked to CKD in any 2026 note"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4008",
+      "org_slug": "northside-health",
+      "name": "Nikolai Mbeki",
+      "age": 88,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-08-17",
+      "attending_provider": "Dr. Petrov",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "M05.451",
+          "description": "Rheumatoid myopathy with rheumatoid arthritis of right hip",
+          "hcc_v28_code": "105",
+          "last_documented": "2026-01-08",
+          "encounter_id": "ENC-NOR-4008-1"
+        },
+        {
+          "icd10_code": "F33.3",
+          "description": "Major depressive disorder, recurrent, severe with psychotic symptoms",
+          "hcc_v28_code": "155",
+          "last_documented": "2026-01-08",
+          "encounter_id": "ENC-NOR-4008-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "G20.A1",
+          "description": "Parkinson's disease without dyskinesia, without mention of fluctuations",
+          "hcc_v28_code": "180",
+          "last_documented": "2025-08-17",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4009",
+      "org_slug": "northside-health",
+      "name": "Ingrid Salazar",
+      "age": 68,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_fbdual_aged",
+        "medicaid_dual": true,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-01-18",
+      "attending_provider": "Dr. Haddad",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "C19",
+          "description": "Malignant neoplasm of rectosigmoid junction",
+          "hcc_v28_code": "20",
+          "last_documented": "2026-02-01",
+          "encounter_id": "ENC-NOR-4009-1"
+        },
+        {
+          "icd10_code": "N18.32",
+          "description": "Chronic kidney disease, stage 3b",
+          "hcc_v28_code": "329",
+          "last_documented": "2026-02-01",
+          "encounter_id": "ENC-NOR-4009-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "E13.628",
+          "description": "Other specified diabetes mellitus with other skin complications",
+          "hcc_v28_code": "37",
+          "last_documented": "2025-09-18",
+          "evidence": "problem list only, no MEAT in 2026 encounters"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4010",
+      "org_slug": "northside-health",
+      "name": "Curtis Thornton",
+      "age": 75,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-02-10",
+      "attending_provider": "Dr. Ferreira",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "N18.6",
+          "description": "End stage renal disease",
+          "hcc_v28_code": "326",
+          "last_documented": "2026-03-02",
+          "encounter_id": "ENC-NOR-4010-1"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "I50.22",
+          "description": "Chronic systolic (congestive) heart failure",
+          "hcc_v28_code": "226",
+          "last_documented": "2025-01-10",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        },
+        {
+          "icd10_code": "I09.0",
+          "description": "Rheumatic myocarditis",
+          "hcc_v28_code": "226",
+          "last_documented": "2025-01-10",
+          "evidence": "abnormal lab in 2026, no assessment documented"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4011",
+      "org_slug": "northside-health",
+      "name": "Beatrice Petrov",
+      "age": 82,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-03-11",
+      "attending_provider": "Dr. Lindqvist",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "K74.2",
+          "description": "Hepatic fibrosis with hepatic sclerosis",
+          "hcc_v28_code": "62",
+          "last_documented": "2026-04-03",
+          "encounter_id": "ENC-NOR-4011-1"
+        },
+        {
+          "icd10_code": "F14.23",
+          "description": "Cocaine dependence with withdrawal",
+          "hcc_v28_code": "139",
+          "last_documented": "2026-04-03",
+          "encounter_id": "ENC-NOR-4011-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "F25.8",
+          "description": "Other schizoaffective disorders",
+          "hcc_v28_code": "151",
+          "last_documented": "2025-02-11",
+          "evidence": "abnormal lab in 2026, no assessment documented"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4012",
+      "org_slug": "northside-health",
+      "name": "Dmitri Haddad",
+      "age": 89,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-04-12",
+      "attending_provider": "Dr. Ochoa",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "G20.A1",
+          "description": "Parkinson's disease without dyskinesia, without mention of fluctuations",
+          "hcc_v28_code": "180",
+          "last_documented": "2026-05-04",
+          "encounter_id": "ENC-NOR-4012-1"
+        },
+        {
+          "icd10_code": "F03.B3",
+          "description": "Unspecified dementia, moderate, with mood disturbance",
+          "hcc_v28_code": "126",
+          "last_documented": "2026-05-04",
+          "encounter_id": "ENC-NOR-4012-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "C78.4",
+          "description": "Secondary malignant neoplasm of small intestine",
+          "hcc_v28_code": "17",
+          "last_documented": "2025-03-12",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4013",
+      "org_slug": "valley-primary-care",
+      "name": "Harold Ferreira",
+      "age": 69,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_fbdual_aged",
+        "medicaid_dual": true,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-01-10",
+      "attending_provider": "Dr. Salazar",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "E11.59",
+          "description": "Type 2 diabetes mellitus with other circulatory complications",
+          "hcc_v28_code": "36",
+          "last_documented": "2026-01-01",
+          "encounter_id": "ENC-VAL-4013-1"
+        },
+        {
+          "icd10_code": "N18.4",
+          "description": "Chronic kidney disease, stage 4 (severe)",
+          "hcc_v28_code": "327",
+          "last_documented": "2026-01-01",
+          "encounter_id": "ENC-VAL-4013-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "I70.65",
+          "description": "Atherosclerosis of nonbiological bypass graft(s) of other extremity with ulceration",
+          "hcc_v28_code": "267",
+          "last_documented": "2025-01-10",
+          "evidence": "active medication on file, condition not addressed in 2026"
+        },
+        {
+          "icd10_code": "Z99.2",
+          "description": "Dependence on renal dialysis",
+          "hcc_v28_code": "326",
+          "last_documented": "2025-01-10",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4014",
+      "org_slug": "valley-primary-care",
+      "name": "Dolores Lindqvist",
+      "age": 76,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-02-11",
+      "attending_provider": "Dr. Thornton",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "J43.1",
+          "description": "Panlobular emphysema",
+          "hcc_v28_code": "277",
+          "last_documented": "2026-02-02",
+          "encounter_id": "ENC-VAL-4014-1"
+        },
+        {
+          "icd10_code": "J96.22",
+          "description": "Acute and chronic respiratory failure with hypercapnia",
+          "hcc_v28_code": "283",
+          "last_documented": "2026-02-02",
+          "encounter_id": "ENC-VAL-4014-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "K70.30",
+          "description": "Alcoholic cirrhosis of liver without ascites",
+          "hcc_v28_code": "62",
+          "last_documented": "2025-02-11",
+          "evidence": "abnormal lab in 2026, no assessment documented"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4015",
+      "org_slug": "valley-primary-care",
+      "name": "Jerome Ochoa",
+      "age": 83,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-03-12",
+      "attending_provider": "Dr. Petrov",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "M05.49",
+          "description": "Rheumatoid myopathy with rheumatoid arthritis of multiple sites",
+          "hcc_v28_code": "105",
+          "last_documented": "2026-03-03",
+          "encounter_id": "ENC-VAL-4015-1"
+        },
+        {
+          "icd10_code": "F32.2",
+          "description": "Major depressive disorder, single episode, severe without psychotic features",
+          "hcc_v28_code": "155",
+          "last_documented": "2026-03-03",
+          "encounter_id": "ENC-VAL-4015-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "G20.A2",
+          "description": "Parkinson's disease without dyskinesia, with fluctuations",
+          "hcc_v28_code": "180",
+          "last_documented": "2025-03-12",
+          "evidence": "active medication on file, condition not addressed in 2026"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4016",
+      "org_slug": "valley-primary-care",
+      "name": "Priya Bhatt",
+      "age": 90,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-04-13",
+      "attending_provider": "Dr. Haddad",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "C50.422",
+          "description": "Malignant neoplasm of upper-outer quadrant of left male breast",
+          "hcc_v28_code": "20",
+          "last_documented": "2026-04-04",
+          "encounter_id": "ENC-VAL-4016-1"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "I12.9",
+          "description": "Hypertensive chronic kidney disease with stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease",
+          "hcc_v28_code": "329",
+          "last_documented": "2025-04-13",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        },
+        {
+          "icd10_code": "E13.628",
+          "description": "Other specified diabetes mellitus with other skin complications",
+          "hcc_v28_code": "37",
+          "last_documented": "2025-04-13",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4017",
+      "org_slug": "valley-primary-care",
+      "name": "Luis Draper",
+      "age": 70,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_fbdual_aged",
+        "medicaid_dual": true,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-05-14",
+      "attending_provider": "Dr. Ferreira",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "N18.6",
+          "description": "End stage renal disease",
+          "hcc_v28_code": "326",
+          "last_documented": "2026-05-05",
+          "encounter_id": "ENC-VAL-4017-1"
+        },
+        {
+          "icd10_code": "I50.1",
+          "description": "Left ventricular failure, unspecified",
+          "hcc_v28_code": "226",
+          "last_documented": "2026-05-05",
+          "encounter_id": "ENC-VAL-4017-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "I50.1",
+          "description": "Left ventricular failure, unspecified",
+          "hcc_v28_code": "226",
+          "last_documented": "2025-05-14",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4018",
+      "org_slug": "valley-primary-care",
+      "name": "Ruth Novak",
+      "age": 77,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-06-15",
+      "attending_provider": "Dr. Lindqvist",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "K74.60",
+          "description": "Unspecified cirrhosis of liver",
+          "hcc_v28_code": "62",
+          "last_documented": "2026-06-06",
+          "encounter_id": "ENC-VAL-4018-1"
+        },
+        {
+          "icd10_code": "F11.122",
+          "description": "Opioid abuse with intoxication with perceptual disturbance",
+          "hcc_v28_code": "139",
+          "last_documented": "2026-06-06",
+          "encounter_id": "ENC-VAL-4018-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "F25.9",
+          "description": "Schizoaffective disorder, unspecified",
+          "hcc_v28_code": "151",
+          "last_documented": "2025-06-15",
+          "evidence": "active medication on file, condition not addressed in 2026"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4019",
+      "org_slug": "valley-primary-care",
+      "name": "Frank Espinoza",
+      "age": 84,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-07-16",
+      "attending_provider": "Dr. Ochoa",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "G20.A1",
+          "description": "Parkinson's disease without dyskinesia, without mention of fluctuations",
+          "hcc_v28_code": "180",
+          "last_documented": "2026-07-07",
+          "encounter_id": "ENC-VAL-4019-1"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "F03.C11",
+          "description": "Unspecified dementia, severe, with agitation",
+          "hcc_v28_code": "126",
+          "last_documented": "2025-07-16",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        },
+        {
+          "icd10_code": "C79.2",
+          "description": "Secondary malignant neoplasm of skin",
+          "hcc_v28_code": "17",
+          "last_documented": "2025-07-16",
+          "evidence": "abnormal lab in 2026, no assessment documented"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4020",
+      "org_slug": "valley-primary-care",
+      "name": "Helen Quinn",
+      "age": 91,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-08-17",
+      "attending_provider": "Dr. Bhatt",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "E13.52",
+          "description": "Other specified diabetes mellitus with diabetic peripheral angiopathy with gangrene",
+          "hcc_v28_code": "37",
+          "last_documented": "2026-01-08",
+          "encounter_id": "ENC-VAL-4020-1"
+        },
+        {
+          "icd10_code": "J44.89",
+          "description": "Other specified chronic obstructive pulmonary disease",
+          "hcc_v28_code": "277",
+          "last_documented": "2026-01-08",
+          "encounter_id": "ENC-VAL-4020-2"
+        },
+        {
+          "icd10_code": "N18.31",
+          "description": "Chronic kidney disease, stage 3a",
+          "hcc_v28_code": "329",
+          "last_documented": "2026-01-08",
+          "encounter_id": "ENC-VAL-4020-3"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "F02.C11",
+          "description": "Dementia in other diseases classified elsewhere, severe, with agitation",
+          "hcc_v28_code": "125",
+          "last_documented": "2025-08-17",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4021",
+      "org_slug": "valley-primary-care",
+      "name": "Samuel Rasmussen",
+      "age": 71,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_fbdual_aged",
+        "medicaid_dual": true,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-01-18",
+      "attending_provider": "Dr. Draper",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "I50.42",
+          "description": "Chronic combined systolic (congestive) and diastolic (congestive) heart failure",
+          "hcc_v28_code": "226",
+          "last_documented": "2026-02-01",
+          "encounter_id": "ENC-VAL-4021-1"
+        },
+        {
+          "icd10_code": "I47.11",
+          "description": "Inappropriate sinus tachycardia, so stated",
+          "hcc_v28_code": "238",
+          "last_documented": "2026-02-01",
+          "encounter_id": "ENC-VAL-4021-2"
+        },
+        {
+          "icd10_code": "E10.641",
+          "description": "Type 1 diabetes mellitus with hypoglycemia with coma",
+          "hcc_v28_code": "36",
+          "last_documented": "2026-02-01",
+          "encounter_id": "ENC-VAL-4021-3"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "E10.3552",
+          "description": "Type 1 diabetes mellitus with stable proliferative diabetic retinopathy, left eye",
+          "hcc_v28_code": "36",
+          "last_documented": "2025-09-18",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4022",
+      "org_slug": "valley-primary-care",
+      "name": "Ada Villanueva",
+      "age": 78,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-02-10",
+      "attending_provider": "Dr. Novak",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "F25.8",
+          "description": "Other schizoaffective disorders",
+          "hcc_v28_code": "151",
+          "last_documented": "2026-03-02",
+          "encounter_id": "ENC-VAL-4022-1"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "F14.11",
+          "description": "Cocaine abuse, in remission",
+          "hcc_v28_code": "139",
+          "last_documented": "2025-01-10",
+          "evidence": "active medication on file, condition not addressed in 2026"
+        },
+        {
+          "icd10_code": "J41.0",
+          "description": "Simple chronic bronchitis",
+          "hcc_v28_code": "277",
+          "last_documented": "2025-01-10",
+          "evidence": "abnormal lab in 2026, no assessment documented"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4023",
+      "org_slug": "valley-primary-care",
+      "name": "Alfred Achebe",
+      "age": 85,
+      "sex": "M",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-PPO"
+      },
+      "last_visit": "2026-03-11",
+      "attending_provider": "Dr. Espinoza",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "C77.2",
+          "description": "Secondary and unspecified malignant neoplasm of intra-abdominal lymph nodes",
+          "hcc_v28_code": "17",
+          "last_documented": "2026-04-03",
+          "encounter_id": "ENC-VAL-4023-1"
+        },
+        {
+          "icd10_code": "E64.0",
+          "description": "Sequelae of protein-calorie malnutrition",
+          "hcc_v28_code": "63",
+          "last_documented": "2026-04-03",
+          "encounter_id": "ENC-VAL-4023-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "M05.712",
+          "description": "Rheumatoid arthritis with rheumatoid factor of left shoulder without organ or systems involvement",
+          "hcc_v28_code": "105",
+          "last_documented": "2025-02-11",
+          "evidence": "documented by specialist in 2025, not carried forward"
+        }
+      ]
+    },
+    {
+      "patient_id": "PT-4024",
+      "org_slug": "valley-primary-care",
+      "name": "Nadia Moreau",
+      "age": 92,
+      "sex": "F",
+      "enrollment": {
+        "model_segment": "community_nondual_aged",
+        "medicaid_dual": false,
+        "plan": "MA-HMO"
+      },
+      "last_visit": "2026-04-12",
+      "attending_provider": "Dr. Quinn",
+      "documented_conditions_2026": [
+        {
+          "icd10_code": "G30.1",
+          "description": "Alzheimer's disease with late onset",
+          "hcc_v28_code": "125",
+          "last_documented": "2026-05-04",
+          "encounter_id": "ENC-VAL-4024-1"
+        },
+        {
+          "icd10_code": "L89.011",
+          "description": "Pressure ulcer of right elbow, stage 1",
+          "hcc_v28_code": "379",
+          "last_documented": "2026-05-04",
+          "encounter_id": "ENC-VAL-4024-2"
+        }
+      ],
+      "suspected_conditions": [
+        {
+          "icd10_code": "C19",
+          "description": "Malignant neoplasm of rectosigmoid junction",
+          "hcc_v28_code": "20",
+          "last_documented": "2025-03-12",
+          "evidence": "abnormal lab in 2026, no assessment documented"
+        }
+      ]
+    }
+  ]
+}

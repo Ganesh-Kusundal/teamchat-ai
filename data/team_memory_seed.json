@@ -1,0 +1,122 @@
+{
+  "note": "Pre-existing team memories for the team_memory tool. Every value is a flat dictionary exactly one level deep (string / number / boolean only). Partitioned by org_slug: a recall must never cross that boundary. Both organizations intentionally share the key 'q1_recapture_target' with different values.",
+  "version": "teamchat-seed-2026.1",
+  "memories": [
+    {
+      "memory_id": "MEM-NOR-001",
+      "org_slug": "northside-health",
+      "key": "diabetes_documentation_policy",
+      "value": {
+        "rule": "state the causal link between diabetes and CKD explicitly in the assessment, do not leave it implied",
+        "approved_by": "Dr. Halloran",
+        "effective_date": "2026-02-01",
+        "applies_to": "all providers",
+        "mandatory": true
+      },
+      "created_by": "sarah@northside-health.test",
+      "created_at": "2026-02-03T15:22:00Z",
+      "room": "coding-huddle"
+    },
+    {
+      "memory_id": "MEM-NOR-002",
+      "org_slug": "northside-health",
+      "key": "q1_recapture_target",
+      "value": {
+        "target_rate": "92%",
+        "current_rate": "78%",
+        "owner": "Priya Ramaswamy",
+        "due_date": "2026-06-30",
+        "escalate_below": "70%"
+      },
+      "created_by": "mike@northside-health.test",
+      "created_at": "2026-01-19T11:05:00Z",
+      "room": "coding-huddle"
+    },
+    {
+      "memory_id": "MEM-NOR-003",
+      "org_slug": "northside-health",
+      "key": "ehr_problem_list_quirk",
+      "value": {
+        "issue": "the problem list carries last year's unspecified codes forward automatically",
+        "workaround": "re-verify CKD stage from the most recent eGFR before coding",
+        "reported_by": "Tom Castellanos",
+        "ticket": "IT-4471",
+        "open": true
+      },
+      "created_by": "lisa@northside-health.test",
+      "created_at": "2026-02-11T09:40:00Z",
+      "room": "care-gaps"
+    },
+    {
+      "memory_id": "MEM-NOR-004",
+      "org_slug": "northside-health",
+      "key": "friday_chart_review_ritual",
+      "value": {
+        "cadence": "every Friday 08:30 local",
+        "facilitator": "Priya Ramaswamy",
+        "scope": "top 20 patients by open gap value",
+        "duration_minutes": 45
+      },
+      "created_by": "sarah@northside-health.test",
+      "created_at": "2026-01-09T16:12:00Z",
+      "room": "general"
+    },
+    {
+      "memory_id": "MEM-VAL-001",
+      "org_slug": "valley-primary-care",
+      "key": "q1_recapture_target",
+      "value": {
+        "target_rate": "85%",
+        "current_rate": "81%",
+        "owner": "Dr. Sorensen",
+        "due_date": "2026-05-15",
+        "escalate_below": "75%"
+      },
+      "created_by": "elena@valley-primary-care.test",
+      "created_at": "2026-01-22T14:31:00Z",
+      "room": "risk-adjustment"
+    },
+    {
+      "memory_id": "MEM-VAL-002",
+      "org_slug": "valley-primary-care",
+      "key": "awv_scheduling_rule",
+      "value": {
+        "rule": "book the annual wellness visit in January for any patient with two or more chronic HCCs",
+        "owner": "Dr. Sorensen",
+        "effective_date": "2026-01-05",
+        "exception": "skip if a hospital discharge occurred in the last 30 days"
+      },
+      "created_by": "elena@valley-primary-care.test",
+      "created_at": "2026-01-05T10:02:00Z",
+      "room": "risk-adjustment"
+    },
+    {
+      "memory_id": "MEM-VAL-003",
+      "org_slug": "valley-primary-care",
+      "key": "coder_review_queue_rule",
+      "value": {
+        "rule": "any chart with an unspecified chronic code goes to the coder queue before the claim is dropped",
+        "queue_owner": "Marta Escalante",
+        "sla_hours": 48,
+        "auto_release": false
+      },
+      "created_by": "diego@valley-primary-care.test",
+      "created_at": "2026-02-06T13:18:00Z",
+      "room": "risk-adjustment"
+    },
+    {
+      "memory_id": "MEM-VAL-004",
+      "org_slug": "valley-primary-care",
+      "key": "specialist_records_lag",
+      "value": {
+        "issue": "cardiology notes from the affiliated group arrive 2 to 3 weeks late",
+        "workaround": "check the fax queue before declaring a heart failure gap unsupported",
+        "reported_by": "Diego Arriaga",
+        "recurring": true
+      },
+      "created_by": "diego@valley-primary-care.test",
+      "created_at": "2026-02-17T08:55:00Z",
+      "room": "care-gaps"
+    }
+  ]
+}

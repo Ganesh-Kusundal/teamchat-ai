@@ -1,0 +1,96 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOrgMember(orgId) {
+      return isAuthenticated() && 
+        request.auth.token.orgId == orgId;
+    }
+
+    function isOrgAdmin(orgId) {
+      return isOrgMember(orgId) && 
+        request.auth.token.role == 'admin';
+    }
+
+    function isRoomMember(orgId, roomId) {
+      return isOrgMember(orgId) &&
+        exists(/databases/$(database)/documents/organizations/$(orgId)/rooms/$(roomId)/members/$(request.auth.uid));
+    }
+
+    // 1. Organizations Collection (Tenant Boundary)
+    match /organizations/{orgId} {
+      allow read: if isOrgMember(orgId);
+      allow write: if isOrgAdmin(orgId);
+
+      // 2. Organization Users
+      match /users/{uid} {
+        allow read: if isOrgMember(orgId);
+        allow write: if isOrgAdmin(orgId) || (isAuthenticated() && request.auth.uid == uid);
+      }
+
+      // 3. Rooms
+      match /rooms/{roomId} {
+        allow read: if isOrgMember(orgId) && 
+          (!resource.data.isPrivate || isRoomMember(orgId, roomId));
+        allow create: if isOrgAdmin(orgId);
+        allow update, delete: if isOrgAdmin(orgId);
+
+        // 4. Room Members
+        match /members/{memberId} {
+          allow read: if isOrgMember(orgId);
+          allow write: if isOrgAdmin(orgId);
+        }
+
+        // 5. Messages
+        match /messages/{messageId} {
+          allow read: if isRoomMember(orgId, roomId);
+          allow create: if isRoomMember(orgId, roomId) && 
+            request.resource.data.senderId == request.auth.uid &&
+            request.resource.data.orgId == orgId &&
+            request.resource.data.roomId == roomId;
+          allow update, delete: if isOrgAdmin(orgId);
+        }
+
+        // 6. Real-Time Presence & Typing (Transient State)
+        match /presence/{uid} {
+          allow read: if isOrgMember(orgId);
+          allow write: if isAuthenticated() && request.auth.uid == uid;
+        }
+
+        match /typing/{uid} {
+          allow read: if isRoomMember(orgId, roomId);
+          allow write: if isAuthenticated() && request.auth.uid == uid;
+        }
+
+        // 7. AI Requests & Grounding Audit Records
+        match /aiRequests/{requestId} {
+          allow read: if isRoomMember(orgId, roomId);
+          allow write: if false; // Only Cloud Run backend writes AI records
+        }
+
+        match /toolCalls/{toolCallId} {
+          allow read: if isRoomMember(orgId, roomId);
+          allow write: if false; // Only Cloud Run backend writes tool call audit logs
+        }
+
+        match /grounding/{groundingId} {
+          allow read: if isRoomMember(orgId, roomId);
+          allow write: if false; // Only Cloud Run backend writes grounding records
+        }
+      }
+
+      // 8. Organization-Scoped Team Memory
+      match /memories/{memoryId} {
+        allow read: if isOrgMember(orgId);
+        allow create, update: if isOrgMember(orgId) &&
+          request.resource.data.org_slug == orgId;
+        allow delete: if isOrgAdmin(orgId);
+      }
+    }
+  }
+}

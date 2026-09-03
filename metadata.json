@@ -1,0 +1,6 @@
+{
+  "name": "TeamChat AI",
+  "description": "Multi-tenant collaborative AI chat platform with real-time messaging, presence, user attribution, and Gemini AI integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,1001 @@
+icd10_code,description,code_family,chapter,chronic,specificity,hcc_v28_code,hcc_v28_label
+B34.0,"Adenovirus infection, unspecified",B34,Certain infectious and parasitic diseases,false,unspecified,,
+B34.1,"Enterovirus infection, unspecified",B34,Certain infectious and parasitic diseases,false,unspecified,,
+B34.2,"Coronavirus infection, unspecified",B34,Certain infectious and parasitic diseases,false,unspecified,,
+B34.3,"Parvovirus infection, unspecified",B34,Certain infectious and parasitic diseases,false,unspecified,,
+B34.4,"Papovavirus infection, unspecified",B34,Certain infectious and parasitic diseases,false,unspecified,,
+B34.8,Other viral infections of unspecified site,B34,Certain infectious and parasitic diseases,false,unspecified,,
+B34.9,"Viral infection, unspecified",B34,Certain infectious and parasitic diseases,false,unspecified,,
+C18.0,Malignant neoplasm of cecum,C18,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C18.1,Malignant neoplasm of appendix,C18,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C18.2,Malignant neoplasm of ascending colon,C18,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C18.3,Malignant neoplasm of hepatic flexure,C18,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C18.4,Malignant neoplasm of transverse colon,C18,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C18.5,Malignant neoplasm of splenic flexure,C18,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C18.6,Malignant neoplasm of descending colon,C18,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C18.7,Malignant neoplasm of sigmoid colon,C18,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C18.8,Malignant neoplasm of overlapping sites of colon,C18,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C18.9,"Malignant neoplasm of colon, unspecified",C18,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C19,Malignant neoplasm of rectosigmoid junction,C19,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C20,Malignant neoplasm of rectum,C20,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C25.0,Malignant neoplasm of head of pancreas,C25,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C25.1,Malignant neoplasm of body of pancreas,C25,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C25.2,Malignant neoplasm of tail of pancreas,C25,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C25.3,Malignant neoplasm of pancreatic duct,C25,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C25.4,Malignant neoplasm of endocrine pancreas,C25,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C25.7,Malignant neoplasm of other parts of pancreas,C25,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C25.8,Malignant neoplasm of overlapping sites of pancreas,C25,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C25.9,"Malignant neoplasm of pancreas, unspecified",C25,Neoplasms,true,unspecified,18,"Pancreas, Brain and Other Severe Cancers"
+C34.00,Malignant neoplasm of unspecified main bronchus,C34,Neoplasms,true,unspecified,19,Lung and Other Severe Cancers
+C34.01,Malignant neoplasm of right main bronchus,C34,Neoplasms,true,specified,19,Lung and Other Severe Cancers
+C34.02,Malignant neoplasm of left main bronchus,C34,Neoplasms,true,specified,19,Lung and Other Severe Cancers
+C34.10,"Malignant neoplasm of upper lobe, unspecified bronchus or lung",C34,Neoplasms,true,unspecified,19,Lung and Other Severe Cancers
+C34.11,"Malignant neoplasm of upper lobe, right bronchus or lung",C34,Neoplasms,true,specified,19,Lung and Other Severe Cancers
+C34.12,"Malignant neoplasm of upper lobe, left bronchus or lung",C34,Neoplasms,true,specified,19,Lung and Other Severe Cancers
+C34.2,"Malignant neoplasm of middle lobe, bronchus or lung",C34,Neoplasms,true,specified,19,Lung and Other Severe Cancers
+C34.30,"Malignant neoplasm of lower lobe, unspecified bronchus or lung",C34,Neoplasms,true,unspecified,19,Lung and Other Severe Cancers
+C34.31,"Malignant neoplasm of lower lobe, right bronchus or lung",C34,Neoplasms,true,specified,19,Lung and Other Severe Cancers
+C34.32,"Malignant neoplasm of lower lobe, left bronchus or lung",C34,Neoplasms,true,specified,19,Lung and Other Severe Cancers
+C34.80,Malignant neoplasm of overlapping sites of unspecified bronchus and lung,C34,Neoplasms,true,unspecified,19,Lung and Other Severe Cancers
+C34.81,Malignant neoplasm of overlapping sites of right bronchus and lung,C34,Neoplasms,true,specified,19,Lung and Other Severe Cancers
+C34.82,Malignant neoplasm of overlapping sites of left bronchus and lung,C34,Neoplasms,true,specified,19,Lung and Other Severe Cancers
+C34.90,Malignant neoplasm of unspecified part of unspecified bronchus or lung,C34,Neoplasms,true,unspecified,19,Lung and Other Severe Cancers
+C34.91,Malignant neoplasm of unspecified part of right bronchus or lung,C34,Neoplasms,true,unspecified,19,Lung and Other Severe Cancers
+C34.92,Malignant neoplasm of unspecified part of left bronchus or lung,C34,Neoplasms,true,unspecified,19,Lung and Other Severe Cancers
+C50.011,"Malignant neoplasm of nipple and areola, right female breast",C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.012,"Malignant neoplasm of nipple and areola, left female breast",C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.019,"Malignant neoplasm of nipple and areola, unspecified female breast",C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.021,"Malignant neoplasm of nipple and areola, right male breast",C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.022,"Malignant neoplasm of nipple and areola, left male breast",C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.029,"Malignant neoplasm of nipple and areola, unspecified male breast",C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.111,Malignant neoplasm of central portion of right female breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.112,Malignant neoplasm of central portion of left female breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.119,Malignant neoplasm of central portion of unspecified female breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.121,Malignant neoplasm of central portion of right male breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.122,Malignant neoplasm of central portion of left male breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.129,Malignant neoplasm of central portion of unspecified male breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.211,Malignant neoplasm of upper-inner quadrant of right female breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.212,Malignant neoplasm of upper-inner quadrant of left female breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.219,Malignant neoplasm of upper-inner quadrant of unspecified female breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.221,Malignant neoplasm of upper-inner quadrant of right male breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.222,Malignant neoplasm of upper-inner quadrant of left male breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.229,Malignant neoplasm of upper-inner quadrant of unspecified male breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.311,Malignant neoplasm of lower-inner quadrant of right female breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.312,Malignant neoplasm of lower-inner quadrant of left female breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.321,Malignant neoplasm of lower-inner quadrant of right male breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.422,Malignant neoplasm of upper-outer quadrant of left male breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.429,Malignant neoplasm of upper-outer quadrant of unspecified male breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.511,Malignant neoplasm of lower-outer quadrant of right female breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.519,Malignant neoplasm of lower-outer quadrant of unspecified female breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.522,Malignant neoplasm of lower-outer quadrant of left male breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.622,Malignant neoplasm of axillary tail of left male breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.629,Malignant neoplasm of axillary tail of unspecified male breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.812,Malignant neoplasm of overlapping sites of left female breast,C50,Neoplasms,true,specified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.819,Malignant neoplasm of overlapping sites of unspecified female breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.911,Malignant neoplasm of unspecified site of right female breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.912,Malignant neoplasm of unspecified site of left female breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.919,Malignant neoplasm of unspecified site of unspecified female breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C50.A0,Malignant inflammatory neoplasm of unspecified breast,C50,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C61,Malignant neoplasm of prostate,C61,Neoplasms,true,specified,22,"Prostate, Testis and Other Cancers"
+C64.9,"Malignant neoplasm of unspecified kidney, except renal pelvis",C64,Neoplasms,true,unspecified,20,"Colorectal, Breast, Kidney and Other Cancers"
+C71.2,Malignant neoplasm of temporal lobe,C71,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C71.3,Malignant neoplasm of parietal lobe,C71,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C71.6,Malignant neoplasm of cerebellum,C71,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C71.7,Malignant neoplasm of brain stem,C71,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C71.8,Malignant neoplasm of overlapping sites of brain,C71,Neoplasms,true,specified,18,"Pancreas, Brain and Other Severe Cancers"
+C71.9,"Malignant neoplasm of brain, unspecified",C71,Neoplasms,true,unspecified,18,"Pancreas, Brain and Other Severe Cancers"
+C77.0,"Secondary and unspecified malignant neoplasm of lymph nodes of head, face and neck",C77,Neoplasms,true,unspecified,17,Metastatic Cancer
+C77.2,Secondary and unspecified malignant neoplasm of intra-abdominal lymph nodes,C77,Neoplasms,true,unspecified,17,Metastatic Cancer
+C77.3,Secondary and unspecified malignant neoplasm of axilla and upper limb lymph nodes,C77,Neoplasms,true,unspecified,17,Metastatic Cancer
+C77.5,Secondary and unspecified malignant neoplasm of intrapelvic lymph nodes,C77,Neoplasms,true,unspecified,17,Metastatic Cancer
+C77.8,Secondary and unspecified malignant neoplasm of lymph nodes of multiple regions,C77,Neoplasms,true,unspecified,17,Metastatic Cancer
+C78.00,Secondary malignant neoplasm of unspecified lung,C78,Neoplasms,true,unspecified,17,Metastatic Cancer
+C78.2,Secondary malignant neoplasm of pleura,C78,Neoplasms,true,specified,17,Metastatic Cancer
+C78.39,Secondary malignant neoplasm of other respiratory organs,C78,Neoplasms,true,specified,17,Metastatic Cancer
+C78.4,Secondary malignant neoplasm of small intestine,C78,Neoplasms,true,specified,17,Metastatic Cancer
+C78.5,Secondary malignant neoplasm of large intestine and rectum,C78,Neoplasms,true,specified,17,Metastatic Cancer
+C78.7,Secondary malignant neoplasm of liver and intrahepatic bile duct,C78,Neoplasms,true,specified,17,Metastatic Cancer
+C78.80,Secondary malignant neoplasm of unspecified digestive organ,C78,Neoplasms,true,unspecified,17,Metastatic Cancer
+C78.89,Secondary malignant neoplasm of other digestive organs,C78,Neoplasms,true,specified,17,Metastatic Cancer
+C79.10,Secondary malignant neoplasm of unspecified urinary organs,C79,Neoplasms,true,unspecified,17,Metastatic Cancer
+C79.11,Secondary malignant neoplasm of bladder,C79,Neoplasms,true,specified,17,Metastatic Cancer
+C79.19,Secondary malignant neoplasm of other urinary organs,C79,Neoplasms,true,specified,17,Metastatic Cancer
+C79.2,Secondary malignant neoplasm of skin,C79,Neoplasms,true,specified,17,Metastatic Cancer
+C79.49,Secondary malignant neoplasm of other parts of nervous system,C79,Neoplasms,true,specified,17,Metastatic Cancer
+C79.51,Secondary malignant neoplasm of bone,C79,Neoplasms,true,specified,17,Metastatic Cancer
+C79.61,Secondary malignant neoplasm of right ovary,C79,Neoplasms,true,specified,17,Metastatic Cancer
+C79.62,Secondary malignant neoplasm of left ovary,C79,Neoplasms,true,specified,17,Metastatic Cancer
+C79.70,Secondary malignant neoplasm of unspecified adrenal gland,C79,Neoplasms,true,unspecified,17,Metastatic Cancer
+C79.72,Secondary malignant neoplasm of left adrenal gland,C79,Neoplasms,true,specified,17,Metastatic Cancer
+C79.81,Secondary malignant neoplasm of breast,C79,Neoplasms,true,specified,17,Metastatic Cancer
+C80.2,Malignant neoplasm associated with transplanted organ,C80,Neoplasms,true,specified,17,Metastatic Cancer
+C90.00,Multiple myeloma not having achieved remission,C90,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C90.01,Multiple myeloma in remission,C90,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C90.11,Plasma cell leukemia in remission,C90,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C90.22,Extramedullary plasmacytoma in relapse,C90,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C90.32,Solitary plasmacytoma in relapse,C90,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C91.30,Prolymphocytic leukemia of B-cell type not having achieved remission,C91,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C91.32,"Prolymphocytic leukemia of B-cell type, in relapse",C91,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C91.50,Adult T-cell lymphoma/leukemia (HTLV-1-associated) not having achieved remission,C91,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C91.62,"Prolymphocytic leukemia of T-cell type, in relapse",C91,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C91.90,"Lymphoid leukemia, unspecified not having achieved remission",C91,Neoplasms,true,unspecified,23,Multiple Myeloma and Other Neoplasms
+C91.91,"Lymphoid leukemia, unspecified, in remission",C91,Neoplasms,true,unspecified,23,Multiple Myeloma and Other Neoplasms
+C91.Z0,Other lymphoid leukemia not having achieved remission,C91,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C91.Z2,"Other lymphoid leukemia, in relapse",C91,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.02,"Acute myeloblastic leukemia, in relapse",C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.10,"Chronic myeloid leukemia, BCR/ABL-positive, not having achieved remission",C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.20,"Atypical chronic myeloid leukemia, BCR/ABL-negative, not having achieved remission",C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.41,"Acute promyelocytic leukemia, in remission",C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.42,"Acute promyelocytic leukemia, in relapse",C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.51,"Acute myelomonocytic leukemia, in remission",C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.60,Acute myeloid leukemia with 11q23-abnormality not having achieved remission,C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.90,"Myeloid leukemia, unspecified, not having achieved remission",C92,Neoplasms,true,unspecified,23,Multiple Myeloma and Other Neoplasms
+C92.91,"Myeloid leukemia, unspecified in remission",C92,Neoplasms,true,unspecified,23,Multiple Myeloma and Other Neoplasms
+C92.92,"Myeloid leukemia, unspecified in relapse",C92,Neoplasms,true,unspecified,23,Multiple Myeloma and Other Neoplasms
+C92.A0,"Acute myeloid leukemia with multilineage dysplasia, not having achieved remission",C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.A2,"Acute myeloid leukemia with multilineage dysplasia, in relapse",C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.Z0,Other myeloid leukemia not having achieved remission,C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+C92.Z1,"Other myeloid leukemia, in remission",C92,Neoplasms,true,specified,23,Multiple Myeloma and Other Neoplasms
+D50.9,"Iron deficiency anemia, unspecified",D50,Diseases of the blood and blood-forming organs,true,unspecified,,
+D61.02,Shwachman-Diamond syndrome,D61,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D61.1,Drug-induced aplastic anemia,D61,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D61.818,Other pancytopenia,D61,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D64.9,"Anemia, unspecified",D64,Diseases of the blood and blood-forming organs,false,unspecified,,
+D68.020,"Von Willebrand disease, type 2A",D68,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D68.09,Other von Willebrand disease,D68,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D68.2,Hereditary deficiency of other clotting factors,D68,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D68.318,"Other hemorrhagic disorder due to intrinsic circulating anticoagulants, antibodies, or inhibitors",D68,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D68.32,Hemorrhagic disorder due to extrinsic circulating anticoagulants,D68,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D68.4,Acquired coagulation factor deficiency,D68,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D68.52,Prothrombin gene mutation,D68,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+D68.69,Other thrombophilia,D68,Diseases of the blood and blood-forming organs,true,specified,112,Aplastic Anemia and Other Significant Blood Disorders
+E03.9,"Hypothyroidism, unspecified",E03,"Endocrine, nutritional and metabolic diseases",false,unspecified,,
+E10.21,Type 1 diabetes mellitus with diabetic nephropathy,E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.3552,"Type 1 diabetes mellitus with stable proliferative diabetic retinopathy, left eye",E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.3553,"Type 1 diabetes mellitus with stable proliferative diabetic retinopathy, bilateral",E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.40,"Type 1 diabetes mellitus with diabetic neuropathy, unspecified",E10,"Endocrine, nutritional and metabolic diseases",true,unspecified,36,Diabetes with Chronic Complications
+E10.41,Type 1 diabetes mellitus with diabetic mononeuropathy,E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.42,Type 1 diabetes mellitus with diabetic polyneuropathy,E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.59,Type 1 diabetes mellitus with other circulatory complications,E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.621,Type 1 diabetes mellitus with foot ulcer,E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.641,Type 1 diabetes mellitus with hypoglycemia with coma,E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.65,Type 1 diabetes mellitus with hyperglycemia,E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.69,Type 1 diabetes mellitus with other specified complication,E10,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E10.8,Type 1 diabetes mellitus with unspecified complications,E10,"Endocrine, nutritional and metabolic diseases",true,unspecified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E10.9,Type 1 diabetes mellitus without complications,E10,"Endocrine, nutritional and metabolic diseases",true,unspecified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E11.21,Type 2 diabetes mellitus with diabetic nephropathy,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.22,Type 2 diabetes mellitus with diabetic chronic kidney disease,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.3312,"Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy with macular edema, left eye",E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.3392,"Type 2 diabetes mellitus with moderate nonproliferative diabetic retinopathy without macular edema, left eye",E11,"Endocrine, nutritional and metabolic diseases",true,unspecified,36,Diabetes with Chronic Complications
+E11.3559,"Type 2 diabetes mellitus with stable proliferative diabetic retinopathy, unspecified eye",E11,"Endocrine, nutritional and metabolic diseases",true,unspecified,36,Diabetes with Chronic Complications
+E11.37X9,"Type 2 diabetes mellitus with diabetic macular edema, resolved following treatment, unspecified eye",E11,"Endocrine, nutritional and metabolic diseases",true,unspecified,36,Diabetes with Chronic Complications
+E11.40,"Type 2 diabetes mellitus with diabetic neuropathy, unspecified",E11,"Endocrine, nutritional and metabolic diseases",true,unspecified,36,Diabetes with Chronic Complications
+E11.42,Type 2 diabetes mellitus with diabetic polyneuropathy,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.43,Type 2 diabetes mellitus with diabetic autonomic (poly)neuropathy,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.59,Type 2 diabetes mellitus with other circulatory complications,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.610,Type 2 diabetes mellitus with diabetic neuropathic arthropathy,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.620,Type 2 diabetes mellitus with diabetic dermatitis,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.630,Type 2 diabetes mellitus with periodontal disease,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.641,Type 2 diabetes mellitus with hypoglycemia with coma,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.65,Type 2 diabetes mellitus with hyperglycemia,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.69,Type 2 diabetes mellitus with other specified complication,E11,"Endocrine, nutritional and metabolic diseases",true,specified,36,Diabetes with Chronic Complications
+E11.9,Type 2 diabetes mellitus without complications,E11,"Endocrine, nutritional and metabolic diseases",true,unspecified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.01,Other specified diabetes mellitus with hyperosmolarity with coma,E13,"Endocrine, nutritional and metabolic diseases",true,specified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.10,Other specified diabetes mellitus with ketoacidosis without coma,E13,"Endocrine, nutritional and metabolic diseases",true,unspecified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.22,Other specified diabetes mellitus with diabetic chronic kidney disease,E13,"Endocrine, nutritional and metabolic diseases",true,specified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.3219,"Other specified diabetes mellitus with mild nonproliferative diabetic retinopathy with macular edema, unspecified eye",E13,"Endocrine, nutritional and metabolic diseases",true,unspecified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.3491,"Other specified diabetes mellitus with severe nonproliferative diabetic retinopathy without macular edema, right eye",E13,"Endocrine, nutritional and metabolic diseases",true,unspecified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.40,"Other specified diabetes mellitus with diabetic neuropathy, unspecified",E13,"Endocrine, nutritional and metabolic diseases",true,unspecified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.43,Other specified diabetes mellitus with diabetic autonomic (poly)neuropathy,E13,"Endocrine, nutritional and metabolic diseases",true,specified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.52,Other specified diabetes mellitus with diabetic peripheral angiopathy with gangrene,E13,"Endocrine, nutritional and metabolic diseases",true,specified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.610,Other specified diabetes mellitus with diabetic neuropathic arthropathy,E13,"Endocrine, nutritional and metabolic diseases",true,specified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.628,Other specified diabetes mellitus with other skin complications,E13,"Endocrine, nutritional and metabolic diseases",true,specified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.641,Other specified diabetes mellitus with hypoglycemia with coma,E13,"Endocrine, nutritional and metabolic diseases",true,specified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E13.69,Other specified diabetes mellitus with other specified complication,E13,"Endocrine, nutritional and metabolic diseases",true,specified,37,"Diabetes with Glycemic, Unspecified, or No Complications"
+E43,Unspecified severe protein-calorie malnutrition,E43,"Endocrine, nutritional and metabolic diseases",true,unspecified,63,Protein-Calorie Malnutrition
+E44.0,Moderate protein-calorie malnutrition,E44,"Endocrine, nutritional and metabolic diseases",true,specified,63,Protein-Calorie Malnutrition
+E55.9,"Vitamin D deficiency, unspecified",E55,"Endocrine, nutritional and metabolic diseases",false,unspecified,,
+E64.0,Sequelae of protein-calorie malnutrition,E64,"Endocrine, nutritional and metabolic diseases",true,specified,63,Protein-Calorie Malnutrition
+E64.1,Sequelae of vitamin A deficiency,E64,"Endocrine, nutritional and metabolic diseases",true,specified,63,Protein-Calorie Malnutrition
+E64.2,Sequelae of vitamin C deficiency,E64,"Endocrine, nutritional and metabolic diseases",true,specified,63,Protein-Calorie Malnutrition
+E64.3,Sequelae of rickets,E64,"Endocrine, nutritional and metabolic diseases",true,specified,63,Protein-Calorie Malnutrition
+E66.01,Morbid (severe) obesity due to excess calories,E66,"Endocrine, nutritional and metabolic diseases",true,specified,48,Morbid Obesity
+E66.9,"Obesity, unspecified",E66,"Endocrine, nutritional and metabolic diseases",false,unspecified,,
+E78.011,Heterozygous familial hypercholesterolemia [HeFH],E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.019,"Familial hypercholesterolemia, unspecified",E78,"Endocrine, nutritional and metabolic diseases",false,unspecified,,
+E78.1,Pure hyperglyceridemia,E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.2,Mixed hyperlipidemia,E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.3,Hyperchylomicronemia,E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.41,Elevated Lipoprotein(a),E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.49,Other hyperlipidemia,E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.5,"Hyperlipidemia, unspecified",E78,"Endocrine, nutritional and metabolic diseases",false,unspecified,,
+E78.6,Lipoprotein deficiency,E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.71,Barth syndrome,E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.72,Smith-Lemli-Opitz syndrome,E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.79,Other disorders of bile acid and cholesterol metabolism,E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+E78.81,Lipoid dermatoarthritis,E78,"Endocrine, nutritional and metabolic diseases",false,specified,,
+F01.511,"Vascular dementia, unspecified severity, with agitation",F01,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,125,"Dementia, Moderate"
+F01.54,"Vascular dementia, unspecified severity, with anxiety",F01,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,125,"Dementia, Moderate"
+F02.818,"Dementia in other diseases classified elsewhere, unspecified severity, with other behavioral disturbance",F02,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,125,"Dementia, Moderate"
+F02.83,"Dementia in other diseases classified elsewhere, unspecified severity, with mood disturbance",F02,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,125,"Dementia, Moderate"
+F02.A0,"Dementia in other diseases classified elsewhere, mild, without behavioral disturbance, psychotic disturbance, mood disturbance, and anxiety",F02,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,125,"Dementia, Moderate"
+F02.B18,"Dementia in other diseases classified elsewhere, moderate, with other behavioral disturbance",F02,"Mental, behavioral and neurodevelopmental disorders",true,specified,125,"Dementia, Moderate"
+F02.B2,"Dementia in other diseases classified elsewhere, moderate, with psychotic disturbance",F02,"Mental, behavioral and neurodevelopmental disorders",true,specified,125,"Dementia, Moderate"
+F02.C11,"Dementia in other diseases classified elsewhere, severe, with agitation",F02,"Mental, behavioral and neurodevelopmental disorders",true,specified,125,"Dementia, Moderate"
+F02.C18,"Dementia in other diseases classified elsewhere, severe, with other behavioral disturbance",F02,"Mental, behavioral and neurodevelopmental disorders",true,specified,125,"Dementia, Moderate"
+F02.C2,"Dementia in other diseases classified elsewhere, severe, with psychotic disturbance",F02,"Mental, behavioral and neurodevelopmental disorders",true,specified,125,"Dementia, Moderate"
+F02.C3,"Dementia in other diseases classified elsewhere, severe, with mood disturbance",F02,"Mental, behavioral and neurodevelopmental disorders",true,specified,125,"Dementia, Moderate"
+F02.C4,"Dementia in other diseases classified elsewhere, severe, with anxiety",F02,"Mental, behavioral and neurodevelopmental disorders",true,specified,125,"Dementia, Moderate"
+F03.918,"Unspecified dementia, unspecified severity, with other behavioral disturbance",F03,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,126,"Dementia, Mild or Unspecified"
+F03.92,"Unspecified dementia, unspecified severity, with psychotic disturbance",F03,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,126,"Dementia, Mild or Unspecified"
+F03.A2,"Unspecified dementia, mild, with psychotic disturbance",F03,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,126,"Dementia, Mild or Unspecified"
+F03.A3,"Unspecified dementia, mild, with mood disturbance",F03,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,126,"Dementia, Mild or Unspecified"
+F03.A4,"Unspecified dementia, mild, with anxiety",F03,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,126,"Dementia, Mild or Unspecified"
+F03.B0,"Unspecified dementia, moderate, without behavioral disturbance, psychotic disturbance, mood disturbance, and anxiety",F03,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,126,"Dementia, Mild or Unspecified"
+F03.B3,"Unspecified dementia, moderate, with mood disturbance",F03,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,126,"Dementia, Mild or Unspecified"
+F03.C11,"Unspecified dementia, severe, with agitation",F03,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,126,"Dementia, Mild or Unspecified"
+F03.C18,"Unspecified dementia, severe, with other behavioral disturbance",F03,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,126,"Dementia, Mild or Unspecified"
+F10.129,"Alcohol abuse with intoxication, unspecified",F10,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.130,"Alcohol abuse with withdrawal, uncomplicated",F10,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.150,Alcohol abuse with alcohol-induced psychotic disorder with delusions,F10,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.151,Alcohol abuse with alcohol-induced psychotic disorder with hallucinations,F10,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.20,"Alcohol dependence, uncomplicated",F10,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.229,"Alcohol dependence with intoxication, unspecified",F10,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.239,"Alcohol dependence with withdrawal, unspecified",F10,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.250,Alcohol dependence with alcohol-induced psychotic disorder with delusions,F10,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.282,Alcohol dependence with alcohol-induced sleep disorder,F10,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.929,"Alcohol use, unspecified with intoxication, unspecified",F10,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.930,"Alcohol use, unspecified with withdrawal, uncomplicated",F10,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.94,"Alcohol use, unspecified with alcohol-induced mood disorder",F10,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.96,"Alcohol use, unspecified with alcohol-induced persisting amnestic disorder",F10,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F10.97,"Alcohol use, unspecified with alcohol-induced persisting dementia",F10,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.11,"Opioid abuse, in remission",F11,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.122,Opioid abuse with intoxication with perceptual disturbance,F11,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.150,Opioid abuse with opioid-induced psychotic disorder with delusions,F11,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.181,Opioid abuse with opioid-induced sexual dysfunction,F11,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.19,Opioid abuse with unspecified opioid-induced disorder,F11,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.20,"Opioid dependence, uncomplicated",F11,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.23,Opioid dependence with withdrawal,F11,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.259,"Opioid dependence with opioid-induced psychotic disorder, unspecified",F11,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.288,Opioid dependence with other opioid-induced disorder,F11,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.94,"Opioid use, unspecified with opioid-induced mood disorder",F11,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F11.982,"Opioid use, unspecified with opioid-induced sleep disorder",F11,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.11,"Cocaine abuse, in remission",F14,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.122,Cocaine abuse with intoxication with perceptual disturbance,F14,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.14,Cocaine abuse with cocaine-induced mood disorder,F14,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.150,Cocaine abuse with cocaine-induced psychotic disorder with delusions,F14,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.181,Cocaine abuse with cocaine-induced sexual dysfunction,F14,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.221,Cocaine dependence with intoxication delirium,F14,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.23,Cocaine dependence with withdrawal,F14,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.250,Cocaine dependence with cocaine-induced psychotic disorder with delusions,F14,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.251,Cocaine dependence with cocaine-induced psychotic disorder with hallucinations,F14,"Mental, behavioral and neurodevelopmental disorders",true,specified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.920,"Cocaine use, unspecified with intoxication, uncomplicated",F14,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.93,"Cocaine use, unspecified with withdrawal",F14,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.94,"Cocaine use, unspecified with cocaine-induced mood disorder",F14,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F14.982,"Cocaine use, unspecified with cocaine-induced sleep disorder",F14,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications"
+F20.2,Catatonic schizophrenia,F20,"Mental, behavioral and neurodevelopmental disorders",true,specified,151,Schizophrenia
+F20.3,Undifferentiated schizophrenia,F20,"Mental, behavioral and neurodevelopmental disorders",true,specified,151,Schizophrenia
+F20.81,Schizophreniform disorder,F20,"Mental, behavioral and neurodevelopmental disorders",true,specified,151,Schizophrenia
+F20.9,"Schizophrenia, unspecified",F20,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,151,Schizophrenia
+F25.0,"Schizoaffective disorder, bipolar type",F25,"Mental, behavioral and neurodevelopmental disorders",true,specified,151,Schizophrenia
+F25.8,Other schizoaffective disorders,F25,"Mental, behavioral and neurodevelopmental disorders",true,specified,151,Schizophrenia
+F25.9,"Schizoaffective disorder, unspecified",F25,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,151,Schizophrenia
+F30.11,"Manic episode without psychotic symptoms, mild",F30,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,152,Psychosis or Bipolar Disorder
+F30.12,"Manic episode without psychotic symptoms, moderate",F30,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,152,Psychosis or Bipolar Disorder
+F30.2,"Manic episode, severe with psychotic symptoms",F30,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F30.8,Other manic episodes,F30,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F30.9,"Manic episode, unspecified",F30,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,152,Psychosis or Bipolar Disorder
+F31.0,"Bipolar disorder, current episode hypomanic",F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.13,"Bipolar disorder, current episode manic without psychotic features, severe",F31,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,152,Psychosis or Bipolar Disorder
+F31.2,"Bipolar disorder, current episode manic severe with psychotic features",F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.30,"Bipolar disorder, current episode depressed, mild or moderate severity, unspecified",F31,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,152,Psychosis or Bipolar Disorder
+F31.31,"Bipolar disorder, current episode depressed, mild",F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.32,"Bipolar disorder, current episode depressed, moderate",F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.5,"Bipolar disorder, current episode depressed, severe, with psychotic features",F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.60,"Bipolar disorder, current episode mixed, unspecified",F31,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,152,Psychosis or Bipolar Disorder
+F31.63,"Bipolar disorder, current episode mixed, severe, without psychotic features",F31,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,152,Psychosis or Bipolar Disorder
+F31.70,"Bipolar disorder, currently in remission, most recent episode unspecified",F31,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,152,Psychosis or Bipolar Disorder
+F31.72,"Bipolar disorder, in full remission, most recent episode hypomanic",F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.74,"Bipolar disorder, in full remission, most recent episode manic",F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.75,"Bipolar disorder, in partial remission, most recent episode depressed",F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.81,Bipolar II disorder,F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.89,Other bipolar disorder,F31,"Mental, behavioral and neurodevelopmental disorders",true,specified,152,Psychosis or Bipolar Disorder
+F31.9,"Bipolar disorder, unspecified",F31,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,152,Psychosis or Bipolar Disorder
+F32.2,"Major depressive disorder, single episode, severe without psychotic features",F32,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,155,"Major Depression, Moderate or Specified Persistent"
+F32.9,"Major depressive disorder, single episode, unspecified",F32,"Mental, behavioral and neurodevelopmental disorders",false,unspecified,,
+F33.2,"Major depressive disorder, recurrent severe without psychotic features",F33,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,155,"Major Depression, Moderate or Specified Persistent"
+F33.3,"Major depressive disorder, recurrent, severe with psychotic symptoms",F33,"Mental, behavioral and neurodevelopmental disorders",true,specified,155,"Major Depression, Moderate or Specified Persistent"
+F33.9,"Major depressive disorder, recurrent, unspecified",F33,"Mental, behavioral and neurodevelopmental disorders",false,unspecified,,
+F41.9,"Anxiety disorder, unspecified",F41,"Mental, behavioral and neurodevelopmental disorders",true,unspecified,,
+G20.A1,"Parkinson's disease without dyskinesia, without mention of fluctuations",G20,Diseases of the nervous system,true,unspecified,180,Parkinson and Other Degenerative Disease of Basal Ganglia
+G20.A2,"Parkinson's disease without dyskinesia, with fluctuations",G20,Diseases of the nervous system,true,unspecified,180,Parkinson and Other Degenerative Disease of Basal Ganglia
+G30.1,Alzheimer's disease with late onset,G30,Diseases of the nervous system,true,specified,125,"Dementia, Moderate"
+G30.9,"Alzheimer's disease, unspecified",G30,Diseases of the nervous system,true,unspecified,125,"Dementia, Moderate"
+G35.B0,"Primary progressive multiple sclerosis, unspecified",G35,Diseases of the nervous system,true,unspecified,196,Multiple Sclerosis
+G35.B2,Non-active primary progressive multiple sclerosis,G35,Diseases of the nervous system,true,specified,196,Multiple Sclerosis
+G35.C2,Non-active secondary progressive multiple sclerosis,G35,Diseases of the nervous system,true,specified,196,Multiple Sclerosis
+G40.001,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, not intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.009,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, not intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.011,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.019,"Localization-related (focal) (partial) idiopathic epilepsy and epileptic syndromes with seizures of localized onset, intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.201,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, not intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.209,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, not intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.211,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.219,"Localization-related (focal) (partial) symptomatic epilepsy and epileptic syndromes with complex partial seizures, intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.401,"Other generalized epilepsy and epileptic syndromes, not intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.409,"Other generalized epilepsy and epileptic syndromes, not intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.419,"Other generalized epilepsy and epileptic syndromes, intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.42,Cyclin-Dependent Kinase-Like 5 Deficiency Disorder,G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.501,"Epileptic seizures related to external causes, not intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.509,"Epileptic seizures related to external causes, not intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.804,"Other epilepsy, intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.812,"Lennox-Gastaut syndrome, not intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.844,"KCNQ2-related epilepsy, intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.901,"Epilepsy, unspecified, not intractable, with status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.909,"Epilepsy, unspecified, not intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.911,"Epilepsy, unspecified, intractable, with status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.919,"Epilepsy, unspecified, intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.A01,"Absence epileptic syndrome, not intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.A11,"Absence epileptic syndrome, intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.A19,"Absence epileptic syndrome, intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.B09,"Juvenile myoclonic epilepsy, not intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.B19,"Juvenile myoclonic epilepsy, intractable, without status epilepticus",G40,Diseases of the nervous system,true,unspecified,201,Seizure Disorders and Convulsions
+G40.C01,"Lafora progressive myoclonus epilepsy, not intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G40.C11,"Lafora progressive myoclonus epilepsy, intractable, with status epilepticus",G40,Diseases of the nervous system,true,specified,201,Seizure Disorders and Convulsions
+G43.011,"Migraine without aura, intractable, with status migrainosus",G43,Diseases of the nervous system,false,unspecified,,
+G43.119,"Migraine with aura, intractable, without status migrainosus",G43,Diseases of the nervous system,false,unspecified,,
+G43.411,"Hemiplegic migraine, intractable, with status migrainosus",G43,Diseases of the nervous system,false,specified,,
+G43.519,"Persistent migraine aura without cerebral infarction, intractable, without status migrainosus",G43,Diseases of the nervous system,false,unspecified,,
+G43.711,"Chronic migraine without aura, intractable, with status migrainosus",G43,Diseases of the nervous system,false,unspecified,,
+G43.829,"Menstrual migraine, not intractable, without status migrainosus",G43,Diseases of the nervous system,false,unspecified,,
+G43.831,"Menstrual migraine, intractable, with status migrainosus",G43,Diseases of the nervous system,false,specified,,
+G43.839,"Menstrual migraine, intractable, without status migrainosus",G43,Diseases of the nervous system,false,unspecified,,
+G43.901,"Migraine, unspecified, not intractable, with status migrainosus",G43,Diseases of the nervous system,false,unspecified,,
+G43.909,"Migraine, unspecified, not intractable, without status migrainosus",G43,Diseases of the nervous system,false,unspecified,,
+G43.D0,"Abdominal migraine, not intractable",G43,Diseases of the nervous system,false,specified,,
+G43.D1,"Abdominal migraine, intractable",G43,Diseases of the nervous system,false,specified,,
+G47.33,Obstructive sleep apnea (adult) (pediatric),G47,Diseases of the nervous system,true,specified,,
+G62.1,Alcoholic polyneuropathy,G62,Diseases of the nervous system,true,specified,75,Polyneuropathy and Mononeuropathy
+G62.89,Other specified polyneuropathies,G62,Diseases of the nervous system,true,specified,75,Polyneuropathy and Mononeuropathy
+G62.9,"Polyneuropathy, unspecified",G62,Diseases of the nervous system,true,unspecified,75,Polyneuropathy and Mononeuropathy
+G80.8,Other cerebral palsy,G80,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G81.01,Flaccid hemiplegia affecting right dominant side,G81,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G81.04,Flaccid hemiplegia affecting left nondominant side,G81,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G81.10,Spastic hemiplegia affecting unspecified side,G81,Diseases of the nervous system,true,unspecified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G81.13,Spastic hemiplegia affecting right nondominant side,G81,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G81.93,"Hemiplegia, unspecified affecting right nondominant side",G81,Diseases of the nervous system,true,unspecified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G82.20,"Paraplegia, unspecified",G82,Diseases of the nervous system,true,unspecified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G82.22,"Paraplegia, incomplete",G82,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G82.50,"Quadriplegia, unspecified",G82,Diseases of the nervous system,true,unspecified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G82.51,"Quadriplegia, C1-C4 complete",G82,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G82.53,"Quadriplegia, C5-C7 complete",G82,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.0,Diplegia of upper limbs,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.11,Monoplegia of lower limb affecting right dominant side,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.12,Monoplegia of lower limb affecting left dominant side,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.13,Monoplegia of lower limb affecting right nondominant side,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.14,Monoplegia of lower limb affecting left nondominant side,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.22,Monoplegia of upper limb affecting left dominant side,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.23,Monoplegia of upper limb affecting right nondominant side,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.30,"Monoplegia, unspecified affecting unspecified side",G83,Diseases of the nervous system,true,unspecified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.34,"Monoplegia, unspecified affecting left nondominant side",G83,Diseases of the nervous system,true,unspecified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.4,Cauda equina syndrome,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.5,Locked-in state,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.81,Brown-Sequard syndrome,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.82,Anterior cord syndrome,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.83,Posterior cord syndrome,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G83.89,Other specified paralytic syndromes,G83,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G89.11,Acute pain due to trauma,G89,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G89.12,Acute post-thoracotomy pain,G89,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G89.21,Chronic pain due to trauma,G89,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+G89.22,Chronic post-thoracotomy pain,G89,Diseases of the nervous system,true,specified,192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes"
+H52.10,"Myopia, unspecified eye",H52,Diseases of the eye and adnexa,false,unspecified,,
+H52.12,"Myopia, left eye",H52,Diseases of the eye and adnexa,false,specified,,
+H52.201,"Unspecified astigmatism, right eye",H52,Diseases of the eye and adnexa,false,unspecified,,
+H52.202,"Unspecified astigmatism, left eye",H52,Diseases of the eye and adnexa,false,unspecified,,
+H52.211,"Irregular astigmatism, right eye",H52,Diseases of the eye and adnexa,false,specified,,
+H52.213,"Irregular astigmatism, bilateral",H52,Diseases of the eye and adnexa,false,specified,,
+H52.222,"Regular astigmatism, left eye",H52,Diseases of the eye and adnexa,false,specified,,
+H52.229,"Regular astigmatism, unspecified eye",H52,Diseases of the eye and adnexa,false,unspecified,,
+H52.32,Aniseikonia,H52,Diseases of the eye and adnexa,false,specified,,
+H52.512,"Internal ophthalmoplegia (complete) (total), left eye",H52,Diseases of the eye and adnexa,false,specified,,
+H52.519,"Internal ophthalmoplegia (complete) (total), unspecified eye",H52,Diseases of the eye and adnexa,false,unspecified,,
+H52.6,Other disorders of refraction,H52,Diseases of the eye and adnexa,false,specified,,
+H90.11,"Conductive hearing loss, unilateral, right ear, with unrestricted hearing on the contralateral side",H90,Diseases of the ear and mastoid process,false,specified,,
+H90.2,"Conductive hearing loss, unspecified",H90,Diseases of the ear and mastoid process,false,unspecified,,
+H90.3,"Sensorineural hearing loss, bilateral",H90,Diseases of the ear and mastoid process,false,specified,,
+H90.41,"Sensorineural hearing loss, unilateral, right ear, with unrestricted hearing on the contralateral side",H90,Diseases of the ear and mastoid process,false,specified,,
+H90.42,"Sensorineural hearing loss, unilateral, left ear, with unrestricted hearing on the contralateral side",H90,Diseases of the ear and mastoid process,false,specified,,
+H90.5,Unspecified sensorineural hearing loss,H90,Diseases of the ear and mastoid process,false,unspecified,,
+H90.6,"Mixed conductive and sensorineural hearing loss, bilateral",H90,Diseases of the ear and mastoid process,false,specified,,
+H90.72,"Mixed conductive and sensorineural hearing loss, unilateral, left ear, with unrestricted hearing on the contralateral side",H90,Diseases of the ear and mastoid process,false,specified,,
+H90.8,"Mixed conductive and sensorineural hearing loss, unspecified",H90,Diseases of the ear and mastoid process,false,unspecified,,
+H90.A11,"Conductive hearing loss, unilateral, right ear with restricted hearing on the contralateral side",H90,Diseases of the ear and mastoid process,false,specified,,
+H90.A22,"Sensorineural hearing loss, unilateral, left ear, with restricted hearing on the contralateral side",H90,Diseases of the ear and mastoid process,false,specified,,
+H90.A31,"Mixed conductive and sensorineural hearing loss, unilateral, right ear with restricted hearing on the contralateral side",H90,Diseases of the ear and mastoid process,false,specified,,
+I09.0,Rheumatic myocarditis,I09,Diseases of the circulatory system,true,specified,226,"Heart Failure, Except End-Stage"
+I09.1,"Rheumatic diseases of endocardium, valve unspecified",I09,Diseases of the circulatory system,true,unspecified,226,"Heart Failure, Except End-Stage"
+I10,Essential (primary) hypertension,I10,Diseases of the circulatory system,false,specified,,
+I11.0,Hypertensive heart disease with heart failure,I11,Diseases of the circulatory system,true,specified,226,"Heart Failure, Except End-Stage"
+I11.9,Hypertensive heart disease without heart failure,I11,Diseases of the circulatory system,true,unspecified,226,"Heart Failure, Except End-Stage"
+I12.9,"Hypertensive chronic kidney disease with stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease",I12,Diseases of the circulatory system,true,unspecified,329,"Chronic Kidney Disease, Moderate (Stage 3)"
+I13.0,"Hypertensive heart and chronic kidney disease with heart failure and stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease",I13,Diseases of the circulatory system,true,unspecified,226,"Heart Failure, Except End-Stage"
+I13.10,"Hypertensive heart and chronic kidney disease without heart failure, with stage 1 through stage 4 chronic kidney disease, or unspecified chronic kidney disease",I13,Diseases of the circulatory system,true,unspecified,226,"Heart Failure, Except End-Stage"
+I21.02,ST elevation (STEMI) myocardial infarction involving left anterior descending coronary artery,I21,Diseases of the circulatory system,true,specified,228,Acute Myocardial Infarction
+I21.11,ST elevation (STEMI) myocardial infarction involving right coronary artery,I21,Diseases of the circulatory system,true,specified,228,Acute Myocardial Infarction
+I21.21,ST elevation (STEMI) myocardial infarction involving left circumflex coronary artery,I21,Diseases of the circulatory system,true,specified,228,Acute Myocardial Infarction
+I21.4,Non-ST elevation (NSTEMI) myocardial infarction,I21,Diseases of the circulatory system,true,specified,228,Acute Myocardial Infarction
+I21.9,"Acute myocardial infarction, unspecified",I21,Diseases of the circulatory system,true,unspecified,228,Acute Myocardial Infarction
+I21.A1,Myocardial infarction type 2,I21,Diseases of the circulatory system,true,specified,228,Acute Myocardial Infarction
+I21.A9,Other myocardial infarction type,I21,Diseases of the circulatory system,true,specified,228,Acute Myocardial Infarction
+I21.B,Myocardial infarction with coronary microvascular dysfunction,I21,Diseases of the circulatory system,true,specified,228,Acute Myocardial Infarction
+I22.1,Subsequent ST elevation (STEMI) myocardial infarction of inferior wall,I22,Diseases of the circulatory system,true,specified,228,Acute Myocardial Infarction
+I22.2,Subsequent non-ST elevation (NSTEMI) myocardial infarction,I22,Diseases of the circulatory system,true,specified,228,Acute Myocardial Infarction
+I25.10,Atherosclerotic heart disease of native coronary artery without angina pectoris,I25,Diseases of the circulatory system,false,unspecified,,
+I25.5,Ischemic cardiomyopathy,I25,Diseases of the circulatory system,true,specified,226,"Heart Failure, Except End-Stage"
+I42.8,Other cardiomyopathies,I42,Diseases of the circulatory system,true,specified,226,"Heart Failure, Except End-Stage"
+I44.0,"Atrioventricular block, first degree",I44,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I44.2,"Atrioventricular block, complete",I44,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I44.39,Other atrioventricular block,I44,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I44.4,Left anterior fascicular block,I44,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I44.5,Left posterior fascicular block,I44,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I44.60,Unspecified fascicular block,I44,Diseases of the circulatory system,true,unspecified,238,Specified Heart Arrhythmias
+I44.69,Other fascicular block,I44,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I45.0,Right fascicular block,I45,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I45.2,Bifascicular block,I45,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I45.4,Nonspecific intraventricular block,I45,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I45.5,Other specified heart block,I45,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I45.6,Pre-excitation syndrome,I45,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I45.81,Long QT syndrome,I45,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I45.9,"Conduction disorder, unspecified",I45,Diseases of the circulatory system,true,unspecified,238,Specified Heart Arrhythmias
+I47.0,Re-entry ventricular arrhythmia,I47,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I47.10,"Supraventricular tachycardia, unspecified",I47,Diseases of the circulatory system,true,unspecified,238,Specified Heart Arrhythmias
+I47.11,"Inappropriate sinus tachycardia, so stated",I47,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I48.20,"Chronic atrial fibrillation, unspecified",I48,Diseases of the circulatory system,true,unspecified,238,Specified Heart Arrhythmias
+I48.91,Unspecified atrial fibrillation,I48,Diseases of the circulatory system,true,unspecified,238,Specified Heart Arrhythmias
+I49.02,Ventricular flutter,I49,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I49.1,Atrial premature depolarization,I49,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I49.3,Ventricular premature depolarization,I49,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I49.5,Sick sinus syndrome,I49,Diseases of the circulatory system,true,specified,238,Specified Heart Arrhythmias
+I49.9,"Cardiac arrhythmia, unspecified",I49,Diseases of the circulatory system,true,unspecified,238,Specified Heart Arrhythmias
+I50.1,"Left ventricular failure, unspecified",I50,Diseases of the circulatory system,true,unspecified,226,"Heart Failure, Except End-Stage"
+I50.22,Chronic systolic (congestive) heart failure,I50,Diseases of the circulatory system,true,specified,226,"Heart Failure, Except End-Stage"
+I50.31,Acute diastolic (congestive) heart failure,I50,Diseases of the circulatory system,true,specified,226,"Heart Failure, Except End-Stage"
+I50.32,Chronic diastolic (congestive) heart failure,I50,Diseases of the circulatory system,true,specified,226,"Heart Failure, Except End-Stage"
+I50.33,Acute on chronic diastolic (congestive) heart failure,I50,Diseases of the circulatory system,true,specified,226,"Heart Failure, Except End-Stage"
+I50.42,Chronic combined systolic (congestive) and diastolic (congestive) heart failure,I50,Diseases of the circulatory system,true,specified,226,"Heart Failure, Except End-Stage"
+I50.812,Chronic right heart failure,I50,Diseases of the circulatory system,true,specified,224,"Heart Failure, End-Stage"
+I50.9,"Heart failure, unspecified",I50,Diseases of the circulatory system,true,unspecified,226,"Heart Failure, Except End-Stage"
+I60.00,Nontraumatic subarachnoid hemorrhage from unspecified carotid siphon and bifurcation,I60,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I60.12,Nontraumatic subarachnoid hemorrhage from left middle cerebral artery,I60,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I60.30,Nontraumatic subarachnoid hemorrhage from unspecified posterior communicating artery,I60,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I60.32,Nontraumatic subarachnoid hemorrhage from left posterior communicating artery,I60,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I60.50,Nontraumatic subarachnoid hemorrhage from unspecified vertebral artery,I60,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I60.51,Nontraumatic subarachnoid hemorrhage from right vertebral artery,I60,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I60.7,Nontraumatic subarachnoid hemorrhage from unspecified intracranial artery,I60,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I60.8,Other nontraumatic subarachnoid hemorrhage,I60,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I60.9,"Nontraumatic subarachnoid hemorrhage, unspecified",I60,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I61.1,"Nontraumatic intracerebral hemorrhage in hemisphere, cortical",I61,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I61.2,"Nontraumatic intracerebral hemorrhage in hemisphere, unspecified",I61,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I61.3,Nontraumatic intracerebral hemorrhage in brain stem,I61,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I61.5,"Nontraumatic intracerebral hemorrhage, intraventricular",I61,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I61.6,"Nontraumatic intracerebral hemorrhage, multiple localized",I61,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I62.00,"Nontraumatic subdural hemorrhage, unspecified",I62,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I62.01,Nontraumatic acute subdural hemorrhage,I62,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I62.02,Nontraumatic subacute subdural hemorrhage,I62,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I62.9,"Nontraumatic intracranial hemorrhage, unspecified",I62,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.012,Cerebral infarction due to thrombosis of left vertebral artery,I63,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.013,Cerebral infarction due to thrombosis of bilateral vertebral arteries,I63,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.019,Cerebral infarction due to thrombosis of unspecified vertebral artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.02,Cerebral infarction due to thrombosis of basilar artery,I63,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.10,Cerebral infarction due to embolism of unspecified precerebral artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.111,Cerebral infarction due to embolism of right vertebral artery,I63,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.19,Cerebral infarction due to embolism of other precerebral artery,I63,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.211,Cerebral infarction due to unspecified occlusion or stenosis of right vertebral artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.212,Cerebral infarction due to unspecified occlusion or stenosis of left vertebral artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.219,Cerebral infarction due to unspecified occlusion or stenosis of unspecified vertebral artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.239,Cerebral infarction due to unspecified occlusion or stenosis of unspecified carotid artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.341,Cerebral infarction due to thrombosis of right cerebellar artery,I63,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.343,Cerebral infarction due to thrombosis of bilateral cerebellar arteries,I63,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.349,Cerebral infarction due to thrombosis of unspecified cerebellar artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.39,Cerebral infarction due to thrombosis of other cerebral artery,I63,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.40,Cerebral infarction due to embolism of unspecified cerebral artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.429,Cerebral infarction due to embolism of unspecified anterior cerebral artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.513,Cerebral infarction due to unspecified occlusion or stenosis of bilateral middle cerebral arteries,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.59,Cerebral infarction due to unspecified occlusion or stenosis of other cerebral artery,I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I63.9,"Cerebral infarction, unspecified",I63,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I65.01,Occlusion and stenosis of right vertebral artery,I65,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I65.1,Occlusion and stenosis of basilar artery,I65,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I65.21,Occlusion and stenosis of right carotid artery,I65,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I65.29,Occlusion and stenosis of unspecified carotid artery,I65,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I65.8,Occlusion and stenosis of other precerebral arteries,I65,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I66.01,Occlusion and stenosis of right middle cerebral artery,I66,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I66.02,Occlusion and stenosis of left middle cerebral artery,I66,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I66.09,Occlusion and stenosis of unspecified middle cerebral artery,I66,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I66.19,Occlusion and stenosis of unspecified anterior cerebral artery,I66,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I66.3,Occlusion and stenosis of cerebellar arteries,I66,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I66.8,Occlusion and stenosis of other cerebral arteries,I66,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I67.0,"Dissection of cerebral arteries, nonruptured",I67,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I67.2,Cerebral atherosclerosis,I67,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I67.3,Progressive vascular leukoencephalopathy,I67,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I67.82,Cerebral ischemia,I67,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I67.83,Posterior reversible encephalopathy syndrome,I67,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I67.858,Other hereditary cerebrovascular disease,I67,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I67.89,Other cerebrovascular disease,I67,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I68.0,Cerebral amyloid angiopathy,I68,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.011,Memory deficit following nontraumatic subarachnoid hemorrhage,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.018,Other symptoms and signs involving cognitive functions following nontraumatic subarachnoid hemorrhage,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.039,Monoplegia of upper limb following nontraumatic subarachnoid hemorrhage affecting unspecified side,I69,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.141,Monoplegia of lower limb following nontraumatic intracerebral hemorrhage affecting right dominant side,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.259,Hemiplegia and hemiparesis following other nontraumatic intracranial hemorrhage affecting unspecified side,I69,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.265,"Other paralytic syndrome following other nontraumatic intracranial hemorrhage, bilateral",I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.269,Other paralytic syndrome following other nontraumatic intracranial hemorrhage affecting unspecified side,I69,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.312,Visuospatial deficit and spatial neglect following cerebral infarction,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.321,Dysphasia following cerebral infarction,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.353,Hemiplegia and hemiparesis following cerebral infarction affecting right non-dominant side,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.354,Hemiplegia and hemiparesis following cerebral infarction affecting left non-dominant side,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.393,Ataxia following cerebral infarction,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.822,Dysarthria following other cerebrovascular disease,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.828,Other speech and language deficits following other cerebrovascular disease,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.854,Hemiplegia and hemiparesis following other cerebrovascular disease affecting left non-dominant side,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.862,Other paralytic syndrome following other cerebrovascular disease affecting left dominant side,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.890,Apraxia following other cerebrovascular disease,I69,Diseases of the circulatory system,true,specified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.939,Monoplegia of upper limb following unspecified cerebrovascular disease affecting unspecified side,I69,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.941,Monoplegia of lower limb following unspecified cerebrovascular disease affecting right dominant side,I69,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I69.969,Other paralytic syndrome following unspecified cerebrovascular disease affecting unspecified side,I69,Diseases of the circulatory system,true,unspecified,254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm"
+I70.0,Atherosclerosis of aorta,I70,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I70.229,"Atherosclerosis of native arteries of extremities with rest pain, unspecified extremity",I70,Diseases of the circulatory system,true,unspecified,233,Atherosclerosis of the Extremities with Ulceration or Gangrene
+I70.299,"Other atherosclerosis of native arteries of extremities, unspecified extremity",I70,Diseases of the circulatory system,true,unspecified,233,Atherosclerosis of the Extremities with Ulceration or Gangrene
+I70.302,"Unspecified atherosclerosis of unspecified type of bypass graft(s) of the extremities, left leg",I70,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I70.313,"Atherosclerosis of unspecified type of bypass graft(s) of the extremities with intermittent claudication, bilateral legs",I70,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I70.391,"Other atherosclerosis of unspecified type of bypass graft(s) of the extremities, right leg",I70,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I70.402,"Unspecified atherosclerosis of autologous vein bypass graft(s) of the extremities, left leg",I70,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I70.411,"Atherosclerosis of autologous vein bypass graft(s) of the extremities with intermittent claudication, right leg",I70,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I70.431,Atherosclerosis of autologous vein bypass graft(s) of the right leg with ulceration of thigh,I70,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I70.461,"Atherosclerosis of autologous vein bypass graft(s) of the extremities with gangrene, right leg",I70,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I70.509,"Unspecified atherosclerosis of nonautologous biological bypass graft(s) of the extremities, unspecified extremity",I70,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I70.628,"Atherosclerosis of nonbiological bypass graft(s) of the extremities with rest pain, other extremity",I70,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I70.65,Atherosclerosis of nonbiological bypass graft(s) of other extremity with ulceration,I70,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I70.668,"Atherosclerosis of nonbiological bypass graft(s) of the extremities with gangrene, other extremity",I70,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I70.708,"Unspecified atherosclerosis of other type of bypass graft(s) of the extremities, other extremity",I70,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I70.749,Atherosclerosis of other type of bypass graft(s) of the left leg with ulceration of unspecified site,I70,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I70.90,Unspecified atherosclerosis,I70,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I70.91,Generalized atherosclerosis,I70,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I71.00,Dissection of unspecified site of aorta,I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I71.010,Dissection of ascending aorta,I71,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I71.011,Dissection of aortic arch,I71,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I71.012,Dissection of descending thoracic aorta,I71,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I71.019,"Dissection of thoracic aorta, unspecified",I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I71.10,"Thoracic aortic aneurysm, ruptured, unspecified",I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I71.12,"Aneurysm of the aortic arch, ruptured",I71,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I71.20,"Thoracic aortic aneurysm, without rupture, unspecified",I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I71.21,"Aneurysm of the ascending aorta, without rupture",I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I71.22,"Aneurysm of the aortic arch, without rupture",I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I71.33,"Infrarenal abdominal aortic aneurysm, ruptured",I71,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I71.43,"Infrarenal abdominal aortic aneurysm, without rupture",I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I71.51,"Supraceliac aneurysm of the thoracoabdominal aorta, ruptured",I71,Diseases of the circulatory system,true,specified,267,Vascular Disease with Complications
+I71.60,"Thoracoabdominal aortic aneurysm, without rupture, unspecified",I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I71.61,"Supraceliac aneurysm of the thoracoabdominal aorta, without rupture",I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I71.9,"Aortic aneurysm of unspecified site, without rupture",I71,Diseases of the circulatory system,true,unspecified,267,Vascular Disease with Complications
+I73.1,Thromboangiitis obliterans [Buerger's disease],I73,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I73.89,Other specified peripheral vascular diseases,I73,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I73.9,"Peripheral vascular disease, unspecified",I73,Diseases of the circulatory system,true,unspecified,268,Vascular Disease
+I82.221,Chronic embolism and thrombosis of inferior vena cava,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.291,Chronic embolism and thrombosis of other thoracic veins,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.3,Embolism and thrombosis of renal vein,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.403,"Acute embolism and thrombosis of unspecified deep veins of lower extremity, bilateral",I82,Diseases of the circulatory system,true,unspecified,268,Vascular Disease
+I82.422,Acute embolism and thrombosis of left iliac vein,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.491,Acute embolism and thrombosis of other specified deep vein of right lower extremity,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.5Z2,Chronic embolism and thrombosis of unspecified deep veins of left distal lower extremity,I82,Diseases of the circulatory system,true,unspecified,268,Vascular Disease
+I82.612,Acute embolism and thrombosis of superficial veins of left upper extremity,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.619,Acute embolism and thrombosis of superficial veins of unspecified upper extremity,I82,Diseases of the circulatory system,true,unspecified,268,Vascular Disease
+I82.621,Acute embolism and thrombosis of deep veins of right upper extremity,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.629,Acute embolism and thrombosis of deep veins of unspecified upper extremity,I82,Diseases of the circulatory system,true,unspecified,268,Vascular Disease
+I82.712,Chronic embolism and thrombosis of superficial veins of left upper extremity,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.721,Chronic embolism and thrombosis of deep veins of right upper extremity,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.813,"Embolism and thrombosis of superficial veins of lower extremities, bilateral",I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.891,Chronic embolism and thrombosis of other specified veins,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.A13,"Acute embolism and thrombosis of axillary vein, bilateral",I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.A23,"Chronic embolism and thrombosis of axillary vein, bilateral",I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.B11,Acute embolism and thrombosis of right subclavian vein,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.B12,Acute embolism and thrombosis of left subclavian vein,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.B13,"Acute embolism and thrombosis of subclavian vein, bilateral",I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.B21,Chronic embolism and thrombosis of right subclavian vein,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.B22,Chronic embolism and thrombosis of left subclavian vein,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.B23,"Chronic embolism and thrombosis of subclavian vein, bilateral",I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.C12,Acute embolism and thrombosis of left internal jugular vein,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+I82.C19,Acute embolism and thrombosis of unspecified internal jugular vein,I82,Diseases of the circulatory system,true,unspecified,268,Vascular Disease
+I82.C22,Chronic embolism and thrombosis of left internal jugular vein,I82,Diseases of the circulatory system,true,specified,268,Vascular Disease
+J01.01,Acute recurrent maxillary sinusitis,J01,Diseases of the respiratory system,false,specified,,
+J01.10,"Acute frontal sinusitis, unspecified",J01,Diseases of the respiratory system,false,unspecified,,
+J01.11,Acute recurrent frontal sinusitis,J01,Diseases of the respiratory system,false,specified,,
+J01.20,"Acute ethmoidal sinusitis, unspecified",J01,Diseases of the respiratory system,false,unspecified,,
+J01.21,Acute recurrent ethmoidal sinusitis,J01,Diseases of the respiratory system,false,specified,,
+J01.31,Acute recurrent sphenoidal sinusitis,J01,Diseases of the respiratory system,false,specified,,
+J01.40,"Acute pansinusitis, unspecified",J01,Diseases of the respiratory system,false,unspecified,,
+J01.41,Acute recurrent pansinusitis,J01,Diseases of the respiratory system,false,specified,,
+J01.80,Other acute sinusitis,J01,Diseases of the respiratory system,false,specified,,
+J01.81,Other acute recurrent sinusitis,J01,Diseases of the respiratory system,false,specified,,
+J01.90,"Acute sinusitis, unspecified",J01,Diseases of the respiratory system,false,unspecified,,
+J01.91,"Acute recurrent sinusitis, unspecified",J01,Diseases of the respiratory system,false,unspecified,,
+J06.0,Acute laryngopharyngitis,J06,Diseases of the respiratory system,false,specified,,
+J06.9,"Acute upper respiratory infection, unspecified",J06,Diseases of the respiratory system,false,unspecified,,
+J20.9,"Acute bronchitis, unspecified",J20,Diseases of the respiratory system,false,unspecified,,
+J41.0,Simple chronic bronchitis,J41,Diseases of the respiratory system,true,specified,277,Chronic Obstructive Pulmonary Disease
+J43.1,Panlobular emphysema,J43,Diseases of the respiratory system,true,specified,277,Chronic Obstructive Pulmonary Disease
+J44.0,Chronic obstructive pulmonary disease with (acute) lower respiratory infection,J44,Diseases of the respiratory system,true,specified,277,Chronic Obstructive Pulmonary Disease
+J44.1,Chronic obstructive pulmonary disease with (acute) exacerbation,J44,Diseases of the respiratory system,true,specified,277,Chronic Obstructive Pulmonary Disease
+J44.81,Bronchiolitis obliterans and bronchiolitis obliterans syndrome,J44,Diseases of the respiratory system,true,specified,277,Chronic Obstructive Pulmonary Disease
+J44.89,Other specified chronic obstructive pulmonary disease,J44,Diseases of the respiratory system,true,specified,277,Chronic Obstructive Pulmonary Disease
+J44.9,"Chronic obstructive pulmonary disease, unspecified",J44,Diseases of the respiratory system,true,unspecified,277,Chronic Obstructive Pulmonary Disease
+J47.9,"Bronchiectasis, uncomplicated",J47,Diseases of the respiratory system,true,specified,277,Chronic Obstructive Pulmonary Disease
+J84.02,Pulmonary alveolar microlithiasis,J84,Diseases of the respiratory system,true,specified,280,Fibrosis of Lung and Other Lung Disorders
+J84.03,Idiopathic pulmonary hemosiderosis,J84,Diseases of the respiratory system,true,specified,280,Fibrosis of Lung and Other Lung Disorders
+J84.112,Idiopathic pulmonary fibrosis,J84,Diseases of the respiratory system,true,specified,280,Fibrosis of Lung and Other Lung Disorders
+J84.116,Cryptogenic organizing pneumonia,J84,Diseases of the respiratory system,true,specified,280,Fibrosis of Lung and Other Lung Disorders
+J84.2,Lymphoid interstitial pneumonia,J84,Diseases of the respiratory system,true,specified,280,Fibrosis of Lung and Other Lung Disorders
+J84.83,Surfactant mutations of the lung,J84,Diseases of the respiratory system,true,specified,280,Fibrosis of Lung and Other Lung Disorders
+J84.841,Neuroendocrine cell hyperplasia of infancy,J84,Diseases of the respiratory system,true,specified,280,Fibrosis of Lung and Other Lung Disorders
+J84.89,Other specified interstitial pulmonary diseases,J84,Diseases of the respiratory system,true,specified,280,Fibrosis of Lung and Other Lung Disorders
+J96.02,Acute respiratory failure with hypercapnia,J96,Diseases of the respiratory system,true,specified,283,Respiratory Arrest and Respiratory Failure
+J96.10,"Chronic respiratory failure, unspecified whether with hypoxia or hypercapnia",J96,Diseases of the respiratory system,true,unspecified,283,Respiratory Arrest and Respiratory Failure
+J96.11,Chronic respiratory failure with hypoxia,J96,Diseases of the respiratory system,true,specified,283,Respiratory Arrest and Respiratory Failure
+J96.21,Acute and chronic respiratory failure with hypoxia,J96,Diseases of the respiratory system,true,specified,283,Respiratory Arrest and Respiratory Failure
+J96.22,Acute and chronic respiratory failure with hypercapnia,J96,Diseases of the respiratory system,true,specified,283,Respiratory Arrest and Respiratory Failure
+J96.92,"Respiratory failure, unspecified with hypercapnia",J96,Diseases of the respiratory system,true,unspecified,283,Respiratory Arrest and Respiratory Failure
+K21.00,"Gastro-esophageal reflux disease with esophagitis, without bleeding",K21,Diseases of the digestive system,false,unspecified,,
+K21.01,"Gastro-esophageal reflux disease with esophagitis, with bleeding",K21,Diseases of the digestive system,false,specified,,
+K21.9,Gastro-esophageal reflux disease without esophagitis,K21,Diseases of the digestive system,false,unspecified,,
+K50.00,Crohn's disease of small intestine without complications,K50,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K50.013,Crohn's disease of small intestine with fistula,K50,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K50.019,Crohn's disease of small intestine with unspecified complications,K50,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K50.111,Crohn's disease of large intestine with rectal bleeding,K50,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K50.112,Crohn's disease of large intestine with intestinal obstruction,K50,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K50.113,Crohn's disease of large intestine with fistula,K50,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K50.80,Crohn's disease of both small and large intestine without complications,K50,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K50.819,Crohn's disease of both small and large intestine with unspecified complications,K50,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K50.90,"Crohn's disease, unspecified, without complications",K50,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K50.911,"Crohn's disease, unspecified, with rectal bleeding",K50,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K50.912,"Crohn's disease, unspecified, with intestinal obstruction",K50,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K50.918,"Crohn's disease, unspecified, with other complication",K50,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K51.00,Ulcerative (chronic) pancolitis without complications,K51,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K51.011,Ulcerative (chronic) pancolitis with rectal bleeding,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.013,Ulcerative (chronic) pancolitis with fistula,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.018,Ulcerative (chronic) pancolitis with other complication,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.019,Ulcerative (chronic) pancolitis with unspecified complications,K51,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K51.212,Ulcerative (chronic) proctitis with intestinal obstruction,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.213,Ulcerative (chronic) proctitis with fistula,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.219,Ulcerative (chronic) proctitis with unspecified complications,K51,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K51.30,Ulcerative (chronic) rectosigmoiditis without complications,K51,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K51.311,Ulcerative (chronic) rectosigmoiditis with rectal bleeding,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.312,Ulcerative (chronic) rectosigmoiditis with intestinal obstruction,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.40,Inflammatory polyps of colon without complications,K51,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K51.411,Inflammatory polyps of colon with rectal bleeding,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.412,Inflammatory polyps of colon with intestinal obstruction,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.514,Left sided colitis with abscess,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.813,Other ulcerative colitis with fistula,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.814,Other ulcerative colitis with abscess,K51,Diseases of the digestive system,true,specified,35,Inflammatory Bowel Disease
+K51.819,Other ulcerative colitis with unspecified complications,K51,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K51.90,"Ulcerative colitis, unspecified, without complications",K51,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K51.911,"Ulcerative colitis, unspecified with rectal bleeding",K51,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K51.913,"Ulcerative colitis, unspecified with fistula",K51,Diseases of the digestive system,true,unspecified,35,Inflammatory Bowel Disease
+K59.00,"Constipation, unspecified",K59,Diseases of the digestive system,false,unspecified,,
+K59.01,Slow transit constipation,K59,Diseases of the digestive system,false,specified,,
+K59.02,Outlet dysfunction constipation,K59,Diseases of the digestive system,false,specified,,
+K59.03,Drug induced constipation,K59,Diseases of the digestive system,false,specified,,
+K59.09,Other constipation,K59,Diseases of the digestive system,false,specified,,
+K59.1,Functional diarrhea,K59,Diseases of the digestive system,false,specified,,
+K59.2,"Neurogenic bowel, not elsewhere classified",K59,Diseases of the digestive system,false,specified,,
+K59.31,Toxic megacolon,K59,Diseases of the digestive system,false,specified,,
+K59.4,Anal spasm,K59,Diseases of the digestive system,false,specified,,
+K59.81,Ogilvie syndrome,K59,Diseases of the digestive system,false,specified,,
+K59.89,Other specified functional intestinal disorders,K59,Diseases of the digestive system,false,specified,,
+K59.9,"Functional intestinal disorder, unspecified",K59,Diseases of the digestive system,false,unspecified,,
+K70.0,Alcoholic fatty liver,K70,Diseases of the digestive system,true,specified,62,Cirrhosis of Liver
+K70.11,Alcoholic hepatitis with ascites,K70,Diseases of the digestive system,true,specified,62,Cirrhosis of Liver
+K70.30,Alcoholic cirrhosis of liver without ascites,K70,Diseases of the digestive system,true,unspecified,62,Cirrhosis of Liver
+K70.31,Alcoholic cirrhosis of liver with ascites,K70,Diseases of the digestive system,true,specified,62,Cirrhosis of Liver
+K70.40,Alcoholic hepatic failure without coma,K70,Diseases of the digestive system,true,unspecified,62,Cirrhosis of Liver
+K70.41,Alcoholic hepatic failure with coma,K70,Diseases of the digestive system,true,specified,62,Cirrhosis of Liver
+K70.9,"Alcoholic liver disease, unspecified",K70,Diseases of the digestive system,true,unspecified,62,Cirrhosis of Liver
+K72.01,Acute and subacute hepatic failure with coma,K72,Diseases of the digestive system,true,specified,61,Liver Failure or End-Stage Liver Disorders
+K72.90,"Hepatic failure, unspecified without coma",K72,Diseases of the digestive system,true,unspecified,61,Liver Failure or End-Stage Liver Disorders
+K72.91,"Hepatic failure, unspecified with coma",K72,Diseases of the digestive system,true,unspecified,61,Liver Failure or End-Stage Liver Disorders
+K74.02,"Hepatic fibrosis, advanced fibrosis",K74,Diseases of the digestive system,true,specified,62,Cirrhosis of Liver
+K74.1,Hepatic sclerosis,K74,Diseases of the digestive system,true,specified,62,Cirrhosis of Liver
+K74.2,Hepatic fibrosis with hepatic sclerosis,K74,Diseases of the digestive system,true,specified,62,Cirrhosis of Liver
+K74.4,Secondary biliary cirrhosis,K74,Diseases of the digestive system,true,specified,62,Cirrhosis of Liver
+K74.60,Unspecified cirrhosis of liver,K74,Diseases of the digestive system,true,unspecified,62,Cirrhosis of Liver
+L89.002,"Pressure ulcer of unspecified elbow, stage 2",L89,Diseases of the skin and subcutaneous tissue,true,unspecified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.011,"Pressure ulcer of right elbow, stage 1",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.022,"Pressure ulcer of left elbow, stage 2",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.120,"Pressure ulcer of left upper back, unstageable",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.154,"Pressure ulcer of sacral region, stage 4",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.200,"Pressure ulcer of unspecified hip, unstageable",L89,Diseases of the skin and subcutaneous tissue,true,unspecified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.210,"Pressure ulcer of right hip, unstageable",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.213,"Pressure ulcer of right hip, stage 3",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.229,"Pressure ulcer of left hip, unspecified stage",L89,Diseases of the skin and subcutaneous tissue,true,unspecified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.301,"Pressure ulcer of unspecified buttock, stage 1",L89,Diseases of the skin and subcutaneous tissue,true,unspecified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.42,"Pressure ulcer of contiguous site of back, buttock and hip, stage 2",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.506,Pressure-induced deep tissue damage of unspecified ankle,L89,Diseases of the skin and subcutaneous tissue,true,unspecified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.510,"Pressure ulcer of right ankle, unstageable",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.521,"Pressure ulcer of left ankle, stage 1",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.601,"Pressure ulcer of unspecified heel, stage 1",L89,Diseases of the skin and subcutaneous tissue,true,unspecified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.611,"Pressure ulcer of right heel, stage 1",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.891,"Pressure ulcer of other site, stage 1",L89,Diseases of the skin and subcutaneous tissue,true,specified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.90,"Pressure ulcer of unspecified site, unspecified stage",L89,Diseases of the skin and subcutaneous tissue,true,unspecified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.92,"Pressure ulcer of unspecified site, stage 2",L89,Diseases of the skin and subcutaneous tissue,true,unspecified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L89.94,"Pressure ulcer of unspecified site, stage 4",L89,Diseases of the skin and subcutaneous tissue,true,unspecified,379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone"
+L97.102,Non-pressure chronic ulcer of unspecified thigh with fat layer exposed,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.104,Non-pressure chronic ulcer of unspecified thigh with necrosis of bone,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.109,Non-pressure chronic ulcer of unspecified thigh with unspecified severity,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.111,Non-pressure chronic ulcer of right thigh limited to breakdown of skin,L97,Diseases of the skin and subcutaneous tissue,true,specified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.204,Non-pressure chronic ulcer of unspecified calf with necrosis of bone,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.215,Non-pressure chronic ulcer of right calf with muscle involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.306,Non-pressure chronic ulcer of unspecified ankle with bone involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.308,Non-pressure chronic ulcer of unspecified ankle with other specified severity,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.319,Non-pressure chronic ulcer of right ankle with unspecified severity,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.322,Non-pressure chronic ulcer of left ankle with fat layer exposed,L97,Diseases of the skin and subcutaneous tissue,true,specified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.406,Non-pressure chronic ulcer of unspecified heel and midfoot with bone involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.416,Non-pressure chronic ulcer of right heel and midfoot with bone involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.425,Non-pressure chronic ulcer of left heel and midfoot with muscle involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.426,Non-pressure chronic ulcer of left heel and midfoot with bone involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.506,Non-pressure chronic ulcer of other part of unspecified foot with bone involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.512,Non-pressure chronic ulcer of other part of right foot with fat layer exposed,L97,Diseases of the skin and subcutaneous tissue,true,specified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.513,Non-pressure chronic ulcer of other part of right foot with necrosis of muscle,L97,Diseases of the skin and subcutaneous tissue,true,specified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.529,Non-pressure chronic ulcer of other part of left foot with unspecified severity,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.802,Non-pressure chronic ulcer of other part of unspecified lower leg with fat layer exposed,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.803,Non-pressure chronic ulcer of other part of unspecified lower leg with necrosis of muscle,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.806,Non-pressure chronic ulcer of other part of unspecified lower leg with bone involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.809,Non-pressure chronic ulcer of other part of unspecified lower leg with unspecified severity,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.821,Non-pressure chronic ulcer of other part of left lower leg limited to breakdown of skin,L97,Diseases of the skin and subcutaneous tissue,true,specified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.826,Non-pressure chronic ulcer of other part of left lower leg with bone involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.912,Non-pressure chronic ulcer of unspecified part of right lower leg with fat layer exposed,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.913,Non-pressure chronic ulcer of unspecified part of right lower leg with necrosis of muscle,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.916,Non-pressure chronic ulcer of unspecified part of right lower leg with bone involvement without evidence of necrosis,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+L97.921,Non-pressure chronic ulcer of unspecified part of left lower leg limited to breakdown of skin,L97,Diseases of the skin and subcutaneous tissue,true,unspecified,394,"Chronic Ulcer of Skin, Except Pressure"
+M05.00,"Felty's syndrome, unspecified site",M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.011,"Felty's syndrome, right shoulder",M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.051,"Felty's syndrome, right hip",M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.069,"Felty's syndrome, unspecified knee",M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.121,Rheumatoid lung disease with rheumatoid arthritis of right elbow,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.129,Rheumatoid lung disease with rheumatoid arthritis of unspecified elbow,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.142,Rheumatoid lung disease with rheumatoid arthritis of left hand,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.152,Rheumatoid lung disease with rheumatoid arthritis of left hip,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.171,Rheumatoid lung disease with rheumatoid arthritis of right ankle and foot,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.211,Rheumatoid vasculitis with rheumatoid arthritis of right shoulder,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.219,Rheumatoid vasculitis with rheumatoid arthritis of unspecified shoulder,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.239,Rheumatoid vasculitis with rheumatoid arthritis of unspecified wrist,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.251,Rheumatoid vasculitis with rheumatoid arthritis of right hip,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.261,Rheumatoid vasculitis with rheumatoid arthritis of right knee,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.371,Rheumatoid heart disease with rheumatoid arthritis of right ankle and foot,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.451,Rheumatoid myopathy with rheumatoid arthritis of right hip,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.49,Rheumatoid myopathy with rheumatoid arthritis of multiple sites,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.50,Rheumatoid polyneuropathy with rheumatoid arthritis of unspecified site,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.541,Rheumatoid polyneuropathy with rheumatoid arthritis of right hand,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.629,Rheumatoid arthritis of unspecified elbow with involvement of other organs and systems,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.631,Rheumatoid arthritis of right wrist with involvement of other organs and systems,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.649,Rheumatoid arthritis of unspecified hand with involvement of other organs and systems,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.69,Rheumatoid arthritis of multiple sites with involvement of other organs and systems,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.712,Rheumatoid arthritis with rheumatoid factor of left shoulder without organ or systems involvement,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.739,Rheumatoid arthritis with rheumatoid factor of unspecified wrist without organ or systems involvement,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.752,Rheumatoid arthritis with rheumatoid factor of left hip without organ or systems involvement,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.79,Rheumatoid arthritis with rheumatoid factor of multiple sites without organ or systems involvement,M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.812,Other rheumatoid arthritis with rheumatoid factor of left shoulder,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.841,Other rheumatoid arthritis with rheumatoid factor of right hand,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.9,"Rheumatoid arthritis with rheumatoid factor, unspecified",M05,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M05.A,Abnormal rheumatoid factor and anti-citrullinated protein antibody with rheumatoid arthritis,M05,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.012,"Rheumatoid arthritis without rheumatoid factor, left shoulder",M06,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.049,"Rheumatoid arthritis without rheumatoid factor, unspecified hand",M06,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.061,"Rheumatoid arthritis without rheumatoid factor, right knee",M06,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.1,Adult-onset Still's disease,M06,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.242,"Rheumatoid bursitis, left hand",M06,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.249,"Rheumatoid bursitis, unspecified hand",M06,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.271,"Rheumatoid bursitis, right ankle and foot",M06,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.279,"Rheumatoid bursitis, unspecified ankle and foot",M06,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.332,"Rheumatoid nodule, left wrist",M06,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.352,"Rheumatoid nodule, left hip",M06,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.359,"Rheumatoid nodule, unspecified hip",M06,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.39,"Rheumatoid nodule, multiple sites",M06,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.80,"Other specified rheumatoid arthritis, unspecified site",M06,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.852,"Other specified rheumatoid arthritis, left hip",M06,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.861,"Other specified rheumatoid arthritis, right knee",M06,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.89,"Other specified rheumatoid arthritis, multiple sites",M06,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M06.9,"Rheumatoid arthritis, unspecified",M06,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M17.10,"Unilateral primary osteoarthritis, unspecified knee",M17,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M25.059,"Hemarthrosis, unspecified hip",M25,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M25.271,"Flail joint, right ankle and foot",M25,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M25.339,"Other instability, unspecified wrist",M25,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M25.349,"Other instability, unspecified hand",M25,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M25.439,"Effusion, unspecified wrist",M25,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M25.529,Pain in unspecified elbow,M25,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M25.542,Pain in joints of left hand,M25,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M25.572,Pain in left ankle and joints of left foot,M25,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M25.612,"Stiffness of left shoulder, not elsewhere classified",M25,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M25.621,"Stiffness of right elbow, not elsewhere classified",M25,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M25.631,"Stiffness of right wrist, not elsewhere classified",M25,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M25.731,"Osteophyte, right wrist",M25,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M32.10,"Systemic lupus erythematosus, organ or system involvement unspecified",M32,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M32.15,Tubulo-interstitial nephropathy in systemic lupus erythematosus,M32,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M32.19,Other organ or system involvement in systemic lupus erythematosus,M32,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M32.9,"Systemic lupus erythematosus, unspecified",M32,Diseases of the musculoskeletal system and connective tissue,true,unspecified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M45.6,Ankylosing spondylitis lumbar region,M45,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M45.7,Ankylosing spondylitis of lumbosacral region,M45,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M45.8,Ankylosing spondylitis sacral and sacrococcygeal region,M45,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M45.A2,Non-radiographic axial spondyloarthritis of cervical region,M45,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M45.A4,Non-radiographic axial spondyloarthritis of thoracic region,M45,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M45.A5,Non-radiographic axial spondyloarthritis of thoracolumbar region,M45,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M45.A6,Non-radiographic axial spondyloarthritis of lumbar region,M45,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M45.A7,Non-radiographic axial spondyloarthritis of lumbosacral region,M45,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M45.A8,Non-radiographic axial spondyloarthritis of sacral and sacrococcygeal region,M45,Diseases of the musculoskeletal system and connective tissue,true,specified,105,Rheumatoid Arthritis and Specified Autoimmune Disorders
+M54.40,"Lumbago with sciatica, unspecified side",M54,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M54.41,"Lumbago with sciatica, right side",M54,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M54.42,"Lumbago with sciatica, left side",M54,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M54.50,"Low back pain, unspecified",M54,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M54.51,Vertebrogenic low back pain,M54,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M54.59,Other low back pain,M54,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M79.0,"Rheumatism, unspecified",M79,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M79.602,Pain in left arm,M79,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M79.604,Pain in right leg,M79,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M79.643,Pain in unspecified hand,M79,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M79.646,Pain in unspecified finger(s),M79,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M79.652,Pain in left thigh,M79,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M79.669,Pain in unspecified lower leg,M79,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M79.676,Pain in unspecified toe(s),M79,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M79.89,Other specified soft tissue disorders,M79,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M79.9,"Soft tissue disorder, unspecified",M79,Diseases of the musculoskeletal system and connective tissue,false,unspecified,,
+M79.A21,Nontraumatic compartment syndrome of right lower extremity,M79,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M79.A9,Nontraumatic compartment syndrome of other sites,M79,Diseases of the musculoskeletal system and connective tissue,false,specified,,
+M86.00,"Acute hematogenous osteomyelitis, unspecified site",M86,Diseases of the musculoskeletal system and connective tissue,true,unspecified,97,Chronic Osteomyelitis
+M86.131,"Other acute osteomyelitis, right radius and ulna",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.151,"Other acute osteomyelitis, right femur",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.161,"Other acute osteomyelitis, right tibia and fibula",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.18,"Other acute osteomyelitis, other site",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.19,"Other acute osteomyelitis, multiple sites",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.221,"Subacute osteomyelitis, right humerus",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.251,"Subacute osteomyelitis, right femur",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.259,"Subacute osteomyelitis, unspecified femur",M86,Diseases of the musculoskeletal system and connective tissue,true,unspecified,97,Chronic Osteomyelitis
+M86.269,"Subacute osteomyelitis, unspecified tibia and fibula",M86,Diseases of the musculoskeletal system and connective tissue,true,unspecified,97,Chronic Osteomyelitis
+M86.319,"Chronic multifocal osteomyelitis, unspecified shoulder",M86,Diseases of the musculoskeletal system and connective tissue,true,unspecified,97,Chronic Osteomyelitis
+M86.322,"Chronic multifocal osteomyelitis, left humerus",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.349,"Chronic multifocal osteomyelitis, unspecified hand",M86,Diseases of the musculoskeletal system and connective tissue,true,unspecified,97,Chronic Osteomyelitis
+M86.40,"Chronic osteomyelitis with draining sinus, unspecified site",M86,Diseases of the musculoskeletal system and connective tissue,true,unspecified,97,Chronic Osteomyelitis
+M86.451,"Chronic osteomyelitis with draining sinus, right femur",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.529,"Other chronic hematogenous osteomyelitis, unspecified humerus",M86,Diseases of the musculoskeletal system and connective tissue,true,unspecified,97,Chronic Osteomyelitis
+M86.551,"Other chronic hematogenous osteomyelitis, right femur",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.569,"Other chronic hematogenous osteomyelitis, unspecified tibia and fibula",M86,Diseases of the musculoskeletal system and connective tissue,true,unspecified,97,Chronic Osteomyelitis
+M86.572,"Other chronic hematogenous osteomyelitis, left ankle and foot",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.611,"Other chronic osteomyelitis, right shoulder",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.612,"Other chronic osteomyelitis, left shoulder",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.621,"Other chronic osteomyelitis, right humerus",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.641,"Other chronic osteomyelitis, right hand",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.671,"Other chronic osteomyelitis, right ankle and foot",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.8X0,"Other osteomyelitis, multiple sites",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.8X3,"Other osteomyelitis, forearm",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.8X4,"Other osteomyelitis, hand",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.8X6,"Other osteomyelitis, lower leg",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+M86.8X7,"Other osteomyelitis, ankle and foot",M86,Diseases of the musculoskeletal system and connective tissue,true,specified,97,Chronic Osteomyelitis
+N17.0,Acute kidney failure with tubular necrosis,N17,Diseases of the genitourinary system,false,specified,,
+N18.2,"Chronic kidney disease, stage 2 (mild)",N18,Diseases of the genitourinary system,false,specified,,
+N18.30,"Chronic kidney disease, stage 3 unspecified",N18,Diseases of the genitourinary system,true,unspecified,329,"Chronic Kidney Disease, Moderate (Stage 3)"
+N18.31,"Chronic kidney disease, stage 3a",N18,Diseases of the genitourinary system,true,specified,329,"Chronic Kidney Disease, Moderate (Stage 3)"
+N18.32,"Chronic kidney disease, stage 3b",N18,Diseases of the genitourinary system,true,specified,329,"Chronic Kidney Disease, Moderate (Stage 3)"
+N18.4,"Chronic kidney disease, stage 4 (severe)",N18,Diseases of the genitourinary system,true,specified,327,"Chronic Kidney Disease, Severe (Stage 4)"
+N18.5,"Chronic kidney disease, stage 5",N18,Diseases of the genitourinary system,true,specified,328,"Chronic Kidney Disease, Stage 5"
+N18.6,End stage renal disease,N18,Diseases of the genitourinary system,true,specified,326,End-Stage Renal Disease
+N18.9,"Chronic kidney disease, unspecified",N18,Diseases of the genitourinary system,true,unspecified,,
+N39.0,"Urinary tract infection, site not specified",N39,Diseases of the genitourinary system,false,specified,,
+N39.3,Stress incontinence (female) (male),N39,Diseases of the genitourinary system,false,specified,,
+N39.41,Urge incontinence,N39,Diseases of the genitourinary system,false,specified,,
+N39.43,Post-void dribbling,N39,Diseases of the genitourinary system,false,specified,,
+N39.45,Continuous leakage,N39,Diseases of the genitourinary system,false,specified,,
+N39.46,Mixed incontinence,N39,Diseases of the genitourinary system,false,specified,,
+N39.490,Overflow incontinence,N39,Diseases of the genitourinary system,false,specified,,
+N39.491,Coital incontinence,N39,Diseases of the genitourinary system,false,specified,,
+N39.492,Postural (urinary) incontinence,N39,Diseases of the genitourinary system,false,specified,,
+N39.498,Other specified urinary incontinence,N39,Diseases of the genitourinary system,false,specified,,
+N39.8,Other specified disorders of urinary system,N39,Diseases of the genitourinary system,false,specified,,
+N39.9,"Disorder of urinary system, unspecified",N39,Diseases of the genitourinary system,false,unspecified,,
+R05.1,Acute cough,R05,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R05.2,Subacute cough,R05,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R05.3,Chronic cough,R05,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R05.4,Cough syncope,R05,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R05.8,Other specified cough,R05,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R05.9,"Cough, unspecified",R05,"Symptoms, signs and abnormal findings, not elsewhere classified",false,unspecified,,
+R06.02,Shortness of breath,R06,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R07.9,"Chest pain, unspecified",R07,"Symptoms, signs and abnormal findings, not elsewhere classified",false,unspecified,,
+R10.0,Acute abdomen,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.10,"Upper abdominal pain, unspecified",R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,unspecified,,
+R10.12,Left upper quadrant pain,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.31,Right lower quadrant pain,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.32,Left lower quadrant pain,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.33,Periumbilical pain,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.822,Left upper quadrant rebound abdominal tenderness,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.823,Right lower quadrant rebound abdominal tenderness,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.825,Periumbilic rebound abdominal tenderness,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.826,Epigastric rebound abdominal tenderness,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.8A3,Suprapubic tenderness,R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R10.A1,"Flank pain, right side",R10,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R11.0,Nausea,R11,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R11.10,"Vomiting, unspecified",R11,"Symptoms, signs and abnormal findings, not elsewhere classified",false,unspecified,,
+R11.11,Vomiting without nausea,R11,"Symptoms, signs and abnormal findings, not elsewhere classified",false,unspecified,,
+R11.12,Projectile vomiting,R11,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R11.13,Vomiting of fecal matter,R11,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R11.14,Bilious vomiting,R11,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R11.15,Cyclical vomiting syndrome unrelated to migraine,R11,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R11.16,Cannabis hyperemesis syndrome,R11,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R11.2,"Nausea with vomiting, unspecified",R11,"Symptoms, signs and abnormal findings, not elsewhere classified",false,unspecified,,
+R26.81,Unsteadiness on feet,R26,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R40.4,Transient alteration of awareness,R40,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R42,Dizziness and giddiness,R42,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R51.0,"Headache with orthostatic component, not elsewhere classified",R51,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R51.9,"Headache, unspecified",R51,"Symptoms, signs and abnormal findings, not elsewhere classified",false,unspecified,,
+R53.83,Other fatigue,R53,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R55,Syncope and collapse,R55,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R60.0,Localized edema,R60,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R60.1,Generalized edema,R60,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R60.9,"Edema, unspecified",R60,"Symptoms, signs and abnormal findings, not elsewhere classified",false,unspecified,,
+R63.0,Anorexia,R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R63.1,Polydipsia,R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R63.2,Polyphagia,R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R63.30,"Feeding difficulties, unspecified",R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,unspecified,,
+R63.31,"Pediatric feeding disorder, acute",R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R63.32,"Pediatric feeding disorder, chronic",R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R63.39,Other feeding difficulties,R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R63.4,Abnormal weight loss,R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R63.5,Abnormal weight gain,R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R63.6,Underweight,R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+R63.8,Other symptoms and signs concerning food and fluid intake,R63,"Symptoms, signs and abnormal findings, not elsewhere classified",false,specified,,
+S72.001Q,"Fracture of unspecified part of neck of right femur, subsequent encounter for open fracture type I or II with malunion",S72,"Injury, poisoning and other consequences of external causes",false,unspecified,,
+S72.009D,"Fracture of unspecified part of neck of unspecified femur, subsequent encounter for closed fracture with routine healing",S72,"Injury, poisoning and other consequences of external causes",false,unspecified,,
+S72.022R,"Displaced fracture of epiphysis (separation) (upper) of left femur, subsequent encounter for open fracture type IIIA, IIIB, or IIIC with malunion",S72,"Injury, poisoning and other consequences of external causes",false,specified,,
+S72.026B,"Nondisplaced fracture of epiphysis (separation) (upper) of unspecified femur, initial encounter for open fracture type I or II",S72,"Injury, poisoning and other consequences of external causes",false,unspecified,,
+S72.026D,"Nondisplaced fracture of epiphysis (separation) (upper) of unspecified femur, subsequent encounter for closed fracture with routine healing",S72,"Injury, poisoning and other consequences of external causes",false,unspecified,,
+S72.031H,"Displaced midcervical fracture of right femur, subsequent encounter for open fracture type I or II with delayed healing",S72,"Injury, poisoning and other consequences of external causes",false,specified,,
+S72.032J,"Displaced midcervical fracture of left femur, subsequent encounter for open fracture type IIIA, IIIB, or IIIC with delayed healing",S72,"Injury, poisoning and other consequences of external causes",false,specified,,
+S72.033N,"Displaced midcervical fracture of unspecified femur, subsequent encounter for open fracture type IIIA, IIIB, or IIIC with nonunion",S72,"Injury, poisoning and other consequences of external causes",false,unspecified,,
+S72.042N,"Displaced fracture of base of neck of left femur, subsequent encounter for open fracture type IIIA, IIIB, or IIIC with nonunion",S72,"Injury, poisoning and other consequences of external causes",false,specified,,
+S72.062M,"Displaced articular fracture of head of left femur, subsequent encounter for open fracture type I or II with nonunion",S72,"Injury, poisoning and other consequences of external causes",false,specified,,
+S72.062S,"Displaced articular fracture of head of left femur, sequela",S72,"Injury, poisoning and other consequences of external causes",false,specified,,
+S72.066D,"Nondisplaced articular fracture of head of unspecified femur, subsequent encounter for closed fracture with routine healing",S72,"Injury, poisoning and other consequences of external causes",false,unspecified,,
+T78.03XA,"Anaphylactic reaction due to other fish, initial encounter",T78,"Injury, poisoning and other consequences of external causes",false,specified,,
+T78.03XD,"Anaphylactic reaction due to other fish, subsequent encounter",T78,"Injury, poisoning and other consequences of external causes",false,specified,,
+T78.06XA,"Anaphylactic reaction due to food additives, initial encounter",T78,"Injury, poisoning and other consequences of external causes",false,specified,,
+T78.06XS,"Anaphylactic reaction due to food additives, sequela",T78,"Injury, poisoning and other consequences of external causes",false,specified,,
+T78.071D,"Anaphylactic reaction due to milk and dairy products with reactivity to baked milk, subsequent encounter",T78,"Injury, poisoning and other consequences of external causes",false,specified,,
+T78.080D,"Anaphylactic reaction due to egg with tolerance to baked egg, subsequent encounter",T78,"Injury, poisoning and other consequences of external causes",false,specified,,
+T78.09XS,"Anaphylactic reaction due to other food products, sequela",T78,"Injury, poisoning and other consequences of external causes",false,specified,,
+T78.111A,"Other adverse food reaction due to milk and dairy products with reactivity to baked milk, initial encounter",T78,"Injury, poisoning and other consequences of external causes",false,specified,,
+T78.119A,"Other adverse food reaction due to milk and dairy products with baked milk tolerance/reactivity, unspecified, initial encounter",T78,"Injury, poisoning and other consequences of external causes",false,unspecified,,
+T78.119D,"Other adverse food reaction due to milk and dairy products with baked milk tolerance/reactivity, unspecified, subsequent encounter",T78,"Injury, poisoning and other consequences of external causes",false,unspecified,,
+T78.19XA,"Other adverse food reactions, not elsewhere classified, initial encounter",T78,"Injury, poisoning and other consequences of external causes",false,specified,,
+T78.40XD,"Allergy, unspecified, subsequent encounter",T78,"Injury, poisoning and other consequences of external causes",false,unspecified,,
+U07.1,COVID-19,U07,Codes for special purposes,false,specified,,
+Z00.00,Encounter for general adult medical examination without abnormal findings,Z00,Factors influencing health status and contact with health services,false,unspecified,,
+Z00.01,Encounter for general adult medical examination with abnormal findings,Z00,Factors influencing health status and contact with health services,false,specified,,
+Z00.110,Health examination for newborn under 8 days old,Z00,Factors influencing health status and contact with health services,false,specified,,
+Z00.111,Health examination for newborn 8 to 28 days old,Z00,Factors influencing health status and contact with health services,false,specified,,
+Z00.121,Encounter for routine child health examination with abnormal findings,Z00,Factors influencing health status and contact with health services,false,specified,,
+Z00.129,Encounter for routine child health examination without abnormal findings,Z00,Factors influencing health status and contact with health services,false,unspecified,,
+Z00.2,Encounter for examination for period of rapid growth in childhood,Z00,Factors influencing health status and contact with health services,false,specified,,
+Z00.3,Encounter for examination for adolescent development state,Z00,Factors influencing health status and contact with health services,false,specified,,
+Z00.6,Encounter for examination for normal comparison and control in clinical research program,Z00,Factors influencing health status and contact with health services,false,specified,,
+Z00.70,Encounter for examination for period of delayed growth in childhood without abnormal findings,Z00,Factors influencing health status and contact with health services,false,unspecified,,
+Z00.71,Encounter for examination for period of delayed growth in childhood with abnormal findings,Z00,Factors influencing health status and contact with health services,false,specified,,
+Z00.8,Encounter for other general examination,Z00,Factors influencing health status and contact with health services,false,specified,,
+Z12.11,Encounter for screening for malignant neoplasm of colon,Z12,Factors influencing health status and contact with health services,false,specified,,
+Z13.1,Encounter for screening for diabetes mellitus,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.21,Encounter for screening for nutritional disorder,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.228,Encounter for screening for other metabolic disorders,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.31,Encounter for screening for depression,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.32,Encounter for screening for maternal depression,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.71,Encounter for nonprocreative screening for genetic disease carrier status,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.79,Encounter for other screening for genetic and chromosomal anomalies,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.810,Encounter for screening for upper gastrointestinal disorder,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.811,Encounter for screening for lower gastrointestinal disorder,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.83,Encounter for screening for respiratory disorder NEC,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.850,Encounter for screening for traumatic brain injury,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z13.88,Encounter for screening for disorder due to exposure to contaminants,Z13,Factors influencing health status and contact with health services,false,specified,,
+Z23,Encounter for immunization,Z23,Factors influencing health status and contact with health services,false,specified,,
+Z68.41,"Body mass index [BMI] 40.0-44.9, adult",Z68,Factors influencing health status and contact with health services,false,specified,,
+Z94.0,Kidney transplant status,Z94,Factors influencing health status and contact with health services,true,specified,,
+Z99.2,Dependence on renal dialysis,Z99,Factors influencing health status and contact with health services,true,specified,326,End-Stage Renal Disease

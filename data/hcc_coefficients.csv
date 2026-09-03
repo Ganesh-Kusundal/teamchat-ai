@@ -1,0 +1,45 @@
+hcc_v28_code,hcc_v28_label,coeff_community_nondual_aged,coeff_community_fbdual_aged,hierarchy_supersedes
+17,Metastatic Cancer,2.659,3.021,18;19;20;22;23
+18,"Pancreas, Brain and Other Severe Cancers",1.024,1.311,19;20;22;23
+19,Lung and Other Severe Cancers,0.798,1.045,20;22;23
+20,"Colorectal, Breast, Kidney and Other Cancers",0.317,0.404,22
+22,"Prostate, Testis and Other Cancers",0.129,0.176,
+23,Multiple Myeloma and Other Neoplasms,0.443,0.556,
+35,Diabetes with Severe Acute Complications,0.166,0.212,36;37
+36,Diabetes with Chronic Complications,0.166,0.212,37
+37,"Diabetes with Glycemic, Unspecified, or No Complications",0.105,0.144,
+48,Morbid Obesity,0.25,0.301,
+61,Liver Failure or End-Stage Liver Disorders,0.878,0.994,62
+62,Cirrhosis of Liver,0.201,0.244,
+63,Protein-Calorie Malnutrition,0.59,0.702,
+75,Polyneuropathy and Mononeuropathy,0.128,0.161,
+97,Chronic Osteomyelitis,0.457,0.531,
+105,Rheumatoid Arthritis and Specified Autoimmune Disorders,0.311,0.372,
+112,Aplastic Anemia and Other Significant Blood Disorders,0.658,0.769,
+125,"Dementia, Moderate",0.361,0.421,126
+126,"Dementia, Mild or Unspecified",0.204,0.256,
+139,"Substance Use Disorder, Moderate/Severe, or Substance Use with Complications",0.271,0.324,
+151,Schizophrenia,0.492,0.561,152;155
+152,Psychosis or Bipolar Disorder,0.303,0.359,155
+155,"Major Depression, Moderate or Specified Persistent",0.317,0.371,
+180,Parkinson and Other Degenerative Disease of Basal Ganglia,0.353,0.417,
+192,"Quadriplegia, Paraplegia and Other Paralytic Syndromes",0.47,0.552,
+196,Multiple Sclerosis,0.436,0.503,
+201,Seizure Disorders and Convulsions,0.19,0.235,
+224,"Heart Failure, End-Stage",0.61,0.702,226
+226,"Heart Failure, Except End-Stage",0.32,0.381,
+228,Acute Myocardial Infarction,0.23,0.281,
+233,Atherosclerosis of the Extremities with Ulceration or Gangrene,1.276,1.412,267;268
+238,Specified Heart Arrhythmias,0.242,0.29,
+254,"Cerebrovascular Disease, Except Hemorrhage or Aneurysm",0.096,0.128,
+267,Vascular Disease with Complications,0.371,0.435,268
+268,Vascular Disease,0.101,0.135,
+277,Chronic Obstructive Pulmonary Disease,0.226,0.279,
+280,Fibrosis of Lung and Other Lung Disorders,0.221,0.271,
+283,Respiratory Arrest and Respiratory Failure,0.303,0.361,
+326,End-Stage Renal Disease,0.435,0.51,327;328;329
+327,"Chronic Kidney Disease, Severe (Stage 4)",0.243,0.293,329
+328,"Chronic Kidney Disease, Stage 5",0.264,0.317,327;329
+329,"Chronic Kidney Disease, Moderate (Stage 3)",0.069,0.094,
+379,"Pressure Ulcer of Skin with Necrosis Through to Muscle, Tendon, or Bone",1.101,1.223,394
+394,"Chronic Ulcer of Skin, Except Pressure",0.529,0.613,
