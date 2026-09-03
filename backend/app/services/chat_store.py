@@ -255,7 +255,7 @@ class ChatStore:
         self.presence: Dict[str, PresenceRecord] = {}
         self.typing: Dict[str, TypingIndicator] = {}
         self.sse_clients: Dict[str, SSEClient] = {}
-        self.processed_client_message_ids: Set[str] = set()
+        self.processed_client_message_ids: Set[tuple[str, str, str]] = set()
         self.reset_to_seed()
 
     def reset_to_seed(self):
@@ -396,11 +396,12 @@ class ChatStore:
 
         # Check client message ID deduplication
         if message.clientMessageId:
-            if message.clientMessageId in self.processed_client_message_ids:
-                existing = next((m for m in self.messages if m.clientMessageId == message.clientMessageId), None)
+            dedupe_key = (message.orgSlug, message.roomId, message.clientMessageId)
+            if dedupe_key in self.processed_client_message_ids:
+                existing = next((m for m in self.messages if m.orgSlug == message.orgSlug and m.roomId == message.roomId and m.clientMessageId == message.clientMessageId), None)
                 if existing:
                     return existing
-            self.processed_client_message_ids.add(message.clientMessageId)
+            self.processed_client_message_ids.add(dedupe_key)
 
         self.messages.append(message)
         asyncio.create_task(
@@ -569,6 +570,9 @@ class ChatStore:
     async def broadcast_to_room(self, room_id: str, org_slug: str, event: Dict[str, Any]):
         for client in list(self.sse_clients.values()):
             if client.org_slug == org_slug and (not client.room_id or client.room_id == room_id):
+                room = self.get_room_by_id(room_id, org_slug)
+                if room and client.user_id not in room.memberIds:
+                    continue
                 try:
                     await client.queue.put(event)
                 except Exception:

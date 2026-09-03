@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from ..models.schemas import RequestContext
 from ..services.chat_store import chat_store
 from ..services.memory_engine import memory_engine
-from ..auth.dependencies import get_request_context, require_admin
+from ..auth.dependencies import require_admin
 
 router = APIRouter(prefix="/admin", tags=["Admin Operations"])
 

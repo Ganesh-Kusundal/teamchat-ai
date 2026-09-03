@@ -51,8 +51,10 @@ def _resolve_user_from_token(token: str) -> Optional[UserProfile]:
             user = chat_store.get_user_by_id(uid)
             if user:
                 return user
-            # Firebase token is valid but user not in our seed — reject
+            # Firebase token is valid but user not in our seed — reject.
             return None
+        # Production authentication must never fall through to demo tokens.
+        return None
 
     # --- Mode 2: Demo token (user.id as Bearer) ---
     return chat_store.get_user_by_id(token)
