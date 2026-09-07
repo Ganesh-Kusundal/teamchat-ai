@@ -7,6 +7,7 @@ from ..core.constants import (
     DEFAULT_BASE_RATE, DEMO_PASSWORD, ROOM_SNIPPET_MAX_CHARS,
     SSE_OFFLINE_GRACE_SECONDS, TYPING_TTL_SECONDS, utc_now_iso,
 )
+from ..core.events import EventType, event
 from ..models.schemas import (
     Organization,
     UserProfile,
@@ -383,7 +384,7 @@ class ChatStore:
         )
         self.rooms.append(new_room)
         asyncio.create_task(
-            self.broadcast_to_room(new_room.id, org_slug, {"type": "ROOM_CREATED", "payload": new_room.model_dump()})
+            self.broadcast_to_room(new_room.id, org_slug, event(EventType.ROOM_CREATED, new_room.model_dump(), org_slug))
         )
         return new_room
 
@@ -395,7 +396,7 @@ class ChatStore:
         if user_id not in room.memberIds:
             room.memberIds.append(user_id)
             asyncio.create_task(
-                self.broadcast_to_room(room_id, org_slug, {"type": "MEMBER_ADDED", "payload": {"roomId": room_id, "userId": user_id, "userName": user.name}})
+                self.broadcast_to_room(room_id, org_slug, event(EventType.MEMBER_ADDED, {"roomId": room_id, "userId": user_id, "userName": user.name}, org_slug))
             )
         return True
 
@@ -405,7 +406,7 @@ class ChatStore:
             return False
         room.memberIds.remove(user_id)
         asyncio.create_task(
-            self.broadcast_to_room(room_id, org_slug, {"type": "MEMBER_REMOVED", "payload": {"roomId": room_id, "userId": user_id}}, target_user_id=user_id)
+            self.broadcast_to_room(room_id, org_slug, event(EventType.MEMBER_REMOVED, {"roomId": room_id, "userId": user_id}, org_slug, target_user_id=user_id), target_user_id=user_id)
         )
         return True
 
@@ -447,7 +448,7 @@ class ChatStore:
 
         self.messages.append(message)
         asyncio.create_task(
-            self.broadcast_to_room(message.roomId, message.orgSlug, {"type": "NEW_MESSAGE", "payload": message.model_dump()})
+            self.broadcast_to_room(message.roomId, message.orgSlug, event(EventType.NEW_MESSAGE, message.model_dump(), message.orgSlug))
         )
         return message
 
@@ -477,9 +478,9 @@ class ChatStore:
                 self.broadcast_to_room(
                     room_id,
                     org_slug,
-                    {
-                        "type": "MESSAGES_READ",
-                        "payload": {
+                    event(
+                        EventType.MESSAGES_READ,
+                        {
                             "roomId": room_id,
                             "userId": user.id,
                             "userName": user.name,
@@ -487,7 +488,8 @@ class ChatStore:
                             "messageIds": updated_ids,
                             "receipt": receipt.model_dump(),
                         },
-                    },
+                        org_slug,
+                    ),
                 )
             )
 
@@ -515,9 +517,9 @@ class ChatStore:
             self.broadcast_to_room(
                 room_id,
                 org_slug,
-                {
-                    "type": "STREAM_CHUNK",
-                    "payload": {
+                event(
+                    EventType.STREAM_CHUNK,
+                    {
                         "messageId": message_id,
                         "roomId": room_id,
                         "chunk": content_chunk,
@@ -525,7 +527,8 @@ class ChatStore:
                         "isComplete": is_complete,
                         "toolCalls": [tc.model_dump() for tc in tool_calls] if tool_calls else None,
                     },
-                },
+                    org_slug,
+                ),
             )
         )
 
@@ -546,7 +549,7 @@ class ChatStore:
         )
         self.presence[user_id] = rec
         asyncio.create_task(
-            self.broadcast_to_org(org_slug, {"type": "PRESENCE_UPDATE", "payload": rec.model_dump()})
+            self.broadcast_to_org(org_slug, event(EventType.PRESENCE_UPDATE, rec.model_dump(), org_slug))
         )
 
     def get_online_users_in_org(self, org_slug: str) -> List[PresenceRecord]:
@@ -594,13 +597,11 @@ class ChatStore:
             self.broadcast_to_room(
                 room_id,
                 org_slug,
-                {
-                    "type": "TYPING_UPDATE",
-                    "payload": {
-                        "roomId": room_id,
-                        "typingUsers": active,
-                    },
-                },
+                event(
+                    EventType.TYPING_UPDATE,
+                    {"roomId": room_id, "typingUsers": active},
+                    org_slug,
+                ),
             )
         )
 

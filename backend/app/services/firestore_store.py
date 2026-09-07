@@ -25,6 +25,7 @@ from ..models.schemas import (
 from .chat_store import ChatStore, SEED_MESSAGES, SEED_ORGANIZATIONS, SEED_ROOMS, SEED_USERS
 from .event_broker import FirestoreEventBroker
 from ..core.constants import TYPING_TTL_SECONDS, utc_now_iso
+from ..core.events import EventType, event
 
 
 class FirestoreChatStore(ChatStore):
@@ -181,8 +182,7 @@ class FirestoreChatStore(ChatStore):
                 "addedBy": created_by,
             })
         batch.commit()
-        event = {"type": "ROOM_CREATED", "orgSlug": org_slug, "payload": self._model_data(room)}
-        self._emit_room(room.id, org_slug, event)
+        self._emit_room(room.id, org_slug, event(EventType.ROOM_CREATED, self._model_data(room), org_slug))
         return room
 
     def add_room_member(self, room_id: str, org_slug: str, user_id: str) -> bool:
@@ -203,9 +203,9 @@ class FirestoreChatStore(ChatStore):
                 "addedBy": room.createdBy,
             })
             batch.commit()
-            self._emit_room(room_id, org_slug, {"type": "MEMBER_ADDED", "orgSlug": org_slug, "payload": {
+            self._emit_room(room_id, org_slug, event(EventType.MEMBER_ADDED, {
                 "roomId": room_id, "userId": user_id, "userName": user.name,
-            }})
+            }, org_slug))
         return True
 
     def remove_room_member(self, room_id: str, org_slug: str, user_id: str) -> bool:
@@ -218,9 +218,11 @@ class FirestoreChatStore(ChatStore):
         batch.update(room_ref, {"memberIds": room.memberIds})
         batch.delete(room_ref.collection("members").document(user_id))
         batch.commit()
-        self._emit_room(room_id, org_slug, {"type": "MEMBER_REMOVED", "orgSlug": org_slug, "payload": {
-                "roomId": room_id, "userId": user_id,
-            }}, target_user_id=user_id)
+        self._emit_room(
+            room_id, org_slug,
+            event(EventType.MEMBER_REMOVED, {"roomId": room_id, "userId": user_id}, org_slug, target_user_id=user_id),
+            target_user_id=user_id,
+        )
 
         return True
 
@@ -285,9 +287,9 @@ class FirestoreChatStore(ChatStore):
         else:
             messages_ref.document(message.id).create(self._model_data(message))
 
-        self._emit_room(message.roomId, message.orgSlug, {
-            "type": "NEW_MESSAGE", "orgSlug": message.orgSlug, "payload": self._model_data(message),
-        })
+        self._emit_room(message.roomId, message.orgSlug, event(
+            EventType.NEW_MESSAGE, self._model_data(message), message.orgSlug,
+        ))
         return message
 
     def mark_messages_as_read(self, room_id: str, org_slug: str, user_id: str) -> Dict[str, Any]:
@@ -306,10 +308,10 @@ class FirestoreChatStore(ChatStore):
                 doc.reference.update({"readBy": [r.model_dump() for r in reads]})
                 updated.append(msg.id)
         if updated:
-            self._emit_room(room_id, org_slug, {"type": "MESSAGES_READ", "orgSlug": org_slug, "payload": {
+            self._emit_room(room_id, org_slug, event(EventType.MESSAGES_READ, {
                 "roomId": room_id, "userId": user.id, "userName": user.name,
                 "readAt": read_at, "messageIds": updated, "receipt": receipt.model_dump(),
-            }})
+            }, org_slug))
         return {"updatedMessageIds": updated, "receipt": receipt.model_dump()}
 
     def update_streaming_message(self, message_id: str, room_id: str, org_slug: str,
@@ -324,11 +326,11 @@ class FirestoreChatStore(ChatStore):
         if tool_calls is not None:
             data["toolCalls"] = [tc.model_dump() for tc in tool_calls]
         ref.update(data)
-        self._emit_room(room_id, org_slug, {"type": "STREAM_CHUNK", "orgSlug": org_slug, "payload": {
+        self._emit_room(room_id, org_slug, event(EventType.STREAM_CHUNK, {
             "messageId": message_id, "roomId": room_id, "chunk": content_chunk,
             "fullContent": data["content"], "isComplete": is_complete,
             "toolCalls": data.get("toolCalls"),
-        }})
+        }, org_slug))
 
     def update_presence(self, user_id: str, org_slug: str, is_online: bool, current_room_id: Optional[str] = None):
         user = self.get_user_by_id(user_id)
@@ -340,7 +342,7 @@ class FirestoreChatStore(ChatStore):
             lastActive=utc_now_iso(),
         )
         self._presence_ref(org_slug, user_id).set(self._model_data(rec))
-        self._emit_org(org_slug, {"type": "PRESENCE_UPDATE", "orgSlug": org_slug, "payload": rec.model_dump()})
+        self._emit_org(org_slug, event(EventType.PRESENCE_UPDATE, rec.model_dump(), org_slug))
 
     def get_online_users_in_org(self, org_slug: str) -> List[PresenceRecord]:
         return [PresenceRecord(**d.to_dict()) for d in self._org_ref(org_slug).collection("presence").where("isOnline", "==", True).stream()]
@@ -363,7 +365,7 @@ class FirestoreChatStore(ChatStore):
                 active.append({"userId": value["userId"], "userName": value["userName"]})
             else:
                 doc.reference.delete()
-        self._emit_room(room_id, org_slug, {"type": "TYPING_UPDATE", "orgSlug": org_slug, "payload": {"roomId": room_id, "typingUsers": active}})
+        self._emit_room(room_id, org_slug, event(EventType.TYPING_UPDATE, {"roomId": room_id, "typingUsers": active}, org_slug))
 
     def register_sse_client(self, client_id: str, user_id: str, org_slug: str, room_id: Optional[str] = None):
         client = super().register_sse_client(client_id, user_id, org_slug, room_id)
@@ -376,16 +378,12 @@ class FirestoreChatStore(ChatStore):
             # Local SSE remains available even if the cross-instance relay is temporarily down.
             print(f"[Realtime] Failed to publish cross-instance event: {exc}")
 
-    def _emit_room(self, room_id: str, org_slug: str, event: dict, target_user_id: Optional[str] = None):
-        relay_event = dict(event)
-        relay_event["orgSlug"] = org_slug
-        relay_payload = dict(relay_event.get("payload") or {})
-        relay_payload.setdefault("roomId", room_id)
-        relay_event["payload"] = relay_payload
-        if target_user_id:
-            relay_event["targetUserId"] = target_user_id
-        asyncio.create_task(self.broadcast_to_room(room_id, org_slug, relay_event, target_user_id=target_user_id))
-        asyncio.create_task(self._publish_relay(relay_event))
+    def _emit_room(self, room_id: str, org_slug: str, event_dict: dict, target_user_id: Optional[str] = None):
+        payload = dict(event_dict.get("payload") or {})
+        payload.setdefault("roomId", room_id)
+        event_dict["payload"] = payload
+        asyncio.create_task(self.broadcast_to_room(room_id, org_slug, event_dict, target_user_id=target_user_id))
+        asyncio.create_task(self._publish_relay(event_dict))
 
     def _emit_org(self, org_slug: str, event: dict):
         asyncio.create_task(self.broadcast_to_org(org_slug, event))

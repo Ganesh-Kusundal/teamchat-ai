@@ -9,6 +9,7 @@ from starlette.concurrency import run_in_threadpool
 from ..services.chat_store import chat_store
 from ..auth.dependencies import _resolve_user_from_token
 from ..core.constants import utc_now_iso
+from ..core.events import EventType, event
 
 router = APIRouter(tags=["Real-Time Events"])
 
@@ -38,23 +39,21 @@ async def events_stream(request: Request, token: Optional[str] = None, roomId: O
     async def event_generator():
         try:
             # 1. Initial Connection Event
-            init_payload = {
-                "type": "CONNECTED",
-                "payload": {
+            init_payload = event(
+                EventType.CONNECTED,
+                {
                     "clientId": client_id,
                     "userId": user.id,
                     "orgSlug": user.orgSlug,
                     "serverTime": utc_now_iso(),
                 },
-            }
+                user.orgSlug,
+            )
             yield f"data: {json.dumps(init_payload)}\n\n"
 
             # 2. Initial Presence Sync Snapshot (so client immediately knows who is online)
             online_members = chat_store.get_online_users_in_org(user.orgSlug)
-            presence_sync_payload = {
-                "type": "PRESENCE_SYNC",
-                "payload": [m.model_dump() for m in online_members],
-            }
+            presence_sync_payload = event(EventType.PRESENCE_SYNC, [m.model_dump() for m in online_members], user.orgSlug)
             yield f"data: {json.dumps(presence_sync_payload)}\n\n"
 
             # 3. Main event loop with periodic 15s heartbeat
@@ -65,8 +64,8 @@ async def events_stream(request: Request, token: Optional[str] = None, roomId: O
 
                 try:
                     # Wait for next event or 2s timeout to check heartbeat
-                    event = await asyncio.wait_for(sse_client.queue.get(), timeout=2.0)
-                    yield f"data: {json.dumps(event)}\n\n"
+                    sse_event = await asyncio.wait_for(sse_client.queue.get(), timeout=2.0)
+                    yield f"data: {json.dumps(sse_event)}\n\n"
                 except asyncio.TimeoutError:
                     pass
 
