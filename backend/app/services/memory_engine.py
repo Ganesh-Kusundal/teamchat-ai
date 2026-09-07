@@ -115,4 +115,8 @@ class MemoryEngine:
 
         return {"error": f'Invalid action "{action}". Expected "recall" or "store".'}
 
-memory_engine = MemoryEngine(settings.DATA_DIR)
+if settings.STORAGE_BACKEND == "firestore":
+    from .firestore_memory import FirestoreMemoryEngine
+    memory_engine = FirestoreMemoryEngine()
+else:
+    memory_engine = MemoryEngine(settings.DATA_DIR)

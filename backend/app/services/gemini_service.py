@@ -3,6 +3,7 @@ import re
 import json
 import time
 import asyncio
+import uuid
 from typing import List, Dict, Any, Optional
 from ..config import settings
 from ..models.schemas import Message, UserProfile, ToolCallRecord
@@ -216,7 +217,7 @@ async def handle_ai_invocation(
     trigger_message: Message,
     caller_user: UserProfile,
 ):
-    ai_message_id = f"msg-ai-{int(time.time() * 1000)}"
+    ai_message_id = f"msg-ai-{uuid.uuid4().hex}"
     initial_ai_message = Message(
         id=ai_message_id,
         roomId=room_id,
@@ -243,7 +244,7 @@ You are collaborating in real-time with healthcare and technology professionals 
   * get_patient_risk_profile: load patient profiles and suspected unrecaptured care gaps.
   * team_memory: recall or store organization guidelines and recapture targets.
 - Strict Tenant Boundary: All data you access is strictly scoped to organization "{org_slug}". Never assume or reveal details from other organizations.
-- Formatting: Use clean Markdown with clear headings, bullet points, and bold text."""
+- Formatting & Output Integrity: Use clean Markdown with clear headings, bullet points, and bold text. Never output internal tags like `<tool_code>`, `<tool_output>`, or raw simulated JSON blocks into the final text; always present clinical facts and calculations directly in clear, readable Markdown."""
 
     client = get_genai_client()
 
@@ -292,34 +293,62 @@ You are collaborating in real-time with healthcare and technology professionals 
                     ],
                 )
 
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=attributed_prompt,
-                    config=tool_config,
-                )
-
                 tool_calls_executed: List[ToolCallRecord] = []
+                tool_results_payload = []
+                current_prompt = attributed_prompt
+                max_tool_rounds = 3
 
-                if response.function_calls:
-                    tool_results_payload = []
-                    for call in response.function_calls:
-                        c_args = call.args if isinstance(call.args, dict) else {}
-                        rec = ToolCallRecord(
-                            id=f"tool-{int(time.time()*1000)}-{call.name}",
-                            toolName=call.name,
-                            args=c_args,
-                            status="running",
+                for round_idx in range(max_tool_rounds):
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=current_prompt,
+                        config=tool_config,
+                    )
+
+                    if response.function_calls:
+                        for call in response.function_calls:
+                            c_args = call.args if isinstance(call.args, dict) else {}
+                            rec = ToolCallRecord(
+                                id=f"tool-{int(time.time()*1000)}-{call.name}",
+                                toolName=call.name,
+                                args=c_args,
+                                status="running",
+                            )
+                            tool_calls_executed.append(rec)
+                            t_res = execute_tool(call.name, c_args, org_slug, caller_user)
+                            rec.result = t_res
+                            rec.status = "completed"
+
+                            tool_results_payload.append(
+                                {"name": call.name, "args": c_args, "result": t_res}
+                            )
+
+                        chat_store.update_streaming_message(
+                            ai_message_id,
+                            room_id,
+                            org_slug,
+                            "",
+                            False,
+                            tool_calls_executed,
                         )
-                        tool_calls_executed.append(rec)
-                        t_res = execute_tool(call.name, c_args, org_slug, caller_user)
-                        rec.result = t_res
-                        rec.status = "completed"
 
-                        tool_results_payload.append(
-                            {"name": call.name, "response": {"name": call.name, "content": t_res}}
+                        current_prompt = (
+                            f"{attributed_prompt}\n\n"
+                            f"Tool Results So Far:\n{json.dumps(tool_results_payload, indent=2)}\n\n"
+                            f"If you need to invoke another tool (such as calculate_risk_score or lookup_condition_code) "
+                            f"to answer any team member's questions, call it now. Otherwise, respond directly."
                         )
+                    else:
+                        break
 
-                    followup_prompt = f"{attributed_prompt}\n\nTool Results:\n{json.dumps(tool_results_payload, indent=2)}\n\nNow synthesize a complete, beautifully formatted response addressing {trigger_message.senderName} and the team."
+                if tool_results_payload:
+                    followup_prompt = (
+                        f"{attributed_prompt}\n\n"
+                        f"Official Tool Results:\n{json.dumps(tool_results_payload, indent=2)}\n\n"
+                        f"Now synthesize a complete, beautifully formatted clinical response addressing {trigger_message.senderName} and the team. "
+                        f"Synthesize the calculations and condition mappings directly in clean Markdown prose and tables. "
+                        f"Do NOT output raw `<tool_code>` or raw JSON dumps."
+                    )
 
                     stream_res = client.models.generate_content_stream(
                         model=model_name,
@@ -331,7 +360,9 @@ You are collaborating in real-time with healthcare and technology professionals 
                     )
 
                     for chunk in stream_res:
-                        text_chunk = chunk.text or ""
+                        raw_chunk = chunk.text or ""
+                        # Sanitize any accidental internal tool tags
+                        text_chunk = re.sub(r"</?tool_code>", "", raw_chunk)
                         if text_chunk:
                             chat_store.update_streaming_message(
                                 ai_message_id,

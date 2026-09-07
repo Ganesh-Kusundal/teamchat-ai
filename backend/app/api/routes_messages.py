@@ -1,6 +1,7 @@
 import time
 import asyncio
 import re
+import uuid
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from ..models.schemas import (
@@ -78,7 +79,7 @@ async def send_message(
         or clean_content.startswith("/ask")
     )
 
-    msg_id = f"msg-{int(time.time() * 1000)}-{user.id[-4:]}"
+    msg_id = f"msg-{uuid.uuid4().hex}"
     user_message = Message(
         id=msg_id,
         roomId=room_id,
@@ -98,7 +99,7 @@ async def send_message(
     saved_message = chat_store.add_message(user_message)
 
     # If AI mentioned, launch background generation
-    if mentions_ai:
+    if mentions_ai and chat_store.claim_ai_invocation(saved_message.id):
         asyncio.create_task(
             handle_ai_invocation(
                 room_id=room_id,
@@ -130,6 +131,13 @@ async def set_typing_status(
             chat_store.clear_typing(user.id, room_id, context.org_slug)
     return {"ok": True}
 
+@router.get("/presence")
+async def get_presence_status(
+    context: RequestContext = Depends(get_request_context),
+):
+    online_members = chat_store.get_online_users_in_org(context.org_slug)
+    return [m.model_dump() for m in online_members]
+
 @router.post("/presence")
 async def update_presence_status(
     req: PresenceUpdateRequest,
@@ -137,3 +145,4 @@ async def update_presence_status(
 ):
     chat_store.update_presence(context.uid, context.org_slug, req.isOnline, req.currentRoomId)
     return {"ok": True}
+

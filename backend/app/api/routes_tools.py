@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from ..models.schemas import RequestContext
 from ..services.clinical_engine import clinical_engine
@@ -30,10 +31,12 @@ async def get_patient_profile(
     context: RequestContext = Depends(get_request_context),
 ):
     result = clinical_engine.get_patient_risk_profile(context.org_slug, patient_id)
+    if "error" in result:
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"error": result["error"]})
     return result
 
 @router.get("/tools/lookup")
-async def lookup_condition(q: str = Query(..., description="ICD-10 code or search term")):
+async def lookup_condition(q: str = Query(..., description="ICD-10 code or search term"), context: RequestContext = Depends(get_request_context)):
     if not q or not q.strip():
         raise HTTPException(status_code=400, detail="Missing search query or code parameter 'q'.")
     return clinical_engine.lookup_condition_code(q)
@@ -49,6 +52,8 @@ async def calculate_raf(
         icd10_codes=req.icd10Codes,
         base_rate=req.baseRate or 12000.0,
     )
+    if "error" in result:
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"error": result["error"]})
     return result
 
 @router.get("/memories")

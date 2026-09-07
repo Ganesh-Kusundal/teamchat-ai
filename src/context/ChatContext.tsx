@@ -35,6 +35,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isConnected, setIsConnected] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const messageFetchSequenceRef = useRef(0);
 
   const eventSourceRef = useRef<EventSource | null>(null);
   const currentRoomIdRef = useRef<string | null>(null);
@@ -69,6 +70,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchMessages = useCallback(
     async (roomId: string) => {
       if (!token) return;
+      const sequence = ++messageFetchSequenceRef.current;
       setIsLoadingMessages(true);
       try {
         const res = await fetch(`/api/rooms/${roomId}/messages`, {
@@ -76,12 +78,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         if (res.ok) {
           const data: Message[] = await res.json();
-          setMessages(data);
+          if (sequence === messageFetchSequenceRef.current && currentRoomIdRef.current === roomId) {
+            setMessages(data);
+          }
         }
       } catch (err) {
         console.error('Failed to fetch messages:', err);
       } finally {
-        setIsLoadingMessages(false);
+        if (sequence === messageFetchSequenceRef.current) setIsLoadingMessages(false);
       }
     },
     [token]
@@ -128,10 +132,26 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Initial rooms fetch when tenant / user changes
+  const fetchPresence = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch('/api/presence', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const records: PresenceRecord[] = await res.json();
+        setOnlineUsers(records.filter((p) => p.isOnline));
+      }
+    } catch {
+      // Ignore network errors
+    }
+  }, [token]);
+
+  // Initial rooms and presence fetch when tenant / user changes
   useEffect(() => {
     if (user && token) {
       fetchRooms();
+      fetchPresence();
     } else {
       setRooms([]);
       setCurrentRoom(null);
@@ -140,15 +160,36 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setTypingUsers([]);
       setUnreadMap({});
     }
-  }, [user, token, fetchRooms]);
+  }, [user, token, fetchRooms, fetchPresence]);
 
-  // Fetch messages when current room changes
+  // Periodic presence heartbeat and refresh (keeps presence active and synchronized across tabs)
+  useEffect(() => {
+    if (!user || !token) return;
+    const interval = setInterval(() => {
+      fetchPresence();
+      fetch('/api/presence', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isOnline: true, currentRoomId: currentRoomIdRef.current }),
+      }).catch(() => {});
+    }, 20_000);
+
+    return () => clearInterval(interval);
+  }, [user, token, fetchPresence]);
+
+  // Fetch messages when current room changes, and recover to an accessible room
+  // if the active room is removed from the current user's membership.
   useEffect(() => {
     if (currentRoom?.id) {
       fetchMessages(currentRoom.id);
       setTypingUsers([]);
+    } else if (rooms.length > 0 && user) {
+      setCurrentRoom(rooms[0]);
     }
-  }, [currentRoom?.id, fetchMessages]);
+  }, [currentRoom?.id, fetchMessages, rooms.length, user]);
 
   // 4. Real-time Server-Sent Events (SSE) with exponential backoff reconnection
   const toast = useToast();
@@ -177,9 +218,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const connect = () => {
       if (!sseMountedRef.current) return;
 
-      const sseUrl = `/api/events?token=${encodeURIComponent(token)}${
-        currentRoom ? `&roomId=${encodeURIComponent(currentRoom.id)}` : ''
-      }`;
+      const isFirebaseHosting =
+        typeof window !== 'undefined' &&
+        (window.location.hostname.includes('web.app') ||
+          window.location.hostname.includes('firebaseapp.com'));
+      const sseOrigin = isFirebaseHosting
+        ? 'https://teamchat-ai-872402492611.us-central1.run.app'
+        : '';
+
+      const sseUrl = `${sseOrigin}/api/events?token=${encodeURIComponent(token)}`;
 
       const es = new EventSource(sseUrl);
       eventSourceRef.current = es;
@@ -306,6 +353,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
               break;
             }
 
+            case 'PRESENCE_SYNC': {
+              const records: PresenceRecord[] = payload;
+              setOnlineUsers(records.filter((p) => p.isOnline));
+              break;
+            }
+
             case 'PRESENCE_UPDATE': {
               const record: PresenceRecord = payload;
               setOnlineUsers((prev) => {
@@ -321,6 +374,39 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (prev.some((r) => r.id === newRoom.id)) return prev;
                 return [...prev, newRoom];
               });
+              break;
+            }
+
+            case 'MEMBER_ADDED': {
+              const { roomId, userId } = payload;
+              setRooms((prev) => prev.map((room) => room.id === roomId && !room.memberIds.includes(userId)
+                ? { ...room, memberIds: [...room.memberIds, userId] }
+                : room));
+              setCurrentRoom((prev) => prev && prev.id === roomId && !prev.memberIds.includes(userId)
+                ? { ...prev, memberIds: [...prev.memberIds, userId] }
+                : prev);
+              break;
+            }
+
+            case 'MEMBER_REMOVED': {
+              const { roomId, userId } = payload;
+              if (userId === user.id) {
+                // The server sends this event to the removed member as a final
+                // notification. Drop the room immediately so no stale messages
+                // remain visible while React selects another accessible room.
+                setRooms((prev) => prev.filter((room) => room.id !== roomId));
+                if (currentRoomIdRef.current === roomId) {
+                  setCurrentRoom(null);
+                  setMessages([]);
+                }
+              } else {
+                setRooms((prev) => prev.map((room) => room.id === roomId
+                  ? { ...room, memberIds: room.memberIds.filter((id) => id !== userId) }
+                  : room));
+                setCurrentRoom((prev) => prev && prev.id === roomId
+                  ? { ...prev, memberIds: prev.memberIds.filter((id) => id !== userId) }
+                  : prev);
+              }
               break;
             }
 
@@ -367,7 +453,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sseBackoffRef.current = null;
       }
     };
-  }, [token, user, currentRoom?.id]);
+  }, [token, user]);
 
   // 5. Send Message
   const sendMessage = async (content: string, replyToMessage?: Message) => {
@@ -394,6 +480,40 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!res.ok) {
         throw new Error(`Server returned ${res.status}`);
+      }
+
+      const sentMsg: Message = await res.json();
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === sentMsg.id)) return prev;
+        return [...prev, sentMsg];
+      });
+
+      // Active fallback poll if mentioning Gemini to ensure immediate visibility
+      if (content.includes('@Gemini')) {
+        const targetRoomId = currentRoom.id;
+        let attempts = 0;
+        const pollTimer = setInterval(async () => {
+          attempts += 1;
+          if (attempts > 12 || currentRoomIdRef.current !== targetRoomId) {
+            clearInterval(pollTimer);
+            return;
+          }
+          try {
+            const pollRes = await fetch(`/api/rooms/${targetRoomId}/messages`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (pollRes.ok) {
+              const msgs: Message[] = await pollRes.json();
+              setMessages(msgs);
+              const aiMsg = msgs.find((m) => m.isAi && !m.isStreaming);
+              if (aiMsg && attempts >= 3) {
+                clearInterval(pollTimer);
+              }
+            }
+          } catch {
+            // Ignore temporary polling errors
+          }
+        }, 1200);
       }
     } catch (err) {
       console.error('Send message error:', err);
@@ -447,7 +567,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.ok) {
         const createdRoom: Room = await res.json();
         setRooms((prev) => [...prev, createdRoom]);
-        selectRoom(createdRoom.id);
+        setCurrentRoom(createdRoom);
+        setMessages([]);
+        fetchMessages(createdRoom.id);
+        markRoomAsRead(createdRoom.id);
         return createdRoom;
       }
       return null;

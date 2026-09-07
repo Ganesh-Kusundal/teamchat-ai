@@ -364,19 +364,19 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenInspector, onOpenRoomM
                 id={`message-${msg.id}`}
                 className={`group flex gap-4 transition-colors ${
                   isAi
-                    ? 'bg-indigo-500/5 p-4 rounded-xl border border-indigo-500/10 shadow-xl'
-                    : 'p-1 rounded-lg'
+                    ? 'bg-gradient-to-r from-indigo-950/20 via-indigo-950/10 to-transparent p-4 rounded-xl border border-indigo-500/25 shadow-lg shadow-indigo-950/20'
+                    : 'p-1.5 rounded-lg hover:bg-white/[0.02]'
                 }`}
               >
                 {/* Avatar */}
                 <div className="shrink-0 mt-0.5">
                   {isAi ? (
-                    <div className="w-9 h-9 rounded bg-gradient-to-br from-indigo-500 to-blue-600 flex-shrink-0 flex items-center justify-center text-white shadow-md">
+                    <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-indigo-600 to-blue-600 flex-shrink-0 flex items-center justify-center text-white shadow-md border border-indigo-400/20">
                       <Bot className="w-5 h-5" />
                     </div>
                   ) : (
                     <div
-                      className={`w-9 h-9 rounded flex-shrink-0 flex items-center justify-center text-xs font-bold text-white shadow-sm ${getAvatarColor(
+                      className={`w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold text-white shadow-sm border border-white/5 ${getAvatarColor(
                         msg.senderId
                       )}`}
                     >
@@ -390,26 +390,26 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenInspector, onOpenRoomM
                   {/* Sender & Timestamp & Read Status */}
                   <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                     <span
-                      className={`text-sm font-semibold ${
-                        isAi ? 'text-white flex items-center gap-1.5' : 'text-white'
+                      className={`text-sm font-semibold tracking-tight ${
+                        isAi ? 'text-white flex items-center gap-1.5' : 'text-zinc-100'
                       }`}
                     >
                       {isAi ? 'Gemini AI' : msg.senderName}
                     </span>
 
                     {isAi && (
-                      <span className="text-[10px] text-indigo-400 font-medium px-1.5 py-0.5 rounded bg-indigo-500/10 tracking-wider">
+                      <span className="text-[9px] text-indigo-300 font-medium px-1.5 py-0.2 rounded bg-indigo-500/15 border border-indigo-500/20 tracking-wider font-mono">
                         CO-PILOT
                       </span>
                     )}
 
                     {msg.senderRole && !isAi && (
-                      <span className="text-[10px] text-zinc-500 font-mono">
+                      <span className="text-[10px] text-zinc-400 font-mono">
                         {msg.senderRole}
                       </span>
                     )}
 
-                    <span className="text-[10px] text-zinc-500">
+                    <span className="text-[10px] text-zinc-400 font-mono">
                       {new Date(msg.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -427,8 +427,9 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenInspector, onOpenRoomM
                     {!isAi && (
                       <button
                         onClick={() => setReplyingTo(msg)}
+                        aria-label="Reply to message"
                         title="Reply to message"
-                        className="opacity-0 group-hover:opacity-100 p-0.5 text-zinc-500 hover:text-indigo-300 transition-opacity"
+                        className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-indigo-300 hover:bg-white/5 rounded transition-all cursor-pointer"
                       >
                         <Reply className="w-3.5 h-3.5" />
                       </button>
@@ -612,36 +613,40 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenInspector, onOpenRoomM
         {/* Text Area & Action Buttons */}
         <form
           onSubmit={handleSend}
-          className="bg-[#18181B] border border-white/5 rounded-xl p-3 flex flex-col shadow-2xl focus-within:border-white/15 transition-all"
+          className="bg-[#141518] border border-white/10 rounded-xl p-3 flex flex-col shadow-2xl focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/30 transition-all"
         >
           <textarea
             ref={textareaRef}
             id="chat-message-input"
+            aria-label="Message composer"
             rows={2}
             value={inputContent}
             onChange={(e) => setInputContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Type a message or use @Gemini to consult AI...`}
-            className="bg-transparent border-none resize-none text-sm focus:outline-none text-zinc-200 placeholder:text-zinc-600 h-12"
+            placeholder={`Type a message or mention @Gemini to collaborate with AI...`}
+            className="bg-transparent border-none resize-none text-sm focus:outline-none text-zinc-100 placeholder:text-zinc-500 h-12 leading-relaxed"
           />
 
-          <div className="flex justify-between items-center mt-2 border-t border-white/5 pt-2">
-            <div className="flex items-center gap-1.5">
+          <div className="flex justify-between items-center mt-2 border-t border-white/10 pt-2.5">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => insertMention('@Gemini')}
-                className="px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 flex items-center gap-1.5 transition-colors"
+                className="px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Sparkles className="w-3 h-3 text-indigo-400" />
                 <span>@Gemini</span>
               </button>
+              <span className="text-[10px] text-zinc-500 hidden md:inline font-mono">
+                Press Enter to send · Shift+Enter for new line
+              </span>
             </div>
 
             <button
               type="submit"
               id="btn-send-message"
               disabled={!inputContent.trim()}
-              className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+              className="bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             >
               <span>Send</span>
               <Send className="w-3.5 h-3.5" />

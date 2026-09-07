@@ -4,7 +4,7 @@
 [![React](https://img.shields.io/badge/React-19.0-61DAFB.svg?style=flat&logo=React&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6.svg?style=flat&logo=TypeScript&logoColor=white)](https://www.typescriptlang.org)
 [![Google Gen AI](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4.svg?style=flat&logo=Google&logoColor=white)](https://cloud.google.com/vertex-ai)
-[![Pytest](https://img.shields.io/badge/Pytest-11%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](https://pytest.org)
+[![Pytest](https://img.shields.io/badge/Pytest-15%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](https://pytest.org)
 
 **TeamChat AI** is a production-grade multi-tenant collaborative AI chat platform engineered for healthcare teams (clinicians, risk adjustment coders, quality auditors, and medical directors). Multiple users within an organization can collaborate in real-time rooms and interact with Gemini AI together with multi-speaker attribution, CMS-HCC V28 risk scoring, and zero cross-tenant leakage.
 
@@ -12,10 +12,12 @@
 
 ## 📋 Assessment Submission Deliverables
 
+- **Live Production URL**: [https://teamchat-ai-456789-aee59.web.app](https://teamchat-ai-456789-aee59.web.app)
+- **Cloud Run API URL**: [https://teamchat-ai-872402492611.us-central1.run.app](https://teamchat-ai-872402492611.us-central1.run.app)
 - **Repository**: [https://github.com/Ganesh-Kusundal/teamchat-ai](https://github.com/Ganesh-Kusundal/teamchat-ai)
 - **Role**: Staff/Principal Full-Stack Engineer Technical Assessment
 - **Tech Stack**: Python 3.11+ (FastAPI), React 19 (TypeScript), Vertex AI (Gemini), Cloud Run, Server-Sent Events (SSE)
-- **Automated Tests**: 11/11 Pytest tests passing (`pytest backend/tests/ -q`)
+- **Automated Tests**: 17/17 Pytest tests passing (`pytest backend/tests/ -v`)
 - **Evaluation Guide**: Pre-seeded with 3 organizations, 8 users, and 1-click test credentials switcher.
 
 ---
@@ -45,18 +47,27 @@ graph TD
         end
     end
 
-    subgraph GroundedFixtures ["System of Record Fixtures (teamchat-seed-2026.1)"]
-        CSV1[(condition_codes.csv - 1,000 Codes)]
-        CSV2[(hcc_coefficients.csv - 44 Factors)]
-        CSV3[(demographic_coefficients.csv)]
-        JSON1[(patients.json - 24 Profiles)]
-        JSON2[(team_memory_seed.json - 8 Policies)]
+    subgraph Production ["Managed GCP Services"]
+        Firestore[(Firestore Native: tenant data + event log)]
+        FirebaseAuth[Firebase Authentication]
+        Vertex[Vertex AI Gemini]
     end
 
-    ChatUI -->|REST APIs & SSE Stream| Gateway
+    subgraph GroundedFixtures ["Versioned Seed Fixtures"]
+        CSV1[(condition_codes.csv)]
+        CSV2[(hcc_coefficients.csv)]
+        CSV3[(demographic_coefficients.csv)]
+        JSON1[(patients.json)]
+        JSON2[(team_memory_seed.json)]
+    end
+
+    ChatUI -->|REST APIs & server-controlled SSE| Gateway
     Gateway --> AuthDep
+    AuthDep --> FirebaseAuth
     AuthDep --> ChatStore
+    ChatStore --> Firestore
     Gateway --> GeminiSvc
+    GeminiSvc --> Vertex
     GeminiSvc --> ContextBuilder
     GeminiSvc --> ClinicalEngine
     GeminiSvc --> MemoryEngine
@@ -158,6 +169,8 @@ npm run dev
 ```
 Open `http://localhost:5173` in your browser.
 
+Local mode is intentionally deterministic and uses the seeded in-memory repository. Production mode requires both `FIREBASE_PROJECT_ID` and `STORAGE_BACKEND=firestore`.
+
 ---
 
 ## ☁️ Google Cloud Run + Firebase Hosting Deployment
@@ -168,20 +181,17 @@ Deploy as a unified, single-container production image using the included multi-
 # 1. Build and submit image to Google Container Registry
 gcloud builds submit --tag gcr.io/[PROJECT_ID]/teamchat-ai:latest
 
-# 2. Deploy to Cloud Run (Vertex AI mode — workload identity, no API key needed)
-gcloud run deploy teamchat-ai \
-  --image gcr.io/[PROJECT_ID]/teamchat-ai:latest \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars GOOGLE_CLOUD_PROJECT=[PROJECT_ID],GOOGLE_CLOUD_LOCATION=us-central1,FIREBASE_PROJECT_ID=[PROJECT_ID]
-
-# 3. Deploy frontend to Firebase Hosting (proxies /api/** → Cloud Run automatically)
-npm run build
-firebase deploy --only hosting
+# Recommended: run the complete deployment helper.
+export GOOGLE_CLOUD_PROJECT=[PROJECT_ID]
+export GOOGLE_CLOUD_LOCATION=us-central1
+export FIREBASE_WEB_API_KEY=[FIREBASE_WEB_API_KEY]
+export CORS_ORIGINS=https://[PROJECT_ID].web.app
+./deploy-gcp.sh
 ```
 
-> **Vertex AI vs API Key**: When `GOOGLE_CLOUD_PROJECT` is set, the backend automatically switches to Vertex AI mode using workload identity — no `GEMINI_API_KEY` needed. Set only `GEMINI_API_KEY` for local dev without a GCP project.
+The deployment helper enables Cloud Run, Artifact Registry, Firestore, Vertex AI, and Identity Toolkit; creates the native Firestore database; builds and deploys the Cloud Run image with `STORAGE_BACKEND=firestore`; seeds Firestore and Firebase Auth; and deploys Firebase Hosting. The Cloud Run runtime service account needs Firestore read/write, Vertex AI user, and Firebase Admin/Auth administration permissions. Enable Email/Password in Firebase Authentication before seeding.
+
+> **Vertex AI vs API Key**: When `GOOGLE_CLOUD_PROJECT` is set, the backend automatically switches to Vertex AI using workload identity — no `GEMINI_API_KEY` is needed. Set only `GEMINI_API_KEY` for local development without a GCP project.
 
 ---
 
@@ -195,12 +205,16 @@ teamchat-ai/
 │   │   ├── auth/                # RequestContext & Dependency-injected RBAC
 │   │   ├── models/              # Pydantic domain models & schemas
 │   │   ├── services/
-│   │   │   ├── chat_store.py    # Tenant-partitioned store & SSE connection engine
+│   │   │   ├── chat_store.py    # Local repository and SSE engine
+│   │   │   ├── firestore_store.py # Durable tenant-scoped repository
+│   │   │   ├── event_broker.py  # Cross-instance Firestore event relay
 │   │   │   ├── clinical_engine.py # CMS-HCC V28 Risk engine, 6-step RAF & hierarchies
-│   │   │   ├── memory_engine.py # Semantic team memory store & flat dict validator
+│   │   │   ├── memory_engine.py # Local team memory repository
+│   │   │   ├── firestore_memory.py # Durable team memory repository
 │   │   │   └── gemini_service.py# Gen AI SDK, multi-model fallback & attributed prompts
-│   │   ├── config.py            # Pydantic BaseSettings
-│   │   └── main.py              # FastAPI application gateway & static SPA serving
+│   ├── config.py              # Environment configuration
+│   ├── main.py                # FastAPI application gateway & static SPA serving
+│   ├── scripts/seed_firestore.py # Idempotent Firestore + Firebase Auth seed
 │   ├── tests/                   # Pytest test suite (Tenant isolation, RAF, Memory, Lookup)
 │   └── requirements.txt
 ├── src/                         # React 19 Frontend
@@ -239,23 +253,22 @@ The entire real-time layer is implemented as **Server-Sent Events (SSE)** delive
 | Streaming AI | SSE stream chunks natively | Would require a separate streaming channel |
 | Reconnection | Explicit exponential backoff (1 → 30s) | Automatic but opaque |
 
-Firestore is still used as the **security rules layer** (`firestore.rules`) for defense-in-depth. Switching to Firestore listeners requires adding `firebase()` client init and replacing SSE subscriptions — approximately 50 lines of change.
+Firestore is used by the server as the durable data store, while `firestore.rules` provides defense-in-depth for any direct Firebase access. The browser never reads Firestore directly.
 
-### 2. Demo Token Auth vs Firebase Auth
+### 2. Authentication modes
 
-The backend ships with **dual-mode authentication**:
+The backend supports two explicit modes:
 
-- **Demo mode** (default, local evaluation): Bearer token = `user.id`. Zero setup required.
-- **Firebase Auth mode** (production): Set `FIREBASE_PROJECT_ID` env var. The backend uses `firebase-admin` to verify Firebase ID tokens. `org_slug` is always resolved server-side from the authenticated user record — never from the client request.
+- **Demo mode** (`FIREBASE_PROJECT_ID` empty): local seeded accounts authenticate with a demo bearer token equal to the user ID.
+- **Firebase mode** (`FIREBASE_PROJECT_ID` set): `/api/auth/login` authenticates email/password through Firebase Identity Toolkit, returns the Firebase ID token, and every request verifies that token with `firebase-admin`. Invalid tokens never fall back to demo authentication. The server maps the verified email/UID to the provisioned organization user and checks the `orgId` custom claim.
 
-The frontend `LoginPage` uses a simple email/password form that calls `/api/auth/login`. Wiring Firebase Auth SDK into the login flow is a 20-line change (swap `fetch('/api/auth/login')` with `signInWithEmailAndPassword` → get `idToken` → send as Bearer).
+Use `scripts/seed_firestore.py --seed-auth` to create the evaluator accounts and set their `orgId` and `role` claims. The frontend continues to use REST and SSE only; it does not use a Firebase database listener.
 
-### 3. In-Memory Store vs Firestore
+### 3. Durable Firestore state and horizontal SSE fan-out
 
-The `ChatStore` uses Python dicts for message and room storage. This is intentional for the assessment demo:
-- **Evaluation advantage**: Zero external dependencies, instant startup, fully reproducible.
-- **Production path**: Replace `chat_store.py` with Firestore Admin SDK calls. The `RequestContext` dependency injection means no other file changes are required.
-- **Horizontal scaling**: Upgrade the SSE fan-out to Cloud Pub/Sub — each Cloud Run instance subscribes and relays events.
+When `STORAGE_BACKEND=firestore`, the backend uses Firestore Admin SDK repositories for organizations, users, rooms, room-member subdocuments, messages, presence, typing indicators, and memories. Every document is nested under `organizations/{orgSlug}` and every route derives the tenant from the verified server-side identity.
+
+Realtime delivery remains server-controlled SSE. Because Cloud Run instances have independent memory, writes also go to a short-lived `realtime_events` collection. Each instance polls that event log with its own cursor and relays only tenant/member-authorized events to its local SSE clients. Configure a Firestore TTL policy on `realtime_events.expiresAt` to clean up relay records. No browser-side Firestore listeners are used.
 
 ### 4. Gemini Client: Vertex AI vs API Key
 

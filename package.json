@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:backend": "./.venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload",
-    "dev:python": "./.venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload",
+    "dev:backend": "./.venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8002 --reload",
+    "dev:python": "./.venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8002 --reload",
     "test": "PYTHONPATH=. ./.venv/bin/pytest backend/tests/ -v",
     "test:python": "PYTHONPATH=. ./.venv/bin/pytest backend/tests/ -v",
+    "seed:firestore": "PYTHONPATH=. python3 scripts/seed_firestore.py --seed-auth",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit"

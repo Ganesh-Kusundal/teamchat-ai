@@ -1,5 +1,7 @@
+import asyncio
 import os
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,16 +17,32 @@ from .api import (
     admin_router,
 )
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    if settings.FIREBASE_PROJECT_ID and settings.STORAGE_BACKEND != "firestore":
+        raise RuntimeError("FIREBASE_PROJECT_ID requires STORAGE_BACKEND=firestore")
+    if settings.FIREBASE_PROJECT_ID and not settings.FIREBASE_WEB_API_KEY:
+        raise RuntimeError("FIREBASE_WEB_API_KEY is required when Firebase Auth is enabled")
+    if settings.STORAGE_BACKEND == "firestore":
+        from .services.chat_store import chat_store
+        chat_store.start_broker(asyncio.get_running_loop())
+    yield
+    if settings.STORAGE_BACKEND == "firestore":
+        from .services.chat_store import chat_store
+        await chat_store.close_broker()
+
+
 app = FastAPI(
     title="TeamChat AI Backend",
     description="Multi-Tenant Collaborative AI Platform with Real-Time Presence, CMS-HCC V28 Clinical Intelligence, and Gemini Integration.",
     version=settings.VERSION,
+    lifespan=lifespan,
 )
 
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,7 +57,9 @@ async def health_check():
     return {
         "status": "ok",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "geminiConfigured": has_key,
+        "geminiConfigured": has_key or bool(settings.GOOGLE_CLOUD_PROJECT),
+        "authMode": "firebase" if settings.FIREBASE_PROJECT_ID else "demo",
+        "storageBackend": settings.STORAGE_BACKEND,
         "dataset_version": settings.VERSION,
     }
 

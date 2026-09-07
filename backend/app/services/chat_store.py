@@ -1,6 +1,8 @@
 import time
 import asyncio
+import uuid
 from typing import List, Dict, Any, Optional, Set
+from ..config import settings
 from ..models.schemas import (
     Organization,
     UserProfile,
@@ -53,7 +55,7 @@ SEED_USERS = [
         orgSlug="northside-health",
         title="Lead Clinician & Informaticist",
         statusText="Reviewing Q1 RAF gaps",
-        isOnline=True,
+        isOnline=False,
         avatar="SC",
         passwordHash="password123",
     ),
@@ -65,7 +67,7 @@ SEED_USERS = [
         orgSlug="northside-health",
         title="Senior Risk Adjustment Specialist",
         statusText="Auditing CKD progression",
-        isOnline=True,
+        isOnline=False,
         avatar="MR",
         passwordHash="password123",
     ),
@@ -77,7 +79,7 @@ SEED_USERS = [
         orgSlug="northside-health",
         title="Clinical Quality Auditor",
         statusText="Cross-checking eGFR lab thresholds",
-        isOnline=True,
+        isOnline=False,
         avatar="LW",
         passwordHash="password123",
     ),
@@ -93,6 +95,18 @@ SEED_USERS = [
         avatar="TC",
         passwordHash="password123",
     ),
+    UserProfile(
+        id="usr-marcus-vance",
+        email="marcus@northside-health.test",
+        name="Dr. Marcus Vance",
+        role="member",
+        orgSlug="northside-health",
+        title="Internal Medicine Specialist",
+        statusText="Reviewing chronic patient panel",
+        isOnline=False,
+        avatar="MV",
+        passwordHash="password123",
+    ),
     # Valley Primary Care
     UserProfile(
         id="usr-elena",
@@ -102,8 +116,20 @@ SEED_USERS = [
         orgSlug="valley-primary-care",
         title="Medical Director",
         statusText="Evaluating AWV scheduling policy",
-        isOnline=True,
+        isOnline=False,
         avatar="ES",
+        passwordHash="password123",
+    ),
+    UserProfile(
+        id="usr-david",
+        email="david@valley-primary-care.test",
+        name="David Park",
+        role="member",
+        orgSlug="valley-primary-care",
+        title="Risk Adjustment Lead",
+        statusText="Validating annual wellness audits",
+        isOnline=False,
+        avatar="DP",
         passwordHash="password123",
     ),
     UserProfile(
@@ -114,7 +140,7 @@ SEED_USERS = [
         orgSlug="valley-primary-care",
         title="Lead Risk Coder",
         statusText="Checking cardiology fax queues",
-        isOnline=True,
+        isOnline=False,
         avatar="DA",
         passwordHash="password123",
     ),
@@ -126,7 +152,7 @@ SEED_USERS = [
         orgSlug="valley-primary-care",
         title="Quality Assurance Manager",
         statusText="Monitoring coder SLA queue",
-        isOnline=True,
+        isOnline=False,
         avatar="ME",
         passwordHash="password123",
     ),
@@ -139,7 +165,7 @@ SEED_USERS = [
         orgSlug="metro-cardiology",
         title="Chief of Cardiology",
         statusText="Evaluating HF inpatient discharges",
-        isOnline=True,
+        isOnline=False,
         avatar="MB",
         passwordHash="password123",
     ),
@@ -152,7 +178,7 @@ SEED_ROOMS = [
         name="coding-huddle",
         description="Daily clinical review and CMS-HCC V28 coding alignment",
         isPrivate=False,
-        memberIds=["usr-sarah", "usr-mike", "usr-lisa", "usr-tom"],
+        memberIds=["usr-sarah", "usr-mike", "usr-lisa", "usr-tom", "usr-marcus-vance"],
         createdAt="2026-02-01T08:00:00Z",
         createdBy="usr-sarah",
     ),
@@ -162,7 +188,7 @@ SEED_ROOMS = [
         name="care-gaps",
         description="Suspected chronic condition recapture and documentation audits",
         isPrivate=False,
-        memberIds=["usr-sarah", "usr-mike", "usr-lisa", "usr-tom"],
+        memberIds=["usr-sarah", "usr-mike", "usr-lisa", "usr-tom", "usr-marcus-vance"],
         createdAt="2026-02-01T08:00:00Z",
         createdBy="usr-sarah",
     ),
@@ -172,7 +198,7 @@ SEED_ROOMS = [
         name="general",
         description="General team discussion and administrative announcements",
         isPrivate=False,
-        memberIds=["usr-sarah", "usr-mike", "usr-lisa", "usr-tom"],
+        memberIds=["usr-sarah", "usr-mike", "usr-lisa", "usr-tom", "usr-marcus-vance"],
         createdAt="2026-02-01T08:00:00Z",
         createdBy="usr-sarah",
     ),
@@ -182,7 +208,7 @@ SEED_ROOMS = [
         name="risk-adjustment",
         description="Medicare Advantage value-based contract management and AWV review",
         isPrivate=False,
-        memberIds=["usr-elena", "usr-diego", "usr-marta"],
+        memberIds=["usr-elena", "usr-diego", "usr-marta", "usr-david"],
         createdAt="2026-02-01T08:00:00Z",
         createdBy="usr-elena",
     ),
@@ -192,7 +218,7 @@ SEED_ROOMS = [
         name="care-gaps",
         description="Cardiology records reconciliation and chronic gap closure",
         isPrivate=False,
-        memberIds=["usr-elena", "usr-diego", "usr-marta"],
+        memberIds=["usr-elena", "usr-diego", "usr-marta", "usr-david"],
         createdAt="2026-02-01T08:00:00Z",
         createdBy="usr-elena",
     ),
@@ -256,6 +282,7 @@ class ChatStore:
         self.typing: Dict[str, TypingIndicator] = {}
         self.sse_clients: Dict[str, SSEClient] = {}
         self.processed_client_message_ids: Set[tuple[str, str, str]] = set()
+        self.claimed_ai_invocations: Set[str] = set()
         self.reset_to_seed()
 
     def reset_to_seed(self):
@@ -266,13 +293,14 @@ class ChatStore:
         self.presence.clear()
         self.typing.clear()
         self.processed_client_message_ids.clear()
+        self.claimed_ai_invocations.clear()
 
         for u in self.users:
             self.presence[u.id] = PresenceRecord(
                 userId=u.id,
                 userName=u.name,
                 orgSlug=u.orgSlug,
-                isOnline=bool(u.isOnline),
+                isOnline=False,
                 lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             )
 
@@ -294,6 +322,10 @@ class ChatStore:
 
     def get_user_by_id(self, user_id: str) -> Optional[UserProfile]:
         return next((u for u in self.users if u.id == user_id), None)
+
+    def get_user_by_email(self, email: str) -> Optional[UserProfile]:
+        clean_email = email.strip().lower()
+        return next((u for u in self.users if u.email.lower() == clean_email), None)
 
     def get_users_by_org(self, org_slug: str) -> List[UserProfile]:
         return [u for u in self.users if u.orgSlug == org_slug]
@@ -336,7 +368,7 @@ class ChatStore:
         clean_name = name.strip().lower().replace(" ", "-")
         members = member_ids or [u.id for u in self.get_users_by_org(org_slug)]
         new_room = Room(
-            id=f"room-{org_slug[:3]}-{int(time.time() * 1000) % 1000000:06d}",
+            id=f"room-{org_slug[:3]}-{uuid.uuid4().hex[:12]}",
             orgSlug=org_slug,
             name=clean_name,
             description=description.strip(),
@@ -347,7 +379,7 @@ class ChatStore:
         )
         self.rooms.append(new_room)
         asyncio.create_task(
-            self.broadcast_to_org(org_slug, {"type": "ROOM_CREATED", "payload": new_room.model_dump()})
+            self.broadcast_to_room(new_room.id, org_slug, {"type": "ROOM_CREATED", "payload": new_room.model_dump()})
         )
         return new_room
 
@@ -369,11 +401,17 @@ class ChatStore:
             return False
         room.memberIds.remove(user_id)
         asyncio.create_task(
-            self.broadcast_to_room(room_id, org_slug, {"type": "MEMBER_REMOVED", "payload": {"roomId": room_id, "userId": user_id}})
+            self.broadcast_to_room(room_id, org_slug, {"type": "MEMBER_REMOVED", "payload": {"roomId": room_id, "userId": user_id}}, target_user_id=user_id)
         )
         return True
 
     # --- Messages ---
+    def claim_ai_invocation(self, trigger_message_id: str) -> bool:
+        if trigger_message_id in self.claimed_ai_invocations:
+            return False
+        self.claimed_ai_invocations.add(trigger_message_id)
+        return True
+
     def get_messages(self, room_id: str, org_slug: str, limit: int = 50, before: Optional[str] = None) -> List[Message]:
         room = self.get_room_by_id(room_id, org_slug)
         if not room:
@@ -463,6 +501,8 @@ class ChatStore:
         msg = next((m for m in self.messages if m.id == message_id), None)
         if msg:
             msg.content += content_chunk
+            if is_complete:
+                msg.content = re.sub(r"<\/?tool_code>", "", msg.content)
             msg.isStreaming = not is_complete
             if tool_calls is not None:
                 msg.toolCalls = tool_calls
@@ -491,6 +531,7 @@ class ChatStore:
         if not user:
             return
 
+        user.isOnline = is_online
         rec = PresenceRecord(
             userId=user_id,
             userName=user.name,
@@ -505,7 +546,14 @@ class ChatStore:
         )
 
     def get_online_users_in_org(self, org_slug: str) -> List[PresenceRecord]:
-        return [p for p in self.presence.values() if p.orgSlug == org_slug and p.isOnline]
+        active_sse_user_ids = {c.user_id for c in self.sse_clients.values() if c.org_slug == org_slug}
+        results = []
+        for p in self.presence.values():
+            if p.orgSlug == org_slug:
+                # Online if actively connected via SSE or explicitly flagged online
+                if p.userId in active_sse_user_ids or p.isOnline:
+                    results.append(p)
+        return results
 
     # --- Typing ---
     def set_typing(self, user_id: str, user_name: str, room_id: str, org_slug: str):
@@ -562,16 +610,25 @@ class ChatStore:
     def remove_sse_client(self, client_id: str):
         client = self.sse_clients.pop(client_id, None)
         if client:
-            # If no other client active for this user, mark offline
+            # If no other client active for this user, apply short grace period before marking offline
+            # This prevents flickering during page reloads or room switches.
             has_other = any(c.user_id == client.user_id for c in self.sse_clients.values())
             if not has_other:
-                self.update_presence(client.user_id, client.org_slug, False)
+                async def _delayed_offline(u_id: str, o_slug: str):
+                    await asyncio.sleep(4.0)
+                    if not any(c.user_id == u_id for c in self.sse_clients.values()):
+                        self.update_presence(u_id, o_slug, False)
+                try:
+                    asyncio.create_task(_delayed_offline(client.user_id, client.org_slug))
+                except Exception:
+                    self.update_presence(client.user_id, client.org_slug, False)
 
-    async def broadcast_to_room(self, room_id: str, org_slug: str, event: Dict[str, Any]):
+
+    async def broadcast_to_room(self, room_id: str, org_slug: str, event: Dict[str, Any], target_user_id: Optional[str] = None):
         for client in list(self.sse_clients.values()):
             if client.org_slug == org_slug and (not client.room_id or client.room_id == room_id):
                 room = self.get_room_by_id(room_id, org_slug)
-                if room and client.user_id not in room.memberIds:
+                if room and client.user_id not in room.memberIds and client.user_id != target_user_id:
                     continue
                 try:
                     await client.queue.put(event)
@@ -586,4 +643,8 @@ class ChatStore:
                 except Exception:
                     pass
 
-chat_store = ChatStore()
+if settings.STORAGE_BACKEND == "firestore":
+    from .firestore_store import FirestoreChatStore
+    chat_store = FirestoreChatStore()
+else:
+    chat_store = ChatStore()

@@ -11,6 +11,10 @@ On Cloud Run the SDK authenticates automatically via workload identity (no servi
 account key file needed).
 """
 from typing import Optional
+import json
+import urllib.error
+import urllib.request
+import urllib.parse
 from ..config import settings
 
 _firebase_initialized = False
@@ -38,6 +42,25 @@ def _ensure_initialized() -> bool:
     except Exception as e:
         print(f"[Firebase] Admin SDK initialization failed: {e}. Falling back to demo-token mode.")
         return False
+
+
+def sign_in_with_password(email: str, password: str) -> Optional[dict]:
+    """Authenticate through Firebase Auth REST and return the ID-token payload."""
+    if not settings.FIREBASE_WEB_API_KEY:
+        return None
+    request = urllib.request.Request(
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
+        + urllib.parse.quote(settings.FIREBASE_WEB_API_KEY),
+        data=json.dumps({"email": email.strip(), "password": password, "returnSecureToken": True}).encode(),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as exc:
+        print(f"[Firebase] Password sign-in failed: {exc}")
+        return None
 
 
 def verify_firebase_token(id_token: str) -> Optional[dict]:

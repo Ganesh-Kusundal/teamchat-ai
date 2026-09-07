@@ -18,13 +18,18 @@ class Settings(BaseModel):
     GOOGLE_CLOUD_PROJECT: str = os.getenv("GOOGLE_CLOUD_PROJECT", "")
     GOOGLE_CLOUD_LOCATION: str = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 
-    # --- Firebase Auth (optional) ---
-    # When set, the backend verifies Firebase ID tokens instead of demo tokens.
-    # Leave empty to use the built-in demo-token mode for local evaluation.
+    # --- Firebase Auth / persistence ---
+    # Production enables Firebase ID-token verification and Firestore-backed state.
     FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "")
+    FIREBASE_WEB_API_KEY: str = os.getenv("FIREBASE_WEB_API_KEY", "")
+    STORAGE_BACKEND: str = os.getenv("STORAGE_BACKEND", "memory").strip().lower()
+    FIRESTORE_DATABASE: str = os.getenv("FIRESTORE_DATABASE", "(default)")
+    # HOSTNAME is unique per Cloud Run container; K_REVISION is shared by all instances.
+    INSTANCE_ID: str = os.getenv("INSTANCE_ID", os.getenv("HOSTNAME", os.getenv("K_REVISION", "local")))
 
     # --- Application URL ---
     APP_URL: str = os.getenv("APP_URL", "http://localhost:8000")
+    CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:8000")
 
     # --- Data paths ---
     ROOT_DIR: Path = Path(__file__).resolve().parent.parent.parent

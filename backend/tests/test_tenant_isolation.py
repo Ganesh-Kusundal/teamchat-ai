@@ -14,7 +14,7 @@ def test_patient_cross_tenant_isolation_api(client: TestClient, northside_header
 
     # Northside user attempting to access Valley patient PT-4013 -> Blocked with error
     res_cross = client.get("/api/patients/PT-4013", headers=northside_headers)
-    assert res_cross.status_code == 200
+    assert res_cross.status_code == 404
     data_cross = res_cross.json()
     assert "error" in data_cross
     assert "Strict Tenant Isolation Enforced" in data_cross["error"]

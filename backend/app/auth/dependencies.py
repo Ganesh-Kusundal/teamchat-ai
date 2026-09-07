@@ -5,7 +5,7 @@ Mode 1 — Firebase Auth (production):
   Active when FIREBASE_PROJECT_ID env var is set.
   Verifies the incoming Bearer token as a Firebase ID token.
   org_slug is derived from custom claims on the token (set during user creation).
-  Falls back to demo-token lookup if Firebase verification returns None.
+  Never falls back to demo-token lookup when Firebase mode is enabled.
 
 Mode 2 — Demo token (local evaluation):
   Active when FIREBASE_PROJECT_ID is not set (default).
@@ -16,6 +16,7 @@ Mode 2 — Demo token (local evaluation):
 from typing import Optional
 from fastapi import Request, HTTPException, Security, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.concurrency import run_in_threadpool
 from ..models.schemas import RequestContext, UserProfile
 from ..services.chat_store import chat_store
 from ..config import settings
@@ -28,10 +29,9 @@ def _resolve_user_from_token(token: str) -> Optional[UserProfile]:
     """
     Resolve a UserProfile from a bearer token.
 
-    1. If FIREBASE_PROJECT_ID is set, attempt Firebase ID token verification first.
-       On success, look up the user by their Firebase UID (mapped to our seed users
-       via matching email or uid).
-    2. Fall through to demo-token lookup (token == user.id) for local evaluation.
+    1. If FIREBASE_PROJECT_ID is set, verify the Firebase ID token and map its
+       email or UID to the server-side organization user record.
+    2. Otherwise resolve the local demo token (token == user.id).
     """
     # --- Mode 1: Firebase Auth ---
     if settings.FIREBASE_PROJECT_ID:
@@ -39,17 +39,16 @@ def _resolve_user_from_token(token: str) -> Optional[UserProfile]:
         if claims:
             uid = claims.get("uid", "")
             email = claims.get("email", "")
-            # Match by email first (works even if UIDs differ between Firebase projects)
+            claimed_org = claims.get("orgId")
+            # Match by email first (works even if UIDs differ between Firebase projects),
+            # but require the provisioned server record to agree with the custom claim.
             if email:
-                user = next(
-                    (u for u in chat_store.users if u.email.lower() == email.lower()),
-                    None,
-                )
-                if user:
+                user = chat_store.get_user_by_email(email)
+                if user and claimed_org and user.orgSlug == claimed_org:
                     return user
             # Fall back to UID match
             user = chat_store.get_user_by_id(uid)
-            if user:
+            if user and claimed_org and user.orgSlug == claimed_org:
                 return user
             # Firebase token is valid but user not in our seed — reject.
             return None
@@ -78,7 +77,7 @@ async def get_request_context(
             detail={"error": {"code": "UNAUTHENTICATED", "message": "Missing authentication token."}},
         )
 
-    user = _resolve_user_from_token(token)
+    user = await run_in_threadpool(_resolve_user_from_token, token)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

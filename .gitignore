@@ -39,3 +39,7 @@ pnpm-debug.log*
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Local agent/tool artifacts
+.agents/
+.freebuff/

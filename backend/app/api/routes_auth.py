@@ -1,9 +1,12 @@
+import asyncio
 from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from ..models.schemas import Organization, UserProfile, RequestContext
 from ..services.chat_store import chat_store
 from ..auth.dependencies import get_request_context
+from ..auth.firebase import sign_in_with_password
+from ..config import settings
 
 router = APIRouter(tags=["Authentication & Organizations"])
 
@@ -12,27 +15,45 @@ class LoginRequest(BaseModel):
     password: str = "password123"
 
 @router.get("/orgs", response_model=List[Organization])
-async def get_organizations():
-    return chat_store.get_organizations()
+async def get_organizations(context: RequestContext = Depends(get_request_context)):
+    # Organization metadata is tenant-scoped too; callers only receive their own org.
+    organization = chat_store.get_organization_by_slug(context.org_slug)
+    return [organization] if organization else []
 
 @router.post("/auth/login")
 async def login(req: LoginRequest):
     if not req.email:
         raise HTTPException(status_code=400, detail="Email is required.")
 
-    user = chat_store.authenticate_user(req.email, req.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials. Please select one of the pre-seeded test accounts.",
-        )
+    if settings.FIREBASE_PROJECT_ID:
+        auth_result = await asyncio.to_thread(sign_in_with_password, req.email, req.password)
+        if not auth_result:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid Firebase credentials.",
+            )
+        user = chat_store.get_user_by_email(auth_result.get("email", req.email))
+        token = auth_result.get("idToken")
+        if not user or not token:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Authenticated Firebase user is not provisioned in an organization.",
+            )
+    else:
+        user = chat_store.authenticate_user(req.email, req.password)
+        token = user.id if user else None
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials. Please select one of the pre-seeded test accounts.",
+            )
 
     # Update presence
     chat_store.update_presence(user.id, user.orgSlug, True)
     org = chat_store.get_organization_by_slug(user.orgSlug)
 
     return {
-        "token": user.id,
+        "token": token,
         "user": user.to_public(),   # passwordHash excluded
         "organization": org.model_dump() if org else None,
     }

@@ -25,10 +25,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('teamchat_token'));
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch all organizations for evaluation & tenant switcher
-  const fetchOrganizations = useCallback(async () => {
+  // Fetch organizations for authenticated session (tenant-scoped)
+  const fetchOrganizations = useCallback(async (sessionToken?: string) => {
+    if (!sessionToken) {
+      setAllOrganizations([]);
+      return;
+    }
     try {
-      const res = await fetch('/api/orgs');
+      const res = await fetch('/api/orgs', {
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      });
       if (res.ok) {
         const orgs = await res.json();
         setAllOrganizations(orgs);
@@ -77,11 +83,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    fetchOrganizations();
     if (token) {
+      fetchOrganizations(token);
       fetchMe(token);
     } else {
-      // Default to login screen or auto-login default test user if needed
+      setAllOrganizations([]);
       setIsLoading(false);
     }
   }, [fetchMe, fetchOrganizations, token]);

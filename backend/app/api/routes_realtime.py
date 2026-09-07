@@ -1,10 +1,13 @@
 import json
 import time
 import asyncio
+import uuid
 from typing import Optional
 from fastapi import APIRouter, Request, HTTPException, status
 from fastapi.responses import StreamingResponse
+from starlette.concurrency import run_in_threadpool
 from ..services.chat_store import chat_store
+from ..auth.dependencies import _resolve_user_from_token
 
 router = APIRouter(tags=["Real-Time Events"])
 
@@ -20,11 +23,11 @@ async def events_stream(request: Request, token: Optional[str] = None, roomId: O
     if not auth_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token required for real-time events.")
 
-    user = chat_store.get_user_by_id(auth_token)
+    user = await run_in_threadpool(_resolve_user_from_token, auth_token)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user session.")
 
-    client_id = f"client-{int(time.time() * 1000)}-{user.id[-4:]}"
+    client_id = f"client-{uuid.uuid4().hex}"
     if roomId:
         room = chat_store.get_room_by_id(roomId, user.orgSlug)
         if not room or user.id not in room.memberIds:
@@ -45,7 +48,15 @@ async def events_stream(request: Request, token: Optional[str] = None, roomId: O
             }
             yield f"data: {json.dumps(init_payload)}\n\n"
 
-            # 2. Main event loop with periodic 15s heartbeat
+            # 2. Initial Presence Sync Snapshot (so client immediately knows who is online)
+            online_members = chat_store.get_online_users_in_org(user.orgSlug)
+            presence_sync_payload = {
+                "type": "PRESENCE_SYNC",
+                "payload": [m.model_dump() for m in online_members],
+            }
+            yield f"data: {json.dumps(presence_sync_payload)}\n\n"
+
+            # 3. Main event loop with periodic 15s heartbeat
             last_heartbeat = time.time()
             while True:
                 if await request.is_disconnected():
