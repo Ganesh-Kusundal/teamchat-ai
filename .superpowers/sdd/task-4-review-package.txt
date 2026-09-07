@@ -1,0 +1,490 @@
+# Task 4 Review Package
+## Commits (base 756d314 → HEAD)
+8270966 refactor: shared formatting/memory helpers; unify idempotency key (room-scoped)
+
+## Diff stat
+ backend/app/core/formatting.py           | 18 +++++++++++++
+ backend/app/core/memory_query.py         | 29 ++++++++++++++++++++
+ backend/app/services/chat_store.py       | 15 ++++-------
+ backend/app/services/firestore_memory.py | 22 ++++------------
+ backend/app/services/firestore_store.py  | 15 +++++------
+ backend/app/services/memory_engine.py    | 45 +++++++-------------------------
+ backend/tests/test_shared_helpers.py     | 31 ++++++++++++++++++++++
+ 7 files changed, 104 insertions(+), 71 deletions(-)
+
+## Full diff (U10)
+diff --git a/backend/app/core/formatting.py b/backend/app/core/formatting.py
+new file mode 100644
+index 0000000..fd5fa2d
+--- /dev/null
++++ b/backend/app/core/formatting.py
+@@ -0,0 +1,18 @@
++import re
++import uuid
++
++from .constants import AI_SENDER_NAME, ROOM_SNIPPET_MAX_CHARS
++
++
++def room_snippet(sender_name: str, content: str, is_ai: bool) -> str:
++    prefix = AI_SENDER_NAME.removesuffix(" AI") if is_ai else sender_name
++    return f"{prefix}: {content[:ROOM_SNIPPET_MAX_CHARS]}..."
++
++
++def slugify_room_name(name: str) -> str:
++    # ponytail: one regex is the canonical rule; frontend NewRoomModal keeps its own (deferred codegen)
++    return re.sub(r"[^a-z0-9_-]+", "-", name.strip().lower()).strip("-")
++
++
++def make_room_id(org_slug: str) -> str:
++    return f"room-{org_slug[:3]}-{uuid.uuid4().hex[:12]}"
+diff --git a/backend/app/core/memory_query.py b/backend/app/core/memory_query.py
+new file mode 100644
+index 0000000..962da67
+--- /dev/null
++++ b/backend/app/core/memory_query.py
+@@ -0,0 +1,29 @@
++import json
++from typing import Optional
++
++from ..models.schemas import TeamMemory
++
++
++def validate_flat_value(value: dict) -> Optional[str]:
++    for k, v in value.items():
++        if isinstance(v, (dict, list)):
++            return (
++                "Team memory violation: Value must be a flat dictionary exactly one level deep. "
++                f'Nested object or array in key "{k}" is rejected.'
++            )
++        if not isinstance(v, (str, int, float, bool)):
++            return (
++                "Team memory violation: "
++                f'Value in key "{k}" must be a string, number, or boolean. '
++                f'Received type "{type(v).__name__}".'
++            )
++    return None
++
++
++def memory_matches(memory: TeamMemory, q: str) -> bool:
++    words = [w for w in q.split() if len(w) > 2]
++    key = memory.key.lower()
++    if key in q:
++        return True
++    value_text = json.dumps(memory.value).lower()
++    return any(w in key or w in value_text for w in words)
+diff --git a/backend/app/services/chat_store.py b/backend/app/services/chat_store.py
+index 82fe23f..307c5c9 100644
+--- a/backend/app/services/chat_store.py
++++ b/backend/app/services/chat_store.py
+@@ -1,21 +1,21 @@
+ import time
+ import asyncio
+ import re
+-import uuid
+ from typing import List, Dict, Any, Optional, Set
+ from ..config import settings
+ from ..core.constants import (
+-    DEFAULT_BASE_RATE, DEMO_PASSWORD, ROOM_SNIPPET_MAX_CHARS,
++    DEFAULT_BASE_RATE, DEMO_PASSWORD,
+     SSE_OFFLINE_GRACE_SECONDS, TYPING_TTL_SECONDS, utc_now_iso,
+ )
+ from ..core.events import EventType, event
++from ..core.formatting import make_room_id, room_snippet, slugify_room_name
+ from ..models.schemas import (
+     Organization,
+     UserProfile,
+     Room,
+     Message,
+     MessageReadReceipt,
+     PresenceRecord,
+     TypingIndicator,
+     TypingUser,
+     ToolCallRecord,
+@@ -341,47 +341,42 @@ class ChatStore:
+         org_rooms = [r for r in self.rooms if r.orgSlug == org_slug]
+         
+         # Filter private rooms if user_id is provided
+         if user_id:
+             org_rooms = [r for r in org_rooms if not r.isPrivate or user_id in r.memberIds]
+ 
+         results = []
+         for room in org_rooms:
+             room_msgs = [m for m in self.messages if m.roomId == room.id]
+             last_msg = room_msgs[-1] if room_msgs else None
+-            last_snippet = (
+-                f"Gemini: {last_msg.content[:ROOM_SNIPPET_MAX_CHARS]}..."
+-                if last_msg and last_msg.isAi
+-                else (f"{last_msg.senderName}: {last_msg.content[:ROOM_SNIPPET_MAX_CHARS]}..." if last_msg else None)
+-            )
+             r_copy = room.model_copy()
+-            r_copy.lastMessage = last_snippet
++            r_copy.lastMessage = room_snippet(last_msg.senderName, last_msg.content, last_msg.isAi) if last_msg else None
+             r_copy.lastMessageTimestamp = last_msg.timestamp if last_msg else room.createdAt
+             results.append(r_copy)
+         return results
+ 
+     def get_room_by_id(self, room_id: str, org_slug: str) -> Optional[Room]:
+         return next((r for r in self.rooms if r.id == room_id and r.orgSlug == org_slug), None)
+ 
+     def create_room(
+         self,
+         org_slug: str,
+         name: str,
+         description: str,
+         created_by: str,
+         is_private: bool = False,
+         member_ids: Optional[List[str]] = None,
+     ) -> Room:
+-        clean_name = name.strip().lower().replace(" ", "-")
++        clean_name = slugify_room_name(name)
+         members = member_ids or [u.id for u in self.get_users_by_org(org_slug)]
+         new_room = Room(
+-            id=f"room-{org_slug[:3]}-{uuid.uuid4().hex[:12]}",
++            id=make_room_id(org_slug),
+             orgSlug=org_slug,
+             name=clean_name,
+             description=description.strip(),
+             isPrivate=is_private,
+             memberIds=members,
+             createdAt=utc_now_iso(),
+             createdBy=created_by,
+         )
+         self.rooms.append(new_room)
+         asyncio.create_task(
+diff --git a/backend/app/services/firestore_memory.py b/backend/app/services/firestore_memory.py
+index ad4ec88..315b715 100644
+--- a/backend/app/services/firestore_memory.py
++++ b/backend/app/services/firestore_memory.py
+@@ -1,20 +1,20 @@
+ """Durable organization-scoped team memory repository."""
+ from __future__ import annotations
+ 
+ import hashlib
+-import json
+ import uuid
+ from typing import Any, Dict, Optional
+ 
+ from ..config import settings
+ from ..core.constants import utc_now_iso
++from ..core.memory_query import memory_matches, validate_flat_value
+ from ..models.schemas import TeamMemory
+ from .memory_engine import MemoryEngine
+ 
+ 
+ class FirestoreMemoryEngine(MemoryEngine):
+     def __init__(self):
+         try:
+             from google.cloud import firestore
+         except ImportError as exc:
+             raise RuntimeError(
+@@ -58,47 +58,38 @@ class FirestoreMemoryEngine(MemoryEngine):
+             memories = [self._memory_from_doc(d) for d in docs]
+             if key:
+                 exact = next((m for m in memories if m.key.lower() == key.lower().strip()), None)
+                 if exact:
+                     return {
+                         "dataset_version": settings.VERSION,
+                         "org_slug": org_slug,
+                         "matched_key": exact.key,
+                         "memory": exact.model_dump(),
+                     }
+-            words = [word for word in q.split() if len(word) > 2]
+-            results = []
+-            for memory in memories:
+-                value_text = json.dumps(memory.value).lower()
+-                if memory.key.lower() in q or any(
+-                    word in memory.key.lower() or word in value_text for word in words
+-                ):
+-                    results.append(memory.model_dump())
++            results = [m.model_dump() for m in memories if memory_matches(m, q)]
+             return {
+                 "dataset_version": settings.VERSION,
+                 "org_slug": org_slug,
+                 "query": query or key,
+                 "count": len(results),
+                 "memories": results,
+                 "isolation_note": f'Results strictly scoped to tenant "{org_slug}".',
+             }
+ 
+         if action == "store":
+             if not key or not key.strip():
+                 return {"error": "A valid key string is required to store a team memory."}
+             if not value or not isinstance(value, dict):
+                 return {"error": "A value dictionary is required to store a team memory."}
+-            for field, field_value in value.items():
+-                if isinstance(field_value, (dict, list)):
+-                    return {"error": f'Team memory violation: nested value in key "{field}" is rejected.'}
+-                if not isinstance(field_value, (str, int, float, bool)):
+-                    return {"error": f'Team memory violation: key "{field}" must be a scalar value.'}
++            error = validate_flat_value(value)
++            if error:
++                return {"error": error}
+ 
+             clean_key = key.strip().lower().replace(" ", "_")
+             existing = next(iter(ref.where("key", "==", clean_key).limit(1).stream()), None)
+             memory_id = existing.id if existing else f"MEM-{uuid.uuid4().hex}"
+             memory = TeamMemory(
+                 memory_id=memory_id,
+                 org_slug=org_slug,
+                 key=clean_key,
+                 value=value,
+                 created_by=user_email or "system@teamchat.ai",
+@@ -107,13 +98,10 @@ class FirestoreMemoryEngine(MemoryEngine):
+             )
+             ref.document(memory_id).set(memory.model_dump())
+             return {
+                 "dataset_version": settings.VERSION,
+                 "success": True,
+                 "message": f'Team memory "{clean_key}" stored securely in organization "{org_slug}".',
+                 "memory": memory.model_dump(),
+             }
+ 
+         return {"error": f'Invalid action "{action}". Expected "recall" or "store".'}
+-
+-
+-memory_engine = FirestoreMemoryEngine()
+diff --git a/backend/app/services/firestore_store.py b/backend/app/services/firestore_store.py
+index d6935e4..251a400 100644
+--- a/backend/app/services/firestore_store.py
++++ b/backend/app/services/firestore_store.py
+@@ -2,37 +2,37 @@
+ 
+ All application documents are nested below an organization document.  The backend
+ still performs authorization before calling this repository; the nested paths add a
+ second tenant boundary and make accidental cross-organization queries impossible.
+ """
+ from __future__ import annotations
+ 
+ import asyncio
+ import hashlib
+ import time
+-import uuid
+ from typing import Any, Dict, List, Optional
+ 
+ from ..config import settings
+ from ..models.schemas import (
+     Message,
+     MessageReadReceipt,
+     Organization,
+     PresenceRecord,
+     Room,
+     TypingIndicator,
+     UserProfile,
+ )
+ from .chat_store import ChatStore, SEED_MESSAGES, SEED_ORGANIZATIONS, SEED_ROOMS, SEED_USERS
+ from .event_broker import FirestoreEventBroker
+ from ..core.constants import TYPING_TTL_SECONDS, utc_now_iso
+ from ..core.events import EventType, event
++from ..core.formatting import make_room_id, room_snippet, slugify_room_name
+ 
+ 
+ class FirestoreChatStore(ChatStore):
+     """Synchronous Firestore repository used by FastAPI's production process."""
+ 
+     def __init__(self):
+         try:
+             from google.cloud import firestore
+         except ImportError as exc:
+             raise RuntimeError(
+@@ -138,39 +138,36 @@ class FirestoreChatStore(ChatStore):
+         return Room(**data)
+ 
+     def get_rooms_by_org(self, org_slug: str, user_id: Optional[str] = None) -> List[Room]:
+         rooms = [self._room_from_doc(d) for d in self._rooms_ref(org_slug).stream()]
+         if user_id:
+             rooms = [r for r in rooms if user_id in r.memberIds]
+         for room in rooms:
+             messages = self.get_messages(room.id, org_slug, limit=1)
+             if messages:
+                 last = messages[-1]
+-                room.lastMessage = (
+-                    f"Gemini: {last.content[:45]}..." if last.isAi
+-                    else f"{last.senderName}: {last.content[:45]}..."
+-                )
++                room.lastMessage = room_snippet(last.senderName, last.content, last.isAi)
+                 room.lastMessageTimestamp = last.timestamp
+             else:
+                 room.lastMessageTimestamp = room.createdAt
+         return rooms
+ 
+     def get_room_by_id(self, room_id: str, org_slug: str) -> Optional[Room]:
+         doc = self._rooms_ref(org_slug).document(room_id).get()
+         return self._room_from_doc(doc) if doc.exists else None
+ 
+     def create_room(self, org_slug: str, name: str, description: str, created_by: str,
+                     is_private: bool = False, member_ids: Optional[List[str]] = None) -> Room:
+         room = Room(
+-            id=f"room-{org_slug[:3]}-{uuid.uuid4().hex[:12]}",
++            id=make_room_id(org_slug),
+             orgSlug=org_slug,
+-            name=name.strip().lower().replace(" ", "-"),
++            name=slugify_room_name(name),
+             description=description.strip(),
+             isPrivate=is_private,
+             memberIds=member_ids or [u.id for u in self.get_users_by_org(org_slug)],
+             createdAt=utc_now_iso(),
+             createdBy=created_by,
+         )
+         room_ref = self._rooms_ref(org_slug).document(room.id)
+         batch = self.db.batch()
+         batch.set(room_ref, self._model_data(room))
+         for member_id in room.memberIds:
+@@ -249,22 +246,22 @@ class FirestoreChatStore(ChatStore):
+             query = query.where("timestamp", "<", before)
+         # Return the newest page in chronological order. limit() alone returns
+         # the oldest page and breaks history pagination after the first request.
+         docs = list(query.limit_to_last(max(1, limit)).stream())
+         return [self._message_from_doc(d) for d in docs]
+ 
+     def add_message(self, message: Message) -> Message:
+         messages_ref = self._messages_ref(message.orgSlug, message.roomId)
+         if message.clientMessageId:
+             key = hashlib.sha256(
+-                f"{message.senderId}:{message.clientMessageId}".encode("utf-8")
+-            ).hexdigest()
++                f"{message.orgSlug}:{message.roomId}:{message.clientMessageId}".encode("utf-8")
++            ).hexdigest()  # ponytail: room-scoped to match in-memory chat_store key
+             dedupe_ref = self._rooms_ref(message.orgSlug).document(message.roomId).collection("message_idempotency").document(key)
+             existing = dedupe_ref.get()
+             if existing.exists:
+                 existing_id = existing.to_dict().get("messageId")
+                 saved = messages_ref.document(existing_id).get() if existing_id else None
+                 if saved and saved.exists:
+                     return self._message_from_doc(saved)
+ 
+             transaction = self.db.transaction()
+             message_ref = messages_ref.document(message.id)
+diff --git a/backend/app/services/memory_engine.py b/backend/app/services/memory_engine.py
+index bc57c8a..cc0a9c6 100644
+--- a/backend/app/services/memory_engine.py
++++ b/backend/app/services/memory_engine.py
+@@ -1,16 +1,17 @@
+ import json
+ import time
+ from pathlib import Path
+ from typing import List, Dict, Any, Optional, Literal
+ from ..config import settings
+ from ..core.constants import DATASET_VERSION, utc_now_iso
++from ..core.memory_query import memory_matches, validate_flat_value
+ from ..models.schemas import TeamMemory
+ 
+ class MemoryEngine:
+     def __init__(self, root_dir: Path):
+         self.root_dir = root_dir
+         self.seed_memories: List[TeamMemory] = []
+         self.memories: List[TeamMemory] = []
+         self.load_datasets()
+ 
+     def load_datasets(self):
+@@ -31,65 +32,39 @@ class MemoryEngine:
+         action: Literal["recall", "store"],
+         key: Optional[str] = None,
+         query: Optional[str] = None,
+         value: Optional[Dict[str, Any]] = None,
+         room: Optional[str] = None,
+         user_email: Optional[str] = None,
+     ) -> Dict[str, Any]:
+         if action == "recall":
+             q = (query or key or "").lower().strip()
+             org_mems = [m for m in self.memories if m.org_slug == org_slug]
+-
+-            # Exact key match
+             if key:
+                 exact = next((m for m in org_mems if m.key.lower() == key.lower().strip()), None)
+                 if exact:
+-                    return {
+-                        "dataset_version": DATASET_VERSION,
+-                        "org_slug": org_slug,
+-                        "matched_key": exact.key,
+-                        "memory": exact.model_dump(),
+-                    }
+-
+-            # Semantic / keyword search over key and values
+-            results = []
+-            for m in org_mems:
+-                val_str = json.dumps(m.value).lower()
+-                words = [w for w in q.split() if len(w) > 2]
+-                if m.key.lower() in q or any(w in m.key.lower() or w in val_str for w in words):
+-                    results.append(m.model_dump())
+-
+-            return {
+-                "dataset_version": DATASET_VERSION,
+-                "org_slug": org_slug,
+-                "query": query or key,
+-                "count": len(results),
+-                "memories": results,
+-                "isolation_note": f'Results strictly scoped to tenant "{org_slug}". Cross-tenant memories are completely isolated.',
+-            }
++                    return {"dataset_version": DATASET_VERSION, "org_slug": org_slug,
++                            "matched_key": exact.key, "memory": exact.model_dump()}
++            results = [m.model_dump() for m in org_mems if memory_matches(m, q)]
++            return {"dataset_version": DATASET_VERSION, "org_slug": org_slug, "query": query or key,
++                    "count": len(results), "memories": results,
++                    "isolation_note": f'Results strictly scoped to tenant "{org_slug}". Cross-tenant memories are completely isolated.'}
+ 
+         elif action == "store":
+             if not key:
+                 return {"error": "A valid key string is required to store a team memory."}
+             if not value or not isinstance(value, dict):
+                 return {"error": "A value dictionary is required to store a team memory."}
+ 
+-            # Validate flat dictionary rule: 1 level deep only, values must be string | int | float | bool
+-            for k, v in value.items():
+-                if isinstance(v, (dict, list)):
+-                    return {
+-                        "error": f'Team memory violation: Value must be a flat dictionary exactly one level deep. Nested object or array in key "{k}" is rejected.'
+-                    }
+-                if not isinstance(v, (str, int, float, bool)):
+-                    return {
+-                        "error": f'Team memory violation: Value in key "{k}" must be a string, number, or boolean. Received type "{type(v).__name__}".'
+-                    }
++            error = validate_flat_value(value)
++            if error:
++                return {"error": error}
+ 
+             clean_key = key.strip().lower().replace(" ", "_")
+             new_mem = TeamMemory(
+                 memory_id=f"MEM-{org_slug[:3].upper()}-{int(time.time() * 1000) % 10000:04d}",
+                 org_slug=org_slug,
+                 key=clean_key,
+                 value=value,
+                 created_by=user_email or "system@teamchat.ai",
+                 created_at=utc_now_iso(),
+                 room=room or "general",
+diff --git a/backend/tests/test_shared_helpers.py b/backend/tests/test_shared_helpers.py
+new file mode 100644
+index 0000000..c910a0b
+--- /dev/null
++++ b/backend/tests/test_shared_helpers.py
+@@ -0,0 +1,31 @@
++from backend.app.core.formatting import room_snippet, slugify_room_name, make_room_id
++from backend.app.core.memory_query import validate_flat_value, memory_matches
++from backend.app.models.schemas import TeamMemory
++
++
++def test_snippet_matches_both_store_formats():
++    assert room_snippet("Sarah Chen", "x" * 100, False) == f"Sarah Chen: {'x' * 45}..."
++    assert room_snippet("", "y" * 100, True).startswith("Gemini: ")
++
++
++def test_slugify_unifies_client_and_server_rules():
++    assert slugify_room_name("Clinical Quality Review!") == "clinical-quality-review"
++    assert slugify_room_name("  Risk Room  ") == "risk-room"
++
++
++def test_room_id_prefix():
++    rid = make_room_id("northside-health")
++    assert rid.startswith("room-nor-") and len(rid) == len("room-nor-") + 12
++
++
++def test_flat_value_validation_message_is_shared():
++    assert "flat dictionary exactly one level deep" in validate_flat_value({"a": {"n": 1}})
++    assert "must be a string, number, or boolean" in validate_flat_value({"a": None})
++    assert validate_flat_value({"ok": "yes"}) is None
++
++
++def test_memory_matches_shared():
++    mem = TeamMemory(memory_id="M1", org_slug="o", key="diabetes_policy", value={"rule": "link CKD"},
++                     created_by="e", created_at="2026-01-01T00:00:00Z", room="general")
++    assert memory_matches(mem, "what is our diabetes policy?")
++    assert not memory_matches(mem, "unrelated query entirely")

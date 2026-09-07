@@ -4,7 +4,7 @@
 [![React](https://img.shields.io/badge/React-19.0-61DAFB.svg?style=flat&logo=React&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6.svg?style=flat&logo=TypeScript&logoColor=white)](https://www.typescriptlang.org)
 [![Google Gen AI](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4.svg?style=flat&logo=Google&logoColor=white)](https://cloud.google.com/vertex-ai)
-[![Pytest](https://img.shields.io/badge/Pytest-15%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](https://pytest.org)
+[![Pytest](https://img.shields.io/badge/Pytest-35%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](https://pytest.org)
 
 **TeamChat AI** is a production-grade multi-tenant collaborative AI chat platform engineered for healthcare teams (clinicians, risk adjustment coders, quality auditors, and medical directors). Multiple users within an organization can collaborate in real-time rooms and interact with Gemini AI together with multi-speaker attribution, CMS-HCC V28 risk scoring, and zero cross-tenant leakage.
 
@@ -16,8 +16,8 @@
 - **Cloud Run API URL**: [https://teamchat-ai-872402492611.us-central1.run.app](https://teamchat-ai-872402492611.us-central1.run.app)
 - **Repository**: [https://github.com/Ganesh-Kusundal/teamchat-ai](https://github.com/Ganesh-Kusundal/teamchat-ai)
 - **Role**: Staff/Principal Full-Stack Engineer Technical Assessment
-- **Tech Stack**: Python 3.11+ (FastAPI), React 19 (TypeScript), Vertex AI (Gemini), Cloud Run, Server-Sent Events (SSE)
-- **Automated Tests**: 17/17 Pytest tests passing (`pytest backend/tests/ -v`)
+- **Tech Stack**: Python 3.11+ (FastAPI), React 19 (TypeScript), Vertex AI (Gemini), Cloud Run, Server-Sent Events (SSE), Firestore
+- **Automated Tests**: 35/35 Pytest tests passing (`PYTHONPATH=. ./.venv/bin/pytest backend/tests/ -v`)
 - **Evaluation Guide**: Pre-seeded with 3 organizations, 8 users, and 1-click test credentials switcher.
 
 ---

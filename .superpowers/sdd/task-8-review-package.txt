@@ -1,0 +1,371 @@
+# Task 8 Review Package
+## Commits (base 7f4cc8a → HEAD)
+b426c4e refactor: demo accounts served by API; remove frontend seed triplication and ID-sniffing avatars
+
+## Diff stat
+ backend/app/api/routes_auth.py          |  9 ++++
+ backend/app/services/chat_store.py      |  3 ++
+ backend/app/services/firestore_store.py |  6 +++
+ backend/tests/test_demo_accounts.py     | 10 ++++
+ src/components/ChatArea.tsx             | 10 ++--
+ src/components/LoginPage.tsx            | 88 ++++++---------------------------
+ src/context/AuthContext.tsx             | 15 +++---
+ 7 files changed, 55 insertions(+), 86 deletions(-)
+
+## Full diff (U10)
+diff --git a/backend/app/api/routes_auth.py b/backend/app/api/routes_auth.py
+index 5beca2a..2fe359e 100644
+--- a/backend/app/api/routes_auth.py
++++ b/backend/app/api/routes_auth.py
+@@ -67,10 +67,19 @@ async def get_me(context: RequestContext = Depends(get_request_context)):
+     return {
+         "user": user.to_public() if user else None,          # passwordHash excluded
+         "organization": org.model_dump() if org else None,
+         "onlineMembers": [m.model_dump() for m in online_members],  # PresenceRecord has no passwordHash
+     }
+ 
+ @router.get("/org/users")
+ async def get_org_users(context: RequestContext = Depends(get_request_context)):
+     users = chat_store.get_users_by_org(context.org_slug)
+     return [u.to_public() for u in users]  # passwordHash excluded
++
++@router.get("/demo/accounts")
++async def get_demo_accounts():
++    if settings.FIREBASE_PROJECT_ID:
++        raise HTTPException(status_code=404, detail="Demo accounts are only available in demo mode.")
++    return [
++        {"email": u.email, "name": u.name, "role": u.role, "orgSlug": u.orgSlug, "title": u.title}
++        for u in chat_store.get_all_users()
++    ]
+diff --git a/backend/app/services/chat_store.py b/backend/app/services/chat_store.py
+index 307c5c9..5681955 100644
+--- a/backend/app/services/chat_store.py
++++ b/backend/app/services/chat_store.py
+@@ -329,20 +329,23 @@ class ChatStore:
+     def get_user_by_id(self, user_id: str) -> Optional[UserProfile]:
+         return next((u for u in self.users if u.id == user_id), None)
+ 
+     def get_user_by_email(self, email: str) -> Optional[UserProfile]:
+         clean_email = email.strip().lower()
+         return next((u for u in self.users if u.email.lower() == clean_email), None)
+ 
+     def get_users_by_org(self, org_slug: str) -> List[UserProfile]:
+         return [u for u in self.users if u.orgSlug == org_slug]
+ 
++    def get_all_users(self) -> List[UserProfile]:
++        return self.users
++
+     # --- Rooms ---
+     def get_rooms_by_org(self, org_slug: str, user_id: Optional[str] = None) -> List[Room]:
+         org_rooms = [r for r in self.rooms if r.orgSlug == org_slug]
+         
+         # Filter private rooms if user_id is provided
+         if user_id:
+             org_rooms = [r for r in org_rooms if not r.isPrivate or user_id in r.memberIds]
+ 
+         results = []
+         for room in org_rooms:
+diff --git a/backend/app/services/firestore_store.py b/backend/app/services/firestore_store.py
+index 251a400..5ba5e16 100644
+--- a/backend/app/services/firestore_store.py
++++ b/backend/app/services/firestore_store.py
+@@ -121,20 +121,26 @@ class FirestoreChatStore(ChatStore):
+ 
+     def get_user_by_id(self, user_id: str) -> Optional[UserProfile]:
+         return self._refresh_user(user_id=user_id)
+ 
+     def get_user_by_email(self, email: str) -> Optional[UserProfile]:
+         return self._refresh_user(email=email)
+ 
+     def get_users_by_org(self, org_slug: str) -> List[UserProfile]:
+         return [UserProfile(**d.to_dict()) for d in self._users_ref(org_slug).stream()]
+ 
++    def get_all_users(self) -> List[UserProfile]:
++        users: List[UserProfile] = []
++        for org in self.get_organizations():
++            users.extend(self.get_users_by_org(org.slug))
++        return users
++
+     def authenticate_user(self, email: str, password: str = "") -> Optional[UserProfile]:
+         # Password verification belongs to Firebase Auth in production.
+         return None
+ 
+     def _room_from_doc(self, doc) -> Room:
+         data = doc.to_dict()
+         data["id"] = doc.id
+         return Room(**data)
+ 
+     def get_rooms_by_org(self, org_slug: str, user_id: Optional[str] = None) -> List[Room]:
+diff --git a/backend/tests/test_demo_accounts.py b/backend/tests/test_demo_accounts.py
+new file mode 100644
+index 0000000..243a74b
+--- /dev/null
++++ b/backend/tests/test_demo_accounts.py
+@@ -0,0 +1,10 @@
++from fastapi.testclient import TestClient
++
++
++def test_demo_accounts_listed_in_demo_mode(client: TestClient):
++    res = client.get("/api/demo/accounts")
++    assert res.status_code == 200
++    accounts = res.json()
++    assert len(accounts) == 10
++    assert {"email", "name", "role", "orgSlug", "title"} == set(accounts[0].keys())
++    assert "password" not in accounts[0]
+diff --git a/src/components/ChatArea.tsx b/src/components/ChatArea.tsx
+index 1c753c8..79ecb10 100644
+--- a/src/components/ChatArea.tsx
++++ b/src/components/ChatArea.tsx
+@@ -186,27 +186,27 @@ const ReadStatusIndicator: React.FC<ReadStatusIndicatorProps> = ({
+               </div>
+             ))}
+           </div>
+         </div>
+       )}
+     </div>
+   );
+ };
+ 
+ // Generate consistent vibrant avatar colors matching the theme mockup
++const AVATAR_COLORS = ['bg-indigo-500', 'bg-purple-500', 'bg-pink-500', 'bg-emerald-600', 'bg-amber-500', 'bg-cyan-600'];
++
+ export const getAvatarColor = (id?: string) => {
+   if (!id) return 'bg-indigo-500';
+-  if (id.includes('sarah')) return 'bg-indigo-500';
+-  if (id.includes('mike')) return 'bg-purple-500';
+-  if (id.includes('lisa')) return 'bg-pink-500';
+-  if (id.includes('elena') || id.includes('marcus')) return 'bg-emerald-600';
+-  return 'bg-indigo-600';
++  let h = 0;
++  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 997;
++  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+ };
+ 
+ interface TypingIndicatorProps {
+   typingUsers: TypingUser[];
+ }
+ 
+ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingUsers }) => {
+   if (!typingUsers || typingUsers.length === 0) return null;
+ 
+   const formatTypingText = () => {
+diff --git a/src/components/LoginPage.tsx b/src/components/LoginPage.tsx
+index 6ed6a79..633638a 100644
+--- a/src/components/LoginPage.tsx
++++ b/src/components/LoginPage.tsx
+@@ -1,114 +1,58 @@
+-import React, { useState } from 'react';
++import React, { useEffect, useState } from 'react';
+ import { useAuth } from '../context/AuthContext.js';
++import { api } from '../services/api.js';
+ import {
+   Sparkles,
+   Building2,
+   Lock,
+   Mail,
+   ShieldCheck,
+   CheckCircle2,
+   ArrowRight,
+ } from 'lucide-react';
+ 
++interface DemoAccount { email: string; name: string; role: string; orgSlug: string; title?: string; }
++
++const orgLabel = (orgSlug: string) =>
++  orgSlug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
++
+ export const LoginPage: React.FC = () => {
+   const { login, isLoading } = useAuth();
+   const [email, setEmail] = useState('');
+   const [password, setPassword] = useState('password123');
+   const [error, setError] = useState<string | null>(null);
++  const [testAccounts, setTestAccounts] = useState<DemoAccount[]>([]);
++
++  useEffect(() => {
++    api('/api/demo/accounts').then((r) => (r.ok ? r.json() : [])).then(setTestAccounts).catch(() => {});
++  }, []);
+ 
+   const handleSubmit = async (e: React.FormEvent) => {
+     e.preventDefault();
+     setError(null);
+     const success = await login(email, password);
+     if (!success) {
+       setError('Invalid credentials. Please select one of the pre-configured test users below.');
+     }
+   };
+ 
+   const handleSelectTestUser = (testEmail: string) => {
+     setEmail(testEmail);
+     login(testEmail, 'password123');
+   };
+ 
+-  const testAccounts = [
+-    {
+-      org: 'Northside Health',
+-      slug: 'northside-health',
+-      name: 'Sarah Chen',
+-      role: 'Admin / Risk Lead',
+-      email: 'sarah@northside-health.test',
+-      badgeColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+-    },
+-    {
+-      org: 'Northside Health',
+-      slug: 'northside-health',
+-      name: 'Mike Ross',
+-      role: 'Senior Risk Specialist',
+-      email: 'mike@northside-health.test',
+-      badgeColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+-    },
+-    {
+-      org: 'Northside Health',
+-      slug: 'northside-health',
+-      name: 'Dr. Marcus Vance',
+-      role: 'Internal Medicine',
+-      email: 'marcus@northside-health.test',
+-      badgeColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+-    },
+-    {
+-      org: 'Northside Health',
+-      slug: 'northside-health',
+-      name: 'Lisa Wong',
+-      role: 'Clinical Quality Auditor',
+-      email: 'lisa@northside-health.test',
+-      badgeColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+-    },
+-    {
+-      org: 'Valley Primary Care',
+-      slug: 'valley-primary-care',
+-      name: 'Dr. Elena Sorensen',
+-      role: 'Admin / Medical Director',
+-      email: 'elena@valley-primary-care.test',
+-      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+-    },
+-    {
+-      org: 'Valley Primary Care',
+-      slug: 'valley-primary-care',
+-      name: 'David Park',
+-      role: 'Risk Adjustment Lead',
+-      email: 'david@valley-primary-care.test',
+-      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+-    },
+-    {
+-      org: 'Valley Primary Care',
+-      slug: 'valley-primary-care',
+-      name: 'Diego Arriaga',
+-      role: 'Lead Risk Coder',
+-      email: 'diego@valley-primary-care.test',
+-      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+-    },
+-    {
+-      org: 'Metro Cardiology',
+-      slug: 'metro-cardiology',
+-      name: 'Dr. Marcus Brody',
+-      role: 'Chief of Cardiology',
+-      email: 'marcus@metro-cardiology.test',
+-      badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+-    },
+-  ];
+-
+   const [selectedOrgFilter, setSelectedOrgFilter] = useState<string>('all');
+ 
+   const filteredAccounts = selectedOrgFilter === 'all'
+     ? testAccounts
+-    : testAccounts.filter((acc) => acc.slug === selectedOrgFilter);
++    : testAccounts.filter((acc) => acc.orgSlug === selectedOrgFilter);
+ 
+   return (
+     <div className="min-h-screen bg-[#0C0D10] relative overflow-hidden flex flex-col justify-center py-10 sm:px-6 lg:px-8 text-zinc-100">
+       {/* Ambient background glow */}
+       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-indigo-600/10 blur-[130px] rounded-full pointer-events-none" />
+       <div className="absolute bottom-10 right-10 w-[350px] h-[250px] bg-purple-600/5 blur-[120px] rounded-full pointer-events-none" />
+ 
+       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10">
+         <div className="mx-auto w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white shadow-xl shadow-indigo-600/25 mb-3 font-bold text-lg border border-white/10">
+           TC
+@@ -138,21 +82,21 @@ export const LoginPage: React.FC = () => {
+                 Email address
+               </label>
+               <div className="relative">
+                 <Mail className="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" />
+                 <input
+                   id="login-email"
+                   type="email"
+                   required
+                   value={email}
+                   onChange={(e) => setEmail(e.target.value)}
+-                  placeholder="e.g. sarah@northside-health.test"
++                  placeholder={testAccounts[0] ? `e.g. ${testAccounts[0].email}` : 'e.g. you@example.test'}
+                   className="w-full bg-[#0C0D10] border border-white/10 rounded-lg pl-9 pr-3 py-2 text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 text-xs transition-colors"
+                 />
+               </div>
+             </div>
+ 
+             <div>
+               <label htmlFor="login-password" className="block text-zinc-300 font-medium mb-1">
+                 Password
+               </label>
+               <div className="relative">
+@@ -241,22 +185,22 @@ export const LoginPage: React.FC = () => {
+             <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+               {filteredAccounts.map((acc) => (
+                 <button
+                   key={acc.email}
+                   onClick={() => handleSelectTestUser(acc.email)}
+                   className="w-full text-left p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/15 transition-all flex items-center justify-between group cursor-pointer"
+                 >
+                   <div className="min-w-0 pr-2">
+                     <div className="font-semibold text-xs text-white flex items-center gap-2 truncate">
+                       <span className="truncate">{acc.name}</span>
+-                      <span className={`text-[9px] px-1.5 py-0.2 rounded border shrink-0 font-medium ${acc.badgeColor}`}>
+-                        {acc.org}
++                      <span className={`text-[9px] px-1.5 py-0.2 rounded border shrink-0 font-medium ${acc.orgSlug === 'valley-primary-care' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
++                        {orgLabel(acc.orgSlug)}
+                       </span>
+                     </div>
+                     <div className="text-[11px] text-zinc-400 mt-0.5 truncate font-mono">
+                       {acc.role} · {acc.email}
+                     </div>
+                   </div>
+                   <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 shrink-0 transition-all" />
+                 </button>
+               ))}
+             </div>
+diff --git a/src/context/AuthContext.tsx b/src/context/AuthContext.tsx
+index 1d8e24e..543b657 100644
+--- a/src/context/AuthContext.tsx
++++ b/src/context/AuthContext.tsx
+@@ -143,29 +143,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
+   const switchUser = async (targetUser: User) => {
+     await login(targetUser.email, 'password123');
+   };
+ 
+   const switchOrganization = async (orgSlug: string) => {
+     // Find the first user in that organization to log in as
+     try {
+       const org = allOrganizations.find((o) => o.slug === orgSlug);
+       if (!org) return;
+ 
+-      // Seed email conventions:
+-      const defaultEmail =
+-        orgSlug === 'northside-health'
+-          ? 'sarah@northside-health.test'
+-          : orgSlug === 'valley-primary-care'
+-          ? 'elena@valley-primary-care.test'
+-          : 'marcus@metro-cardiology.test';
+-
+-      await login(defaultEmail, 'password123');
++      const res = await api('/api/demo/accounts');
++      if (!res.ok) return;
++      const accounts: { email: string; orgSlug: string; role: string }[] = await res.json();
++      const admin = accounts.find((a) => a.orgSlug === orgSlug && a.role === 'admin') ??
++                    accounts.find((a) => a.orgSlug === orgSlug);
++      if (admin) await login(admin.email, 'password123');
+     } catch (err) {
+       console.error('Failed to switch organization:', err);
+     }
+   };
+ 
+   const refreshOrgData = async () => {
+     if (token) {
+       await fetchMe(token);
+     }
+   };

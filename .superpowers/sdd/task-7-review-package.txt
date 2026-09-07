@@ -1,0 +1,784 @@
+# Task 7 Review Package
+## Commits (base cde48e4 → HEAD)
+7f4cc8a refactor: single frontend API client; env-configured API base; AI-trigger regex aligned with backend
+
+## Diff stat
+ .env.example                            |   6 ++
+ src/components/RoomMembersModal.tsx     |  12 +---
+ src/components/TenantInspectorModal.tsx |  17 ++----
+ src/context/AuthContext.tsx             |  32 ++++------
+ src/context/ChatContext.tsx             | 100 +++++++-------------------------
+ src/services/api.ts                     |  17 ++++++
+ 6 files changed, 65 insertions(+), 119 deletions(-)
+
+## Full diff (U10)
+diff --git a/.env.example b/.env.example
+index a8e48a9..c471ead 100644
+--- a/.env.example
++++ b/.env.example
+@@ -28,10 +28,16 @@ STORAGE_BACKEND="memory"
+ FIRESTORE_DATABASE="(default)"
+ # Optional: Firestore TTL cleanup is recommended for realtime_events.expiresAt.
+ 
+ # -----------------------------------------------------------
+ # Application URL
+ # -----------------------------------------------------------
+ # Automatically set by Cloud Run at runtime.
+ APP_URL="http://localhost:8000"
+ # Comma-separated browser origins; do not use * when credentials are enabled.
+ CORS_ORIGINS="http://localhost:5173,http://localhost:8000"
++
++# -----------------------------------------------------------
++# Frontend
++# -----------------------------------------------------------
++# Base URL of the backend API. Empty = same origin (Vite dev proxy locally, same service on Cloud Run).
++VITE_API_BASE_URL=""
+diff --git a/src/components/RoomMembersModal.tsx b/src/components/RoomMembersModal.tsx
+index b044b01..cbd4c90 100644
+--- a/src/components/RoomMembersModal.tsx
++++ b/src/components/RoomMembersModal.tsx
+@@ -1,13 +1,14 @@
+ import React, { useState } from 'react';
+ import { useChat } from '../context/ChatContext.js';
+ import { useAuth } from '../context/AuthContext.js';
++import { api } from '../services/api.js';
+ import { Users, UserPlus, UserMinus, X, Shield, Lock } from 'lucide-react';
+ 
+ interface RoomMembersModalProps {
+   isOpen: boolean;
+   onClose: () => void;
+ }
+ 
+ export const RoomMembersModal: React.FC<RoomMembersModalProps> = ({ isOpen, onClose }) => {
+   const { currentRoom } = useChat();
+   const { orgUsers, user, token } = useAuth();
+@@ -16,31 +17,24 @@ export const RoomMembersModal: React.FC<RoomMembersModalProps> = ({ isOpen, onCl
+   if (!isOpen || !currentRoom) return null;
+ 
+   const isRoomAdmin = user?.role === 'admin' || currentRoom.createdBy === user?.id;
+   const currentMemberIds = currentRoom.memberIds || [];
+ 
+   const handleToggleMember = async (targetUserId: string, isCurrentlyMember: boolean) => {
+     if (!token) return;
+     setLoading(true);
+     try {
+       if (isCurrentlyMember) {
+-        await fetch(`/api/rooms/${currentRoom.id}/members/${targetUserId}`, {
+-          method: 'DELETE',
+-          headers: { Authorization: `Bearer ${token}` },
+-        });
++        await api(`/api/rooms/${currentRoom.id}/members/${targetUserId}`, { method: 'DELETE' });
+       } else {
+-        await fetch(`/api/rooms/${currentRoom.id}/members`, {
++        await api(`/api/rooms/${currentRoom.id}/members`, {
+           method: 'POST',
+-          headers: {
+-            'Content-Type': 'application/json',
+-            Authorization: `Bearer ${token}`,
+-          },
+           body: JSON.stringify({ userId: targetUserId }),
+         });
+       }
+     } catch (err) {
+       console.error('Failed to toggle member:', err);
+     } finally {
+       setLoading(false);
+     }
+   };
+ 
+diff --git a/src/components/TenantInspectorModal.tsx b/src/components/TenantInspectorModal.tsx
+index 64d2dbb..e53bac1 100644
+--- a/src/components/TenantInspectorModal.tsx
++++ b/src/components/TenantInspectorModal.tsx
+@@ -6,28 +6,29 @@ import {
+   Calculator,
+   Database,
+   Cpu,
+   CheckCircle,
+   AlertTriangle,
+   X,
+   ArrowRight,
+   Sparkles,
+ } from 'lucide-react';
+ import { RAFCalculationResult } from '../types.js';
++import { api } from '../services/api.js';
+ 
+ interface TenantInspectorModalProps {
+   isOpen: boolean;
+   onClose: () => void;
+ }
+ 
+ export const TenantInspectorModal: React.FC<TenantInspectorModalProps> = ({ isOpen, onClose }) => {
+-  const { organization, token, allOrganizations, switchOrganization } = useAuth();
++  const { organization, allOrganizations, switchOrganization } = useAuth();
+   const [activeTab, setActiveTab] = useState<'isolation' | 'raf' | 'architecture'>('isolation');
+ 
+   // Isolation test state
+   const [testPatientId, setTestPatientId] = useState('PT-4001');
+   const [patientLookupResult, setPatientLookupResult] = useState<any>(null);
+   const [patientLookupLoading, setPatientLookupLoading] = useState(false);
+ 
+   const [memoryKey, setMemoryKey] = useState('q1_recapture_target');
+   const [memoryResult, setMemoryResult] = useState<any>(null);
+   const [memoryLoading, setMemoryLoading] = useState(false);
+@@ -38,64 +39,56 @@ export const TenantInspectorModal: React.FC<TenantInspectorModalProps> = ({ isOp
+   const [rafResult, setRafResult] = useState<RAFCalculationResult | null>(null);
+   const [rafLoading, setRafLoading] = useState(false);
+ 
+   if (!isOpen) return null;
+ 
+   // Run Patient Isolation Test
+   const testPatientLookup = async (pId: string) => {
+     setPatientLookupLoading(true);
+     setPatientLookupResult(null);
+     try {
+-      const res = await fetch(`/api/patients/${pId}`, {
+-        headers: { Authorization: `Bearer ${token}` },
+-      });
++      const res = await api(`/api/patients/${pId}`);
+       const data = await res.json();
+       setPatientLookupResult(data);
+     } catch (err: any) {
+       setPatientLookupResult({ error: err.message });
+     } finally {
+       setPatientLookupLoading(false);
+     }
+   };
+ 
+   // Run Memory Isolation Test
+   const testMemoryLookup = async () => {
+     setMemoryLoading(true);
+     setMemoryResult(null);
+     try {
+-      const res = await fetch(`/api/memories?q=${encodeURIComponent(memoryKey)}`, {
+-        headers: { Authorization: `Bearer ${token}` },
+-      });
++      const res = await api(`/api/memories?q=${encodeURIComponent(memoryKey)}`);
+       const data = await res.json();
+       setMemoryResult(data);
+     } catch (err: any) {
+       setMemoryResult({ error: err.message });
+     } finally {
+       setMemoryLoading(false);
+     }
+   };
+ 
+   // Run Live RAF Calculation
+   const runRafCalculation = async () => {
+     setRafLoading(true);
+     setRafResult(null);
+     try {
+       const codes = rafCodesInput
+         .split(/[,\s]+/)
+         .map((c) => c.trim())
+         .filter(Boolean);
+-      const res = await fetch('/api/tools/calculate-raf', {
++      const res = await api('/api/tools/calculate-raf', {
+         method: 'POST',
+-        headers: {
+-          'Content-Type': 'application/json',
+-          Authorization: `Bearer ${token}`,
+-        },
+         body: JSON.stringify({
+           icd10Codes: codes,
+           baseRate: rafBaseRate,
+         }),
+       });
+       const data = await res.json();
+       setRafResult(data);
+     } catch (err) {
+       console.error(err);
+     } finally {
+diff --git a/src/context/AuthContext.tsx b/src/context/AuthContext.tsx
+index c551d64..1d8e24e 100644
+--- a/src/context/AuthContext.tsx
++++ b/src/context/AuthContext.tsx
+@@ -1,12 +1,13 @@
+-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
++import React, { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback } from 'react';
+ import { User, Organization } from '../types.js';
++import { api, setAuthToken } from '../services/api.js';
+ 
+ interface AuthContextType {
+   user: User | null;
+   organization: Organization | null;
+   allOrganizations: Organization[];
+   orgUsers: User[];
+   token: string | null;
+   isLoading: boolean;
+   login: (email: string, password?: string) => Promise<boolean>;
+   logout: () => void;
+@@ -18,56 +19,54 @@ interface AuthContextType {
+ const AuthContext = createContext<AuthContextType | undefined>(undefined);
+ 
+ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+   const [user, setUser] = useState<User | null>(null);
+   const [organization, setOrganization] = useState<Organization | null>(null);
+   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
+   const [orgUsers, setOrgUsers] = useState<User[]>([]);
+   const [token, setToken] = useState<string | null>(() => localStorage.getItem('teamchat_token'));
+   const [isLoading, setIsLoading] = useState(true);
+ 
++  useLayoutEffect(() => {
++    setAuthToken(token);
++  }, [token]);
++
+   // Fetch organizations for authenticated session (tenant-scoped)
+   const fetchOrganizations = useCallback(async (sessionToken?: string) => {
+     if (!sessionToken) {
+       setAllOrganizations([]);
+       return;
+     }
+     try {
+-      const res = await fetch('/api/orgs', {
+-        headers: { Authorization: `Bearer ${sessionToken}` },
+-      });
++      const res = await api('/api/orgs', { token: sessionToken });
+       if (res.ok) {
+         const orgs = await res.json();
+         setAllOrganizations(orgs);
+       }
+     } catch (err) {
+       console.error('Failed to load organizations:', err);
+     }
+   }, []);
+ 
+   // Fetch current user and organization details
+   const fetchMe = useCallback(async (sessionToken: string) => {
+     try {
+-      const res = await fetch('/api/auth/me', {
+-        headers: { Authorization: `Bearer ${sessionToken}` },
+-      });
++      const res = await api('/api/auth/me', { token: sessionToken });
+       if (res.ok) {
+         const data = await res.json();
+         setUser(data.user);
+         setOrganization(data.organization);
+         setToken(sessionToken);
+         localStorage.setItem('teamchat_token', sessionToken);
+ 
+         // Fetch users in this org
+-        const usersRes = await fetch('/api/org/users', {
+-          headers: { Authorization: `Bearer ${sessionToken}` },
+-        });
++        const usersRes = await api('/api/org/users', { token: sessionToken });
+         if (usersRes.ok) {
+           const usersList = await usersRes.json();
+           setOrgUsers(usersList);
+         }
+         return true;
+       } else {
+         // Stale or invalid token
+         localStorage.removeItem('teamchat_token');
+         setToken(null);
+         setUser(null);
+@@ -88,63 +87,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
+       fetchMe(token);
+     } else {
+       setAllOrganizations([]);
+       setIsLoading(false);
+     }
+   }, [fetchMe, fetchOrganizations, token]);
+ 
+   const login = async (email: string, password = 'password123'): Promise<boolean> => {
+     setIsLoading(true);
+     try {
+-      const res = await fetch('/api/auth/login', {
++      const res = await api('/api/auth/login', {
+         method: 'POST',
+-        headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ email, password }),
+       });
+ 
+       if (!res.ok) {
+         setIsLoading(false);
+         return false;
+       }
+ 
+       const data = await res.json();
+       setToken(data.token);
+       setUser(data.user);
+       setOrganization(data.organization);
+       localStorage.setItem('teamchat_token', data.token);
+ 
+       // Fetch org users
+-      const usersRes = await fetch('/api/org/users', {
+-        headers: { Authorization: `Bearer ${data.token}` },
+-      });
++      const usersRes = await api('/api/org/users', { token: data.token });
+       if (usersRes.ok) {
+         setOrgUsers(await usersRes.json());
+       }
+ 
+       setIsLoading(false);
+       return true;
+     } catch (err) {
+       console.error('Login error:', err);
+       setIsLoading(false);
+       return false;
+     }
+   };
+ 
+   const logout = () => {
+     if (token) {
+       // Notify server offline
+-      fetch('/api/presence', {
++      api('/api/presence', {
+         method: 'POST',
+-        headers: {
+-          'Content-Type': 'application/json',
+-          Authorization: `Bearer ${token}`,
+-        },
+         body: JSON.stringify({ isOnline: false }),
+       }).catch(() => {});
+     }
+     localStorage.removeItem('teamchat_token');
+     setToken(null);
+     setUser(null);
+     setOrganization(null);
+     setOrgUsers([]);
+   };
+ 
+diff --git a/src/context/ChatContext.tsx b/src/context/ChatContext.tsx
+index 1b92823..52769e4 100644
+--- a/src/context/ChatContext.tsx
++++ b/src/context/ChatContext.tsx
+@@ -1,14 +1,15 @@
+ import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+ import { Room, Message, PresenceRecord, ToolCallRecord, TypingUser } from '../types.js';
+ import { useAuth } from './AuthContext.js';
+ import { useToast } from '../components/Toast.js';
++import { api, API_BASE } from '../services/api.js';
+ 
+ interface ChatContextType {
+   rooms: Room[];
+   currentRoom: Room | null;
+   messages: Message[];
+   onlineUsers: PresenceRecord[];
+   typingUsers: TypingUser[];
+   unreadMap: Record<string, number>;
+   isConnected: boolean;
+   isLoadingMessages: boolean;
+@@ -46,108 +47,95 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
+   const sseBackoffRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+   const sseRetryCountRef = useRef(0);
+   const sseMountedRef = useRef(true);
+ 
+   currentRoomIdRef.current = currentRoom?.id || null;
+ 
+   // 1. Fetch Rooms for tenant
+   const fetchRooms = useCallback(async () => {
+     if (!token) return;
+     try {
+-      const res = await fetch('/api/rooms', {
+-        headers: { Authorization: `Bearer ${token}` },
+-      });
++      const res = await api('/api/rooms');
+       if (res.ok) {
+         const data: Room[] = await res.json();
+         setRooms(data);
+         // If no active room yet, pick the first one
+         if (!currentRoomIdRef.current && data.length > 0) {
+           setCurrentRoom(data[0]);
+         }
+       }
+     } catch (err) {
+       console.error('Failed to load rooms:', err);
+     }
+   }, [token]);
+ 
+   // 2. Fetch Messages for active room
+   const fetchMessages = useCallback(
+     async (roomId: string) => {
+       if (!token) return;
+       const sequence = ++messageFetchSequenceRef.current;
+       setIsLoadingMessages(true);
+       try {
+-        const res = await fetch(`/api/rooms/${roomId}/messages`, {
+-          headers: { Authorization: `Bearer ${token}` },
+-        });
++        const res = await api(`/api/rooms/${roomId}/messages`);
+         if (res.ok) {
+           const data: Message[] = await res.json();
+           if (sequence === messageFetchSequenceRef.current && currentRoomIdRef.current === roomId) {
+             setMessages(data);
+           }
+         }
+       } catch (err) {
+         console.error('Failed to fetch messages:', err);
+       } finally {
+         if (sequence === messageFetchSequenceRef.current) setIsLoadingMessages(false);
+       }
+     },
+     [token]
+   );
+ 
+   // 3. Mark Room as Read
+   const markRoomAsRead = useCallback(
+     async (roomId: string) => {
+       if (!token) return;
+       try {
+-        await fetch(`/api/rooms/${roomId}/read`, {
+-          method: 'POST',
+-          headers: { Authorization: `Bearer ${token}` },
+-        });
++        await api(`/api/rooms/${roomId}/read`, { method: 'POST' });
+         setUnreadMap((prev) => ({ ...prev, [roomId]: 0 }));
+       } catch (err) {
+         console.error('Failed to mark room as read:', err);
+       }
+     },
+     [token]
+   );
+ 
+   // 4. Select Room
+   const selectRoom = (roomId: string) => {
+     const target = rooms.find((r) => r.id === roomId);
+     if (target) {
+       setCurrentRoom(target);
+       // Clear unreads
+       setUnreadMap((prev) => ({ ...prev, [roomId]: 0 }));
+       fetchMessages(roomId);
+       markRoomAsRead(roomId);
+ 
+       // Notify presence of current room
+       if (token) {
+-        fetch('/api/presence', {
++        api('/api/presence', {
+           method: 'POST',
+-          headers: {
+-            'Content-Type': 'application/json',
+-            Authorization: `Bearer ${token}`,
+-          },
+           body: JSON.stringify({ isOnline: true, currentRoomId: roomId }),
+         }).catch(() => {});
+       }
+     }
+   };
+ 
+   const fetchPresence = useCallback(async () => {
+     if (!token) return;
+     try {
+-      const res = await fetch('/api/presence', {
+-        headers: { Authorization: `Bearer ${token}` },
+-      });
++      const res = await api('/api/presence');
+       if (res.ok) {
+         const records: PresenceRecord[] = await res.json();
+         setOnlineUsers(records.filter((p) => p.isOnline));
+       }
+     } catch {
+       // Ignore network errors
+     }
+   }, [token]);
+ 
+   // Initial rooms and presence fetch when tenant / user changes
+@@ -163,26 +151,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
+       setTypingUsers([]);
+       setUnreadMap({});
+     }
+   }, [user, token, fetchRooms, fetchPresence]);
+ 
+   // Periodic presence heartbeat and refresh (keeps presence active and synchronized across tabs)
+   useEffect(() => {
+     if (!user || !token) return;
+     const interval = setInterval(() => {
+       fetchPresence();
+-      fetch('/api/presence', {
++      api('/api/presence', {
+         method: 'POST',
+-        headers: {
+-          'Content-Type': 'application/json',
+-          Authorization: `Bearer ${token}`,
+-        },
+         body: JSON.stringify({ isOnline: true, currentRoomId: currentRoomIdRef.current }),
+       }).catch(() => {});
+     }, 20_000);
+ 
+     return () => clearInterval(interval);
+   }, [user, token, fetchPresence]);
+ 
+   // Fetch messages when current room changes, and recover to an accessible room
+   // if the active room is removed from the current user's membership.
+   useEffect(() => {
+@@ -214,29 +198,21 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
+       setIsConnected(false);
+       return;
+     }
+ 
+     const MAX_BACKOFF_MS = 30_000;
+     const INITIAL_BACKOFF_MS = 1_000;
+ 
+     const connect = () => {
+       if (!sseMountedRef.current) return;
+ 
+-      const isFirebaseHosting =
+-        typeof window !== 'undefined' &&
+-        (window.location.hostname.includes('web.app') ||
+-          window.location.hostname.includes('firebaseapp.com'));
+-      const sseOrigin = isFirebaseHosting
+-        ? 'https://teamchat-ai-872402492611.us-central1.run.app'
+-        : '';
+-
+-      const sseUrl = `${sseOrigin}/api/events?token=${encodeURIComponent(token)}`;
++      const sseUrl = `${API_BASE}/api/events?token=${encodeURIComponent(token)}`;
+ 
+       const es = new EventSource(sseUrl);
+       eventSourceRef.current = es;
+ 
+       es.onopen = () => {
+         if (!sseMountedRef.current) return;
+         const wasDisconnected = sseRetryCountRef.current > 0;
+         sseRetryCountRef.current = 0;
+         setRetryCount(0);
+         setIsConnected(true);
+@@ -259,24 +235,21 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
+             case 'NEW_MESSAGE': {
+               const newMsg: Message = payload;
+               if (newMsg.roomId === currentRoomIdRef.current) {
+                 setMessages((prev) => {
+                   if (prev.some((m) => m.id === newMsg.id)) {
+                     return prev.map((m) => (m.id === newMsg.id ? newMsg : m));
+                   }
+                   return [...prev, newMsg];
+                 });
+                 if (token && newMsg.senderId !== user.id) {
+-                  fetch(`/api/rooms/${newMsg.roomId}/read`, {
+-                    method: 'POST',
+-                    headers: { Authorization: `Bearer ${token}` },
+-                  }).catch(() => {});
++                  api(`/api/rooms/${newMsg.roomId}/read`, { method: 'POST' }).catch(() => {});
+                 }
+               } else {
+                 setUnreadMap((prev) => ({
+                   ...prev,
+                   [newMsg.roomId]: (prev[newMsg.roomId] || 0) + 1,
+                 }));
+               }
+               setRooms((prev) =>
+                 prev.map((r) =>
+                   r.id === newMsg.roomId
+@@ -458,69 +431,64 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
+     };
+   }, [token, user]);
+ 
+   // 5. Send Message
+   const sendMessage = async (content: string, replyToMessage?: Message) => {
+     if (!token || !currentRoom || !content.trim()) return;
+ 
+     const clientMessageId = `client-msg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+ 
+     try {
+-      const res = await fetch(`/api/rooms/${currentRoom.id}/messages`, {
++      const res = await api(`/api/rooms/${currentRoom.id}/messages`, {
+         method: 'POST',
+-        headers: {
+-          'Content-Type': 'application/json',
+-          Authorization: `Bearer ${token}`,
+-        },
+         body: JSON.stringify({
+           content: content.trim(),
+           clientMessageId,
+           replyToId: replyToMessage?.id,
+           replyToSnippet: replyToMessage
+             ? `${replyToMessage.senderName}: ${replyToMessage.content.slice(0, 80)}`
+             : undefined,
+         }),
+       });
+ 
+       if (!res.ok) {
+         throw new Error(`Server returned ${res.status}`);
+       }
+ 
+       const sentMsg: Message = await res.json();
+       setMessages((prev) => {
+         if (prev.some((m) => m.id === sentMsg.id)) return prev;
+         return [...prev, sentMsg];
+       });
+ 
++      // ponytail: mirrors backend AI_MENTION regex; codegen would share it — deferred
+       const mentionsAi = /@(?:gemini|ai)\b|\/(?:gemini|ai|ask)\b/i.test(content);
+       if (mentionsAi) {
+         setIsAiThinking(true);
+         if (aiThinkingTimeoutRef.current) clearTimeout(aiThinkingTimeoutRef.current);
+         aiThinkingTimeoutRef.current = setTimeout(() => {
+           setIsAiThinking(false);
+         }, 18000);
+       }
+ 
+       // Active fallback poll if mentioning Gemini to ensure immediate visibility
+       if (mentionsAi) {
+         const targetRoomId = currentRoom.id;
+         let attempts = 0;
+         const pollTimer = setInterval(async () => {
+           attempts += 1;
+           if (attempts > 12 || currentRoomIdRef.current !== targetRoomId) {
+             clearInterval(pollTimer);
+             return;
+           }
+           try {
+-            const pollRes = await fetch(`/api/rooms/${targetRoomId}/messages`, {
+-              headers: { Authorization: `Bearer ${token}` },
+-            });
++            const pollRes = await api(`/api/rooms/${targetRoomId}/messages`);
+             if (pollRes.ok) {
+               const msgs: Message[] = await pollRes.json();
+               setMessages(msgs);
+               const aiMsg = msgs.find((m) => m.isAi && !m.isStreaming);
+               if (aiMsg && attempts >= 3) {
+                 clearInterval(pollTimer);
+               }
+             }
+           } catch {
+             // Ignore temporary polling errors
+@@ -534,53 +502,41 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
+   };
+ 
+   // 6. Set Typing status with debouncing
+   const setTypingStatus = (isTyping: boolean) => {
+     if (!token || !currentRoom) return;
+ 
+     if (typingTimeoutRef.current) {
+       clearTimeout(typingTimeoutRef.current);
+     }
+ 
+-    fetch(`/api/rooms/${currentRoom.id}/typing`, {
++    api(`/api/rooms/${currentRoom.id}/typing`, {
+       method: 'POST',
+-      headers: {
+-        'Content-Type': 'application/json',
+-        Authorization: `Bearer ${token}`,
+-      },
+       body: JSON.stringify({ isTyping }),
+     }).catch(() => {});
+ 
+     if (isTyping) {
+       typingTimeoutRef.current = setTimeout(() => {
+-        fetch(`/api/rooms/${currentRoom.id}/typing`, {
++        api(`/api/rooms/${currentRoom.id}/typing`, {
+           method: 'POST',
+-          headers: {
+-            'Content-Type': 'application/json',
+-            Authorization: `Bearer ${token}`,
+-          },
+           body: JSON.stringify({ isTyping: false }),
+         }).catch(() => {});
+       }, 3000);
+     }
+   };
+ 
+   // 7. Create Room
+   const createRoom = async (name: string, description: string, isPrivate = false): Promise<Room | null> => {
+     if (!token) return null;
+     try {
+-      const res = await fetch('/api/rooms', {
++      const res = await api('/api/rooms', {
+         method: 'POST',
+-        headers: {
+-          'Content-Type': 'application/json',
+-          Authorization: `Bearer ${token}`,
+-        },
+         body: JSON.stringify({ name, description, isPrivate }),
+       });
+       if (res.ok) {
+         const createdRoom: Room = await res.json();
+         setRooms((prev) => [...prev, createdRoom]);
+         setCurrentRoom(createdRoom);
+         setMessages([]);
+         fetchMessages(createdRoom.id);
+         markRoomAsRead(createdRoom.id);
+         return createdRoom;
+@@ -590,63 +546,51 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
+       console.error('Failed to create room:', err);
+       return null;
+     }
+   };
+ 
+   // 8. Multi-User Simulator (simulates Sarah, Mike, Lisa, etc. sending in the current room)
+   const simulateCoParticipantMessage = async (coUserId: string, content: string) => {
+     if (!currentRoom) return;
+     try {
+       // 1. Broadcast typing active
+-      await fetch(`/api/rooms/${currentRoom.id}/typing`, {
++      await api(`/api/rooms/${currentRoom.id}/typing`, {
+         method: 'POST',
+-        headers: {
+-          'Content-Type': 'application/json',
+-          Authorization: `Bearer ${coUserId}`,
+-        },
++        token: coUserId,
+         body: JSON.stringify({ isTyping: true }),
+       }).catch(() => {});
+ 
+       // 2. Realistic pause while typing
+       await new Promise((resolve) => setTimeout(resolve, 1400));
+ 
+       // 3. Clear typing and send message
+-      await fetch(`/api/rooms/${currentRoom.id}/typing`, {
++      await api(`/api/rooms/${currentRoom.id}/typing`, {
+         method: 'POST',
+-        headers: {
+-          'Content-Type': 'application/json',
+-          Authorization: `Bearer ${coUserId}`,
+-        },
++        token: coUserId,
+         body: JSON.stringify({ isTyping: false }),
+       }).catch(() => {});
+ 
+-      await fetch(`/api/rooms/${currentRoom.id}/messages`, {
++      await api(`/api/rooms/${currentRoom.id}/messages`, {
+         method: 'POST',
+-        headers: {
+-          'Content-Type': 'application/json',
+-          Authorization: `Bearer ${coUserId}`, // Using coUserId as bearer token
+-        },
++        token: coUserId,
+         body: JSON.stringify({ content }),
+       });
+     } catch (err) {
+       console.error('Co-participant simulation failed:', err);
+     }
+   };
+ 
+   // 9. Reset Demo Data
+   const resetDemoData = async () => {
+     if (!token) return;
+     try {
+-      await fetch('/api/admin/reset-demo', {
+-        method: 'POST',
+-        headers: { Authorization: `Bearer ${token}` },
+-      });
++      await api('/api/admin/reset-demo', { method: 'POST' });
+       await fetchRooms();
+       if (currentRoom) {
+         await fetchMessages(currentRoom.id);
+       }
+     } catch (err) {
+       console.error('Reset demo error:', err);
+     }
+   };
+ 
+   return (
+diff --git a/src/services/api.ts b/src/services/api.ts
+new file mode 100644
+index 0000000..3bce5fd
+--- /dev/null
++++ b/src/services/api.ts
+@@ -0,0 +1,17 @@
++export const API_BASE: string =
++  (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_API_BASE_URL ?? '';
++
++let authToken: string | null = null;
++
++export const setAuthToken = (token: string | null): void => {
++  authToken = token;
++};
++
++export async function api(path: string, init: RequestInit & { token?: string } = {}): Promise<Response> {
++  const bearer = init.token ?? authToken;
++  const headers = new Headers(init.headers);
++  if (bearer) headers.set('Authorization', `Bearer ${bearer}`);
++  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
++  const { token: _omit, ...rest } = init;
++  return fetch(`${API_BASE}${path}`, { ...rest, headers });
++}

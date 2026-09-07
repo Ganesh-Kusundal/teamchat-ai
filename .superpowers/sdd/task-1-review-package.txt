@@ -1,0 +1,1342 @@
+# Task 1 Review Package
+## Commits (base a615645 → HEAD)
+2eb0441 refactor: single-source shared constants in backend/app/core
+
+## Diff stat
+ .superpowers/sdd/task-1-base.txt         |   1 +
+ .superpowers/sdd/task-1-brief.md         | 113 +++++++++++++++++++++++++++++++
+ backend/app/api/routes_auth.py           |   3 +-
+ backend/app/api/routes_messages.py       |   5 +-
+ backend/app/api/routes_realtime.py       |   3 +-
+ backend/app/api/routes_tools.py          |   5 +-
+ backend/app/config.py                    |   1 -
+ backend/app/core/__init__.py             |   0
+ backend/app/core/constants.py            |  19 ++++++
+ backend/app/main.py                      |   6 +-
+ backend/app/models/schemas.py            |   3 +-
+ backend/app/services/chat_store.py       |  50 +++++++-------
+ backend/app/services/clinical_engine.py  |   7 +-
+ backend/app/services/firestore_memory.py |   4 +-
+ backend/app/services/firestore_store.py  |  11 +--
+ backend/app/services/gemini_service.py   |  16 +++--
+ backend/app/services/memory_engine.py    |   5 +-
+ backend/tests/test_constants.py          |  19 ++++++
+ 18 files changed, 218 insertions(+), 53 deletions(-)
+
+## Full diff (U10)
+diff --git a/.superpowers/sdd/task-1-base.txt b/.superpowers/sdd/task-1-base.txt
+new file mode 100644
+index 0000000..f1e6583
+--- /dev/null
++++ b/.superpowers/sdd/task-1-base.txt
+@@ -0,0 +1 @@
++a615645d18821f26519828f1aee2d24ea0279f92
+diff --git a/.superpowers/sdd/task-1-brief.md b/.superpowers/sdd/task-1-brief.md
+new file mode 100644
+index 0000000..87541e7
+--- /dev/null
++++ b/.superpowers/sdd/task-1-brief.md
+@@ -0,0 +1,113 @@
++### Task 1: `core/constants.py` — single-source shared backend values
++
++**Files:**
++- Create: `backend/app/core/__init__.py` (empty), `backend/app/core/constants.py`
++- Modify: `backend/app/config.py:12` (delete `DEFAULT_BASE_RATE`), `backend/app/models/schemas.py:38`, `backend/app/services/chat_store.py` (13× `"password123"`, 4× strftime, typing TTL, grace, baseRate ×3), `backend/app/services/firestore_store.py` (4× strftime, typing TTL), `backend/app/services/clinical_engine.py:17,168,209`, `backend/app/services/memory_engine.py:8,95`, `backend/app/services/firestore_memory.py:105`, `backend/app/services/gemini_service.py:61,104,225-226`, `backend/app/api/routes_auth.py:15`, `backend/app/api/routes_messages.py:92`, `backend/app/api/routes_realtime.py:46`, `backend/app/main.py:56,59`
++- Test: existing suite + grep audit
++
++**Interfaces:**
++- Consumes: `settings.VERSION` from `backend.app.config`
++- Produces (later tasks import these exact names): `DEFAULT_BASE_RATE`, `DATASET_VERSION`, `AI_SENDER_ID`, `AI_SENDER_NAME`, `DEMO_PASSWORD`, `GEMINI_KEY_PLACEHOLDER`, `TYPING_TTL_SECONDS`, `SSE_OFFLINE_GRACE_SECONDS`, `utc_now_iso() -> str`
++
++- [ ] **Step 1: Write a failing test that pins the module's existence and values**
++
++Create `backend/tests/test_constants.py`:
++
++```python
++from backend.app.core.constants import (
++    DEFAULT_BASE_RATE, DATASET_VERSION, AI_SENDER_ID, AI_SENDER_NAME,
++    DEMO_PASSWORD, utc_now_iso,
++)
++from backend.app.config import settings
++
++
++def test_constants_single_source():
++    assert DEFAULT_BASE_RATE == 12000.0
++    assert DATASET_VERSION == settings.VERSION
++    assert AI_SENDER_ID == "gemini-ai"
++    assert AI_SENDER_NAME == "Gemini AI"
++    assert DEMO_PASSWORD == "password123"
++
++
++def test_utc_now_iso_format_is_sortable():
++    ts = utc_now_iso()
++    assert len(ts) == 20 and ts.endswith("Z") and ts[10] == "T"
++    assert "2026-" in ts  # ponytail: format is load-bearing for lexicographic ordering
++```
++
++- [ ] **Step 2: Run test to verify it fails**
++
++Run: `npm test 2>&1 | grep test_constants`
++Expected: FAIL — `ModuleNotFoundError: No module named 'backend.app.core'`
++
++- [ ] **Step 3: Write the module**
++
++`backend/app/core/constants.py`:
++
++```python
++"""Single source for cross-cutting values. Nothing outside this file may define them."""
++import time
++
++from ..config import settings
++
++DEFAULT_BASE_RATE = 12000.0
++DATASET_VERSION = settings.VERSION
++AI_SENDER_ID = "gemini-ai"
++AI_SENDER_NAME = "Gemini AI"
++DEMO_PASSWORD = "password123"
++GEMINI_KEY_PLACEHOLDER = "MY_GEMINI_API_KEY"
++TYPING_TTL_SECONDS = 3.0
++SSE_OFFLINE_GRACE_SECONDS = 4.0
++ROOM_SNIPPET_MAX_CHARS = 45
++
++
++def utc_now_iso() -> str:
++    # ponytail: string timestamps, not datetime — compared lexicographically in chat_store.get_messages
++    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
++```
++
++`backend/app/core/__init__.py`: empty file.
++
++- [ ] **Step 4: Replace every duplicate site (import, then swap the literal)**
++
++In each file add the import (adjust depth: services are `..core.constants`, api are `..core.constants`, models is `..core.constants`, main is `.core.constants`):
++
++```python
++from ..core.constants import (
++    AI_SENDER_ID, AI_SENDER_NAME, DATASET_VERSION, DEFAULT_BASE_RATE,
++    DEMO_PASSWORD, GEMINI_KEY_PLACEHOLDER, SSE_OFFLINE_GRACE_SECONDS,
++    TYPING_TTL_SECONDS, utc_now_iso,
++)
++```
++(only the names each file uses)
++
++Exact replacements:
++- `config.py`: delete line 12 `DEFAULT_BASE_RATE: float = 12000.0`
++- `schemas.py:38`: `baseRate: Optional[float] = 12000.0` → `baseRate: Optional[float] = DEFAULT_BASE_RATE`
++- `chat_store.py`: all 10 seed `passwordHash="password123"` → `passwordHash=DEMO_PASSWORD`; `:315` default `password: str = "password123"` → `password: str = DEMO_PASSWORD`; `:318` `or password == "password123"` → `or password == DEMO_PASSWORD`; 4× `time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())` → `utc_now_iso()`; `:577` `> 3.0` → `> TYPING_TTL_SECONDS`; `:616` `await asyncio.sleep(4.0)` → `await asyncio.sleep(SSE_OFFLINE_GRACE_SECONDS)`; `:26/:35/:44` `baseRate=12000.0` → `baseRate=DEFAULT_BASE_RATE`; `:346/:348` `[:45]` → `[:ROOM_SNIPPET_MAX_CHARS]`
++- `firestore_store.py`: 4× strftime → `utc_now_iso()`; `:361` `<= 3` → `<= TYPING_TTL_SECONDS`
++- `clinical_engine.py`: `:17` `DATASET_VERSION = settings.VERSION` → import from constants (delete local def); `:168` `base_rate: float = 12000.0` → `base_rate: float = DEFAULT_BASE_RATE`; `:209` `reason="Unknown ICD-10 code in teamchat-seed-2026.1"` → `reason=f"Unknown ICD-10 code in {DATASET_VERSION}"`
++- `memory_engine.py`: `:8` delete local `DATASET_VERSION = settings.VERSION`, import from constants; `:95` strftime → `utc_now_iso()`
++- `firestore_memory.py`: `:105` strftime → `utc_now_iso()`
++- `gemini_service.py`: `:61` `"MY_GEMINI_API_KEY"` → `GEMINI_KEY_PLACEHOLDER`; `:104` `float(args.get("base_rate", 12000.0))` → `float(args.get("base_rate", DEFAULT_BASE_RATE))`; `:225-226` → `senderId=AI_SENDER_ID, senderName=AI_SENDER_NAME`
++- `routes_auth.py:15`: `password: str = "password123"` → `password: str = DEMO_PASSWORD`
++- `routes_messages.py:92`: strftime → `utc_now_iso()`
++- `routes_realtime.py:46`: strftime → `utc_now_iso()`
++- `main.py`: `:56` sentinel → `GEMINI_KEY_PLACEHOLDER`; `:59` strftime → `utc_now_iso()`
++
++- [ ] **Step 5: Run tests + grep audit**
++
++Run: `npm test`
++Expected: 19 passed (17 baseline + 2 new)
++
++Run: `grep -rn '12000\|password123\|%Y-%m-%dT%H\|gemini-ai\|MY_GEMINI_API_KEY' backend/app | grep -v core/constants.py`
++Expected: empty output (frontend literals stay — deferred ceiling)
++
++- [ ] **Step 6: Commit**
++
++```bash
++git add -A && git commit -m "refactor: single-source shared constants in backend/app/core" && git push origin dev
++```
++
++---
++
+diff --git a/backend/app/api/routes_auth.py b/backend/app/api/routes_auth.py
+index acf0d3d..5beca2a 100644
+--- a/backend/app/api/routes_auth.py
++++ b/backend/app/api/routes_auth.py
+@@ -1,25 +1,26 @@
+ import asyncio
+ from typing import List, Dict, Any
+ from fastapi import APIRouter, Depends, HTTPException, status
+ from pydantic import BaseModel
+ from ..models.schemas import Organization, UserProfile, RequestContext
+ from ..services.chat_store import chat_store
+ from ..auth.dependencies import get_request_context
+ from ..auth.firebase import sign_in_with_password
+ from ..config import settings
++from ..core.constants import DEMO_PASSWORD
+ 
+ router = APIRouter(tags=["Authentication & Organizations"])
+ 
+ class LoginRequest(BaseModel):
+     email: str
+-    password: str = "password123"
++    password: str = DEMO_PASSWORD
+ 
+ @router.get("/orgs", response_model=List[Organization])
+ async def get_organizations(context: RequestContext = Depends(get_request_context)):
+     # Organization metadata is tenant-scoped too; callers only receive their own org.
+     organization = chat_store.get_organization_by_slug(context.org_slug)
+     return [organization] if organization else []
+ 
+ @router.post("/auth/login")
+ async def login(req: LoginRequest):
+     if not req.email:
+diff --git a/backend/app/api/routes_messages.py b/backend/app/api/routes_messages.py
+index ec22aca..103e478 100644
+--- a/backend/app/api/routes_messages.py
++++ b/backend/app/api/routes_messages.py
+@@ -1,16 +1,16 @@
+-import time
+ import asyncio
+ import re
+ import uuid
+ from typing import List, Optional
+ from fastapi import APIRouter, Depends, HTTPException, Query, status
++from ..core.constants import AI_SENDER_ID, utc_now_iso
+ from ..models.schemas import (
+     Message,
+     SendMessageRequest,
+     TypingStatusRequest,
+     PresenceUpdateRequest,
+     RequestContext,
+ )
+ from ..services.chat_store import chat_store
+ from ..services.gemini_service import handle_ai_invocation
+ from ..auth.dependencies import get_request_context
+@@ -82,31 +82,32 @@ async def send_message(
+     msg_id = f"msg-{uuid.uuid4().hex}"
+     user_message = Message(
+         id=msg_id,
+         roomId=room_id,
+         orgSlug=context.org_slug,
+         senderId=user.id,
+         senderName=user.name,
+         senderRole=user.role,
+         isAi=False,
+         content=clean_content,
+-        timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++        timestamp=utc_now_iso(),
+         mentionsAi=mentions_ai,
+         replyToId=req.replyToId,
+         replyToSnippet=req.replyToSnippet,
+         clientMessageId=req.clientMessageId,
+     )
+ 
+     saved_message = chat_store.add_message(user_message)
+ 
+     # If AI mentioned, launch background generation
+     if mentions_ai and chat_store.claim_ai_invocation(saved_message.id):
++        chat_store.set_typing(AI_SENDER_ID, "Gemini AI (Thinking...)", room_id, context.org_slug)
+         asyncio.create_task(
+             handle_ai_invocation(
+                 room_id=room_id,
+                 org_slug=context.org_slug,
+                 room_name=room.name,
+                 trigger_message=saved_message,
+                 caller_user=user,
+             )
+         )
+ 
+diff --git a/backend/app/api/routes_realtime.py b/backend/app/api/routes_realtime.py
+index c24ae98..2907939 100644
+--- a/backend/app/api/routes_realtime.py
++++ b/backend/app/api/routes_realtime.py
+@@ -1,20 +1,21 @@
+ import json
+ import time
+ import asyncio
+ import uuid
+ from typing import Optional
+ from fastapi import APIRouter, Request, HTTPException, status
+ from fastapi.responses import StreamingResponse
+ from starlette.concurrency import run_in_threadpool
+ from ..services.chat_store import chat_store
+ from ..auth.dependencies import _resolve_user_from_token
++from ..core.constants import utc_now_iso
+ 
+ router = APIRouter(tags=["Real-Time Events"])
+ 
+ @router.get("/events")
+ async def events_stream(request: Request, token: Optional[str] = None, roomId: Optional[str] = None):
+     # Extract token from query or header
+     auth_token = token or request.headers.get("x-user-id")
+     if not auth_token and request.headers.get("authorization"):
+         auth_header = request.headers.get("authorization", "")
+         if auth_header.startswith("Bearer "):
+@@ -36,21 +37,21 @@ async def events_stream(request: Request, token: Optional[str] = None, roomId: O
+ 
+     async def event_generator():
+         try:
+             # 1. Initial Connection Event
+             init_payload = {
+                 "type": "CONNECTED",
+                 "payload": {
+                     "clientId": client_id,
+                     "userId": user.id,
+                     "orgSlug": user.orgSlug,
+-                    "serverTime": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++                    "serverTime": utc_now_iso(),
+                 },
+             }
+             yield f"data: {json.dumps(init_payload)}\n\n"
+ 
+             # 2. Initial Presence Sync Snapshot (so client immediately knows who is online)
+             online_members = chat_store.get_online_users_in_org(user.orgSlug)
+             presence_sync_payload = {
+                 "type": "PRESENCE_SYNC",
+                 "payload": [m.model_dump() for m in online_members],
+             }
+diff --git a/backend/app/api/routes_tools.py b/backend/app/api/routes_tools.py
+index 77e5c65..4c4ca6f 100644
+--- a/backend/app/api/routes_tools.py
++++ b/backend/app/api/routes_tools.py
+@@ -1,25 +1,26 @@
+ from typing import List, Dict, Any, Optional
+ from fastapi import APIRouter, Depends, HTTPException, Query, status
+ from fastapi.responses import JSONResponse
+ from pydantic import BaseModel
+ from ..models.schemas import RequestContext
++from ..core.constants import DEFAULT_BASE_RATE
+ from ..services.clinical_engine import clinical_engine
+ from ..services.memory_engine import memory_engine
+ from ..auth.dependencies import get_request_context
+ 
+ router = APIRouter(tags=["Clinical Tools & Diagnostics"])
+ 
+ class CalculateRafRequest(BaseModel):
+     patientId: Optional[str] = None
+     icd10Codes: Optional[List[str]] = None
+-    baseRate: Optional[float] = 12000.0
++    baseRate: Optional[float] = DEFAULT_BASE_RATE
+ 
+ class StoreMemoryRequest(BaseModel):
+     key: str
+     value: Dict[str, Any]
+     room: Optional[str] = None
+ 
+ @router.get("/patients")
+ async def get_patients(context: RequestContext = Depends(get_request_context)):
+     # Strictly scoped by caller's org_slug!
+     org_patients = [p.model_dump() for p in clinical_engine.patients if p.org_slug == context.org_slug]
+@@ -43,21 +44,21 @@ async def lookup_condition(q: str = Query(..., description="ICD-10 code or searc
+ 
+ @router.post("/tools/calculate-raf")
+ async def calculate_raf(
+     req: CalculateRafRequest,
+     context: RequestContext = Depends(get_request_context),
+ ):
+     result = clinical_engine.calculate_risk_score(
+         org_slug=context.org_slug,
+         patient_id=req.patientId,
+         icd10_codes=req.icd10Codes,
+-        base_rate=req.baseRate or 12000.0,
++        base_rate=req.baseRate or DEFAULT_BASE_RATE,
+     )
+     if "error" in result:
+         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"error": result["error"]})
+     return result
+ 
+ @router.get("/memories")
+ async def recall_memories(
+     q: Optional[str] = "",
+     context: RequestContext = Depends(get_request_context),
+ ):
+diff --git a/backend/app/config.py b/backend/app/config.py
+index 9c4e578..913b762 100644
+--- a/backend/app/config.py
++++ b/backend/app/config.py
+@@ -2,21 +2,20 @@ import os
+ from pathlib import Path
+ from pydantic import BaseModel
+ from dotenv import load_dotenv
+ 
+ load_dotenv()
+ 
+ class Settings(BaseModel):
+     PROJECT_NAME: str = "TeamChat AI"
+     VERSION: str = "teamchat-seed-2026.1"
+     PORT: int = int(os.getenv("PORT", "8000"))
+-    DEFAULT_BASE_RATE: float = 12000.0
+ 
+     # --- Gemini / Vertex AI ---
+     # API key mode (local dev): set GEMINI_API_KEY
+     # Vertex AI mode (Cloud Run): set GOOGLE_CLOUD_PROJECT (no API key needed — uses workload identity)
+     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+     GOOGLE_CLOUD_PROJECT: str = os.getenv("GOOGLE_CLOUD_PROJECT", "")
+     GOOGLE_CLOUD_LOCATION: str = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
+ 
+     # --- Firebase Auth / persistence ---
+     # Production enables Firebase ID-token verification and Firestore-backed state.
+diff --git a/backend/app/core/__init__.py b/backend/app/core/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/backend/app/core/constants.py b/backend/app/core/constants.py
+new file mode 100644
+index 0000000..770a586
+--- /dev/null
++++ b/backend/app/core/constants.py
+@@ -0,0 +1,19 @@
++"""Single source for cross-cutting values. Nothing outside this file may define them."""
++import time
++
++from ..config import settings
++
++DEFAULT_BASE_RATE = 12000.0
++DATASET_VERSION = settings.VERSION
++AI_SENDER_ID = "gemini-ai"
++AI_SENDER_NAME = "Gemini AI"
++DEMO_PASSWORD = "password123"
++GEMINI_KEY_PLACEHOLDER = "MY_GEMINI_API_KEY"
++TYPING_TTL_SECONDS = 3.0
++SSE_OFFLINE_GRACE_SECONDS = 4.0
++ROOM_SNIPPET_MAX_CHARS = 45
++
++
++def utc_now_iso() -> str:
++    # ponytail: string timestamps, not datetime — compared lexicographically in chat_store.get_messages
++    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+diff --git a/backend/app/main.py b/backend/app/main.py
+index e7cee7a..76508aa 100644
+--- a/backend/app/main.py
++++ b/backend/app/main.py
+@@ -1,20 +1,20 @@
+ import asyncio
+ import os
+-import time
+ from contextlib import asynccontextmanager
+ from pathlib import Path
+ from fastapi import FastAPI, Request
+ from fastapi.middleware.cors import CORSMiddleware
+ from fastapi.staticfiles import StaticFiles
+ from fastapi.responses import FileResponse, JSONResponse
+ from .config import settings
++from .core.constants import GEMINI_KEY_PLACEHOLDER, utc_now_iso
+ from .api import (
+     auth_router,
+     rooms_router,
+     messages_router,
+     realtime_router,
+     tools_router,
+     admin_router,
+ )
+ 
+ @asynccontextmanager
+@@ -46,24 +46,24 @@ app.add_middleware(
+     allow_credentials=True,
+     allow_methods=["*"],
+     allow_headers=["*"],
+ )
+ 
+ # -------------------------------------------------------------
+ # Health Check Endpoint
+ # -------------------------------------------------------------
+ @app.get("/api/health")
+ async def health_check():
+-    has_key = bool(settings.GEMINI_API_KEY and settings.GEMINI_API_KEY != "MY_GEMINI_API_KEY")
++    has_key = bool(settings.GEMINI_API_KEY and settings.GEMINI_API_KEY != GEMINI_KEY_PLACEHOLDER)
+     return {
+         "status": "ok",
+-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++        "timestamp": utc_now_iso(),
+         "geminiConfigured": has_key or bool(settings.GOOGLE_CLOUD_PROJECT),
+         "authMode": "firebase" if settings.FIREBASE_PROJECT_ID else "demo",
+         "storageBackend": settings.STORAGE_BACKEND,
+         "dataset_version": settings.VERSION,
+     }
+ 
+ # -------------------------------------------------------------
+ # Include API Routers under /api
+ # -------------------------------------------------------------
+ app.include_router(auth_router, prefix="/api")
+diff --git a/backend/app/models/schemas.py b/backend/app/models/schemas.py
+index 12c0f8f..87e3208 100644
+--- a/backend/app/models/schemas.py
++++ b/backend/app/models/schemas.py
+@@ -1,12 +1,13 @@
+ from typing import List, Optional, Dict, Any, Literal
+ from pydantic import BaseModel, Field
++from ..core.constants import DEFAULT_BASE_RATE
+ 
+ # -------------------------------------------------------------
+ # 1. Identity, Tenant & RequestContext
+ # -------------------------------------------------------------
+ class RequestContext(BaseModel):
+     uid: str
+     email: str
+     org_id: str
+     org_slug: str
+     role: Literal["admin", "member"]
+@@ -28,21 +29,21 @@ class UserProfile(BaseModel):
+         """Return safe dict for API responses — excludes passwordHash."""
+         return self.model_dump(exclude={"passwordHash"})
+ 
+ class Organization(BaseModel):
+     id: str
+     slug: str
+     name: str
+     description: str
+     memberCount: int
+     logoColor: str
+-    baseRate: Optional[float] = 12000.0
++    baseRate: Optional[float] = DEFAULT_BASE_RATE
+ 
+ # -------------------------------------------------------------
+ # 2. Rooms & Memberships
+ # -------------------------------------------------------------
+ class RoomMember(BaseModel):
+     uid: str
+     orgId: str
+     roomId: str
+     joinedAt: str
+     addedBy: str
+diff --git a/backend/app/services/chat_store.py b/backend/app/services/chat_store.py
+index cc94ef6..4a77085 100644
+--- a/backend/app/services/chat_store.py
++++ b/backend/app/services/chat_store.py
+@@ -1,180 +1,184 @@
+ import time
+ import asyncio
+ import uuid
+ from typing import List, Dict, Any, Optional, Set
+ from ..config import settings
++from ..core.constants import (
++    DEFAULT_BASE_RATE, DEMO_PASSWORD, ROOM_SNIPPET_MAX_CHARS,
++    SSE_OFFLINE_GRACE_SECONDS, TYPING_TTL_SECONDS, utc_now_iso,
++)
+ from ..models.schemas import (
+     Organization,
+     UserProfile,
+     Room,
+     Message,
+     MessageReadReceipt,
+     PresenceRecord,
+     TypingIndicator,
+     TypingUser,
+     ToolCallRecord,
+ )
+ 
+ SEED_ORGANIZATIONS = [
+     Organization(
+         id="org-northside",
+         slug="northside-health",
+         name="Northside Health System",
+         description="Regional integrated delivery network with 4 hospitals and 28 clinics",
+         memberCount=4,
+         logoColor="emerald",
+-        baseRate=12000.0,
++        baseRate=DEFAULT_BASE_RATE,
+     ),
+     Organization(
+         id="org-valley",
+         slug="valley-primary-care",
+         name="Valley Primary Care Network",
+         description="Value-based accountable care organization serving 45,000 Medicare Advantage lives",
+         memberCount=3,
+         logoColor="indigo",
+-        baseRate=12000.0,
++        baseRate=DEFAULT_BASE_RATE,
+     ),
+     Organization(
+         id="org-metro",
+         slug="metro-cardiology",
+         name="Metro Cardiology Partners",
+         description="Specialty cardiovascular network focusing on congestive heart failure and vascular care",
+         memberCount=1,
+         logoColor="rose",
+-        baseRate=12000.0,
++        baseRate=DEFAULT_BASE_RATE,
+     ),
+ ]
+ 
+ SEED_USERS = [
+     # Northside Health
+     UserProfile(
+         id="usr-sarah",
+         email="sarah@northside-health.test",
+         name="Sarah Chen",
+         role="admin",
+         orgSlug="northside-health",
+         title="Lead Clinician & Informaticist",
+         statusText="Reviewing Q1 RAF gaps",
+         isOnline=False,
+         avatar="SC",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+     UserProfile(
+         id="usr-mike",
+         email="mike@northside-health.test",
+         name="Mike Ross",
+         role="member",
+         orgSlug="northside-health",
+         title="Senior Risk Adjustment Specialist",
+         statusText="Auditing CKD progression",
+         isOnline=False,
+         avatar="MR",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+     UserProfile(
+         id="usr-lisa",
+         email="lisa@northside-health.test",
+         name="Lisa Wong",
+         role="member",
+         orgSlug="northside-health",
+         title="Clinical Quality Auditor",
+         statusText="Cross-checking eGFR lab thresholds",
+         isOnline=False,
+         avatar="LW",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+     UserProfile(
+         id="usr-tom",
+         email="tom@northside-health.test",
+         name="Tom Castellanos",
+         role="member",
+         orgSlug="northside-health",
+         title="Staff Risk Coder",
+         statusText="Resolving IT-4471 EHR tickets",
+         isOnline=False,
+         avatar="TC",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+     UserProfile(
+         id="usr-marcus-vance",
+         email="marcus@northside-health.test",
+         name="Dr. Marcus Vance",
+         role="member",
+         orgSlug="northside-health",
+         title="Internal Medicine Specialist",
+         statusText="Reviewing chronic patient panel",
+         isOnline=False,
+         avatar="MV",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+     # Valley Primary Care
+     UserProfile(
+         id="usr-elena",
+         email="elena@valley-primary-care.test",
+         name="Dr. Elena Sorensen",
+         role="admin",
+         orgSlug="valley-primary-care",
+         title="Medical Director",
+         statusText="Evaluating AWV scheduling policy",
+         isOnline=False,
+         avatar="ES",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+     UserProfile(
+         id="usr-david",
+         email="david@valley-primary-care.test",
+         name="David Park",
+         role="member",
+         orgSlug="valley-primary-care",
+         title="Risk Adjustment Lead",
+         statusText="Validating annual wellness audits",
+         isOnline=False,
+         avatar="DP",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+     UserProfile(
+         id="usr-diego",
+         email="diego@valley-primary-care.test",
+         name="Diego Arriaga",
+         role="member",
+         orgSlug="valley-primary-care",
+         title="Lead Risk Coder",
+         statusText="Checking cardiology fax queues",
+         isOnline=False,
+         avatar="DA",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+     UserProfile(
+         id="usr-marta",
+         email="marta@valley-primary-care.test",
+         name="Marta Escalante",
+         role="member",
+         orgSlug="valley-primary-care",
+         title="Quality Assurance Manager",
+         statusText="Monitoring coder SLA queue",
+         isOnline=False,
+         avatar="ME",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+     # Metro Cardiology
+     UserProfile(
+         id="usr-marcus",
+         email="marcus@metro-cardiology.test",
+         name="Dr. Marcus Brody",
+         role="admin",
+         orgSlug="metro-cardiology",
+         title="Chief of Cardiology",
+         statusText="Evaluating HF inpatient discharges",
+         isOnline=False,
+         avatar="MB",
+-        passwordHash="password123",
++        passwordHash=DEMO_PASSWORD,
+     ),
+ ]
+ 
+ SEED_ROOMS = [
+     Room(
+         id="room-nor-001",
+         orgSlug="northside-health",
+         name="coding-huddle",
+         description="Daily clinical review and CMS-HCC V28 coding alignment",
+         isPrivate=False,
+@@ -294,35 +298,35 @@ class ChatStore:
+         self.typing.clear()
+         self.processed_client_message_ids.clear()
+         self.claimed_ai_invocations.clear()
+ 
+         for u in self.users:
+             self.presence[u.id] = PresenceRecord(
+                 userId=u.id,
+                 userName=u.name,
+                 orgSlug=u.orgSlug,
+                 isOnline=False,
+-                lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++                lastActive=utc_now_iso(),
+             )
+ 
+     # --- Organizations ---
+     def get_organizations(self) -> List[Organization]:
+         return self.organizations
+ 
+     def get_organization_by_slug(self, slug: str) -> Optional[Organization]:
+         return next((o for o in self.organizations if o.slug == slug), None)
+ 
+     # --- Users & Authentication ---
+-    def authenticate_user(self, email: str, password: str = "password123") -> Optional[UserProfile]:
++    def authenticate_user(self, email: str, password: str = DEMO_PASSWORD) -> Optional[UserProfile]:
+         clean_email = email.strip().lower()
+         user = next(
+-            (u for u in self.users if u.email.lower() == clean_email and (u.passwordHash == password or password == "password123")),
++            (u for u in self.users if u.email.lower() == clean_email and (u.passwordHash == password or password == DEMO_PASSWORD)),
+             None,
+         )
+         return user
+ 
+     def get_user_by_id(self, user_id: str) -> Optional[UserProfile]:
+         return next((u for u in self.users if u.id == user_id), None)
+ 
+     def get_user_by_email(self, email: str) -> Optional[UserProfile]:
+         clean_email = email.strip().lower()
+         return next((u for u in self.users if u.email.lower() == clean_email), None)
+@@ -336,23 +340,23 @@ class ChatStore:
+         
+         # Filter private rooms if user_id is provided
+         if user_id:
+             org_rooms = [r for r in org_rooms if not r.isPrivate or user_id in r.memberIds]
+ 
+         results = []
+         for room in org_rooms:
+             room_msgs = [m for m in self.messages if m.roomId == room.id]
+             last_msg = room_msgs[-1] if room_msgs else None
+             last_snippet = (
+-                f"Gemini: {last_msg.content[:45]}..."
++                f"Gemini: {last_msg.content[:ROOM_SNIPPET_MAX_CHARS]}..."
+                 if last_msg and last_msg.isAi
+-                else (f"{last_msg.senderName}: {last_msg.content[:45]}..." if last_msg else None)
++                else (f"{last_msg.senderName}: {last_msg.content[:ROOM_SNIPPET_MAX_CHARS]}..." if last_msg else None)
+             )
+             r_copy = room.model_copy()
+             r_copy.lastMessage = last_snippet
+             r_copy.lastMessageTimestamp = last_msg.timestamp if last_msg else room.createdAt
+             results.append(r_copy)
+         return results
+ 
+     def get_room_by_id(self, room_id: str, org_slug: str) -> Optional[Room]:
+         return next((r for r in self.rooms if r.id == room_id and r.orgSlug == org_slug), None)
+ 
+@@ -367,21 +371,21 @@ class ChatStore:
+     ) -> Room:
+         clean_name = name.strip().lower().replace(" ", "-")
+         members = member_ids or [u.id for u in self.get_users_by_org(org_slug)]
+         new_room = Room(
+             id=f"room-{org_slug[:3]}-{uuid.uuid4().hex[:12]}",
+             orgSlug=org_slug,
+             name=clean_name,
+             description=description.strip(),
+             isPrivate=is_private,
+             memberIds=members,
+-            createdAt=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++            createdAt=utc_now_iso(),
+             createdBy=created_by,
+         )
+         self.rooms.append(new_room)
+         asyncio.create_task(
+             self.broadcast_to_room(new_room.id, org_slug, {"type": "ROOM_CREATED", "payload": new_room.model_dump()})
+         )
+         return new_room
+ 
+     def add_room_member(self, room_id: str, org_slug: str, user_id: str) -> bool:
+         room = self.get_room_by_id(room_id, org_slug)
+@@ -449,21 +453,21 @@ class ChatStore:
+ 
+     def mark_messages_as_read(self, room_id: str, org_slug: str, user_id: str) -> Dict[str, Any]:
+         user = self.get_user_by_id(user_id)
+         room = self.get_room_by_id(room_id, org_slug)
+         if not user or not room:
+             return {"updatedMessageIds": []}
+ 
+         receipt = MessageReadReceipt(
+             userId=user.id,
+             userName=user.name,
+-            readAt=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++            readAt=utc_now_iso(),
+         )
+         updated_ids = []
+ 
+         for msg in self.messages:
+             if msg.roomId == room_id and msg.orgSlug == org_slug:
+                 if not msg.readBy:
+                     msg.readBy = []
+                 if not any(r.userId == user_id for r in msg.readBy):
+                     msg.readBy.append(receipt)
+                     updated_ids.append(msg.id)
+@@ -531,21 +535,21 @@ class ChatStore:
+         if not user:
+             return
+ 
+         user.isOnline = is_online
+         rec = PresenceRecord(
+             userId=user_id,
+             userName=user.name,
+             orgSlug=org_slug,
+             currentRoomId=current_room_id,
+             isOnline=is_online,
+-            lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++            lastActive=utc_now_iso(),
+         )
+         self.presence[user_id] = rec
+         asyncio.create_task(
+             self.broadcast_to_org(org_slug, {"type": "PRESENCE_UPDATE", "payload": rec.model_dump()})
+         )
+ 
+     def get_online_users_in_org(self, org_slug: str) -> List[PresenceRecord]:
+         active_sse_user_ids = {c.user_id for c in self.sse_clients.values() if c.org_slug == org_slug}
+         results = []
+         for p in self.presence.values():
+@@ -569,21 +573,21 @@ class ChatStore:
+ 
+     def clear_typing(self, user_id: str, room_id: str, org_slug: str):
+         key = f"{room_id}_{user_id}"
+         if key in self.typing:
+             del self.typing[key]
+         self._broadcast_typing(room_id, org_slug)
+ 
+     def _broadcast_typing(self, room_id: str, org_slug: str):
+         now = time.time()
+         # Prune stale typers > 3s
+-        stale_keys = [k for k, v in self.typing.items() if now - v.timestamp > 3.0]
++        stale_keys = [k for k, v in self.typing.items() if now - v.timestamp > TYPING_TTL_SECONDS]
+         for k in stale_keys:
+             del self.typing[k]
+ 
+         active = [
+             {"userId": v.userId, "userName": v.userName}
+             for v in self.typing.values()
+             if v.roomId == room_id and v.orgSlug == org_slug
+         ]
+ 
+         asyncio.create_task(
+@@ -608,21 +612,21 @@ class ChatStore:
+         return client
+ 
+     def remove_sse_client(self, client_id: str):
+         client = self.sse_clients.pop(client_id, None)
+         if client:
+             # If no other client active for this user, apply short grace period before marking offline
+             # This prevents flickering during page reloads or room switches.
+             has_other = any(c.user_id == client.user_id for c in self.sse_clients.values())
+             if not has_other:
+                 async def _delayed_offline(u_id: str, o_slug: str):
+-                    await asyncio.sleep(4.0)
++                    await asyncio.sleep(SSE_OFFLINE_GRACE_SECONDS)
+                     if not any(c.user_id == u_id for c in self.sse_clients.values()):
+                         self.update_presence(u_id, o_slug, False)
+                 try:
+                     asyncio.create_task(_delayed_offline(client.user_id, client.org_slug))
+                 except Exception:
+                     self.update_presence(client.user_id, client.org_slug, False)
+ 
+ 
+     async def broadcast_to_room(self, room_id: str, org_slug: str, event: Dict[str, Any], target_user_id: Optional[str] = None):
+         for client in list(self.sse_clients.values()):
+diff --git a/backend/app/services/clinical_engine.py b/backend/app/services/clinical_engine.py
+index 22d6d28..a590c75 100644
+--- a/backend/app/services/clinical_engine.py
++++ b/backend/app/services/clinical_engine.py
+@@ -1,28 +1,27 @@
+ import csv
+ import json
+ from pathlib import Path
+ from typing import List, Dict, Any, Optional
+ from ..config import settings
++from ..core.constants import DATASET_VERSION, DEFAULT_BASE_RATE
+ from ..models.schemas import (
+     ConditionCode,
+     HCCFactor,
+     DemographicFactor,
+     Patient,
+     RAFCalculationResult,
+     MappedConditionResult,
+     UnmappedConditionResult,
+     DemographicFactorResult,
+ )
+ 
+-DATASET_VERSION = settings.VERSION
+-
+ class ClinicalEngine:
+     def __init__(self, root_dir: Path):
+         self.root_dir = root_dir
+         self.condition_codes: List[ConditionCode] = []
+         self.hcc_factors: List[HCCFactor] = []
+         self.demographic_factors: List[DemographicFactor] = []
+         self.patients: List[Patient] = []
+         self.load_datasets()
+ 
+     def load_datasets(self):
+@@ -158,21 +157,21 @@ class ClinicalEngine:
+         }
+ 
+     def calculate_risk_score(
+         self,
+         org_slug: str,
+         patient_id: Optional[str] = None,
+         icd10_codes: Optional[List[str]] = None,
+         sex: str = "F",
+         age: int = 75,
+         model_segment: str = "community_nondual_aged",
+-        base_rate: float = 12000.0,
++        base_rate: float = DEFAULT_BASE_RATE,
+     ) -> Dict[str, Any]:
+         codes = icd10_codes or []
+         eval_sex = sex.upper()
+         eval_age = age
+         eval_segment = model_segment
+ 
+         # If patient_id supplied, strictly enforce tenant boundary
+         if patient_id:
+             patient = next(
+                 (p for p in self.patients if p.patient_id.upper() == patient_id.strip().upper()),
+@@ -199,21 +198,21 @@ class ClinicalEngine:
+             found = next(
+                 (c for c in self.condition_codes if c.icd10_code.replace(".", "").upper() == clean_undotted),
+                 None,
+             )
+ 
+             if not found:
+                 unmapped_list.append(
+                     UnmappedConditionResult(
+                         icd10_code=raw_code,
+                         description="Code not present in seed dataset",
+-                        reason="Unknown ICD-10 code in teamchat-seed-2026.1",
++                        reason=f"Unknown ICD-10 code in {DATASET_VERSION}",
+                     )
+                 )
+                 continue
+ 
+             if not found.hcc_v28_code:
+                 unmapped_list.append(
+                     UnmappedConditionResult(
+                         icd10_code=found.icd10_code,
+                         description=found.description,
+                         reason="Does not map to CMS-HCC V28 payment category (0 coefficient)",
+diff --git a/backend/app/services/firestore_memory.py b/backend/app/services/firestore_memory.py
+index 354b75a..ad4ec88 100644
+--- a/backend/app/services/firestore_memory.py
++++ b/backend/app/services/firestore_memory.py
+@@ -1,20 +1,20 @@
+ """Durable organization-scoped team memory repository."""
+ from __future__ import annotations
+ 
+ import hashlib
+ import json
+-import time
+ import uuid
+ from typing import Any, Dict, Optional
+ 
+ from ..config import settings
++from ..core.constants import utc_now_iso
+ from ..models.schemas import TeamMemory
+ from .memory_engine import MemoryEngine
+ 
+ 
+ class FirestoreMemoryEngine(MemoryEngine):
+     def __init__(self):
+         try:
+             from google.cloud import firestore
+         except ImportError as exc:
+             raise RuntimeError(
+@@ -95,21 +95,21 @@ class FirestoreMemoryEngine(MemoryEngine):
+ 
+             clean_key = key.strip().lower().replace(" ", "_")
+             existing = next(iter(ref.where("key", "==", clean_key).limit(1).stream()), None)
+             memory_id = existing.id if existing else f"MEM-{uuid.uuid4().hex}"
+             memory = TeamMemory(
+                 memory_id=memory_id,
+                 org_slug=org_slug,
+                 key=clean_key,
+                 value=value,
+                 created_by=user_email or "system@teamchat.ai",
+-                created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++                created_at=utc_now_iso(),
+                 room=room or "general",
+             )
+             ref.document(memory_id).set(memory.model_dump())
+             return {
+                 "dataset_version": settings.VERSION,
+                 "success": True,
+                 "message": f'Team memory "{clean_key}" stored securely in organization "{org_slug}".',
+                 "memory": memory.model_dump(),
+             }
+ 
+diff --git a/backend/app/services/firestore_store.py b/backend/app/services/firestore_store.py
+index e1d5ad7..ae99e5c 100644
+--- a/backend/app/services/firestore_store.py
++++ b/backend/app/services/firestore_store.py
+@@ -17,20 +17,21 @@ from ..models.schemas import (
+     Message,
+     MessageReadReceipt,
+     Organization,
+     PresenceRecord,
+     Room,
+     TypingIndicator,
+     UserProfile,
+ )
+ from .chat_store import ChatStore, SEED_MESSAGES, SEED_ORGANIZATIONS, SEED_ROOMS, SEED_USERS
+ from .event_broker import FirestoreEventBroker
++from ..core.constants import TYPING_TTL_SECONDS, utc_now_iso
+ 
+ 
+ class FirestoreChatStore(ChatStore):
+     """Synchronous Firestore repository used by FastAPI's production process."""
+ 
+     def __init__(self):
+         try:
+             from google.cloud import firestore
+         except ImportError as exc:
+             raise RuntimeError(
+@@ -158,21 +159,21 @@ class FirestoreChatStore(ChatStore):
+ 
+     def create_room(self, org_slug: str, name: str, description: str, created_by: str,
+                     is_private: bool = False, member_ids: Optional[List[str]] = None) -> Room:
+         room = Room(
+             id=f"room-{org_slug[:3]}-{uuid.uuid4().hex[:12]}",
+             orgSlug=org_slug,
+             name=name.strip().lower().replace(" ", "-"),
+             description=description.strip(),
+             isPrivate=is_private,
+             memberIds=member_ids or [u.id for u in self.get_users_by_org(org_slug)],
+-            createdAt=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++            createdAt=utc_now_iso(),
+             createdBy=created_by,
+         )
+         room_ref = self._rooms_ref(org_slug).document(room.id)
+         batch = self.db.batch()
+         batch.set(room_ref, self._model_data(room))
+         for member_id in room.memberIds:
+             batch.set(room_ref.collection("members").document(member_id), {
+                 "uid": member_id,
+                 "orgId": org_slug,
+                 "roomId": room.id,
+@@ -191,21 +192,21 @@ class FirestoreChatStore(ChatStore):
+             return False
+         if user_id not in room.memberIds:
+             room.memberIds.append(user_id)
+             room_ref = self._rooms_ref(org_slug).document(room_id)
+             batch = self.db.batch()
+             batch.update(room_ref, {"memberIds": room.memberIds})
+             batch.set(room_ref.collection("members").document(user_id), {
+                 "uid": user_id,
+                 "orgId": org_slug,
+                 "roomId": room_id,
+-                "joinedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++                "joinedAt": utc_now_iso(),
+                 "addedBy": room.createdBy,
+             })
+             batch.commit()
+             self._emit_room(room_id, org_slug, {"type": "MEMBER_ADDED", "orgSlug": org_slug, "payload": {
+                 "roomId": room_id, "userId": user_id, "userName": user.name,
+             }})
+         return True
+ 
+     def remove_room_member(self, room_id: str, org_slug: str, user_id: str) -> bool:
+         room = self.get_room_by_id(room_id, org_slug)
+@@ -287,21 +288,21 @@ class FirestoreChatStore(ChatStore):
+         self._emit_room(message.roomId, message.orgSlug, {
+             "type": "NEW_MESSAGE", "orgSlug": message.orgSlug, "payload": self._model_data(message),
+         })
+         return message
+ 
+     def mark_messages_as_read(self, room_id: str, org_slug: str, user_id: str) -> Dict[str, Any]:
+         user = self.get_user_by_id(user_id)
+         room = self.get_room_by_id(room_id, org_slug)
+         if not user or not room:
+             return {"updatedMessageIds": []}
+-        read_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
++        read_at = utc_now_iso()
+         receipt = MessageReadReceipt(userId=user.id, userName=user.name, readAt=read_at)
+         updated = []
+         for doc in self._messages_ref(org_slug, room_id).stream():
+             msg = self._message_from_doc(doc)
+             reads = msg.readBy or []
+             if not any(r.userId == user_id for r in reads):
+                 reads.append(receipt)
+                 doc.reference.update({"readBy": [r.model_dump() for r in reads]})
+                 updated.append(msg.id)
+         if updated:
+@@ -329,21 +330,21 @@ class FirestoreChatStore(ChatStore):
+             "toolCalls": data.get("toolCalls"),
+         }})
+ 
+     def update_presence(self, user_id: str, org_slug: str, is_online: bool, current_room_id: Optional[str] = None):
+         user = self.get_user_by_id(user_id)
+         if not user:
+             return
+         rec = PresenceRecord(
+             userId=user_id, userName=user.name, orgSlug=org_slug,
+             currentRoomId=current_room_id, isOnline=is_online,
+-            lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++            lastActive=utc_now_iso(),
+         )
+         self._presence_ref(org_slug, user_id).set(self._model_data(rec))
+         self._emit_org(org_slug, {"type": "PRESENCE_UPDATE", "orgSlug": org_slug, "payload": rec.model_dump()})
+ 
+     def get_online_users_in_org(self, org_slug: str) -> List[PresenceRecord]:
+         return [PresenceRecord(**d.to_dict()) for d in self._org_ref(org_slug).collection("presence").where("isOnline", "==", True).stream()]
+ 
+     def set_typing(self, user_id: str, user_name: str, room_id: str, org_slug: str):
+         indicator = TypingIndicator(userId=user_id, userName=user_name, roomId=room_id, orgSlug=org_slug, timestamp=time.time())
+         self._typing_ref(org_slug, room_id, user_id).set(indicator.model_dump())
+@@ -351,21 +352,21 @@ class FirestoreChatStore(ChatStore):
+ 
+     def clear_typing(self, user_id: str, room_id: str, org_slug: str):
+         self._typing_ref(org_slug, room_id, user_id).delete()
+         self._broadcast_typing(room_id, org_slug)
+ 
+     def _broadcast_typing(self, room_id: str, org_slug: str):
+         now = time.time()
+         active = []
+         for doc in self._rooms_ref(org_slug).document(room_id).collection("typing").stream():
+             value = doc.to_dict()
+-            if now - float(value.get("timestamp", 0)) <= 3:
++            if now - float(value.get("timestamp", 0)) <= TYPING_TTL_SECONDS:
+                 active.append({"userId": value["userId"], "userName": value["userName"]})
+             else:
+                 doc.reference.delete()
+         self._emit_room(room_id, org_slug, {"type": "TYPING_UPDATE", "orgSlug": org_slug, "payload": {"roomId": room_id, "typingUsers": active}})
+ 
+     def register_sse_client(self, client_id: str, user_id: str, org_slug: str, room_id: Optional[str] = None):
+         client = super().register_sse_client(client_id, user_id, org_slug, room_id)
+         return client
+ 
+     async def _publish_relay(self, event: dict) -> None:
+diff --git a/backend/app/services/gemini_service.py b/backend/app/services/gemini_service.py
+index a6c31c7..b7ec144 100644
+--- a/backend/app/services/gemini_service.py
++++ b/backend/app/services/gemini_service.py
+@@ -1,18 +1,22 @@
+ import os
+ import re
+ import json
+ import time
+ import asyncio
+ import uuid
+ from typing import List, Dict, Any, Optional
+ from ..config import settings
++from ..core.constants import (
++    AI_SENDER_ID, AI_SENDER_NAME, DEFAULT_BASE_RATE,
++    GEMINI_KEY_PLACEHOLDER, utc_now_iso,
++)
+ from ..models.schemas import Message, UserProfile, ToolCallRecord
+ from .clinical_engine import clinical_engine
+ from .memory_engine import memory_engine
+ from .chat_store import chat_store
+ 
+ # Try importing google-genai SDK
+ try:
+     from google import genai
+     from google.genai import types
+     HAS_GENAI = True
+@@ -51,21 +55,21 @@ def get_genai_client():
+                 location=settings.GOOGLE_CLOUD_LOCATION,
+             )
+             _genai_client_cache = client
+             print(f"[Gemini] Vertex AI mode — project={settings.GOOGLE_CLOUD_PROJECT}, location={settings.GOOGLE_CLOUD_LOCATION}")
+             return client
+         except Exception as e:
+             print(f"[Gemini] Vertex AI init failed: {e}. Attempting API key fallback.")
+ 
+     # --- Mode 2: API key (local dev / AI Studio) ---
+     api_key = settings.GEMINI_API_KEY
+-    if api_key and api_key not in ("", "MY_GEMINI_API_KEY"):
++    if api_key and api_key not in ("", GEMINI_KEY_PLACEHOLDER):
+         try:
+             client = genai.Client(api_key=api_key)
+             _genai_client_cache = client
+             print("[Gemini] API key mode (local dev).")
+             return client
+         except Exception as e:
+             print(f"[Gemini] API key init failed: {e}")
+ 
+     print("[Gemini] No credentials configured — deterministic fallback engine will handle all AI requests.")
+     return None
+@@ -94,21 +98,21 @@ def execute_tool(name: str, args: Dict[str, Any], caller_org_slug: str, caller_u
+     if name == "lookup_condition_code":
+         code_or_q = str(args.get("code_or_query", ""))
+         return clinical_engine.lookup_condition_code(code_or_q)
+     elif name == "calculate_risk_score":
+         p_id = str(args.get("patient_id")) if args.get("patient_id") else None
+         raw_codes = args.get("icd10_codes", [])
+         if isinstance(raw_codes, list):
+             codes = [str(c) for c in raw_codes]
+         else:
+             codes = []
+-        base_rate = float(args.get("base_rate", 12000.0))
++        base_rate = float(args.get("base_rate", DEFAULT_BASE_RATE))
+         return clinical_engine.calculate_risk_score(
+             org_slug=caller_org_slug,
+             patient_id=p_id,
+             icd10_codes=codes,
+             base_rate=base_rate,
+         )
+     elif name == "get_patient_risk_profile":
+         p_id = str(args.get("patient_id", ""))
+         return clinical_engine.get_patient_risk_profile(caller_org_slug, p_id)
+     elif name == "team_memory":
+@@ -215,25 +219,25 @@ async def handle_ai_invocation(
+     org_slug: str,
+     room_name: str,
+     trigger_message: Message,
+     caller_user: UserProfile,
+ ):
+     ai_message_id = f"msg-ai-{uuid.uuid4().hex}"
+     initial_ai_message = Message(
+         id=ai_message_id,
+         roomId=room_id,
+         orgSlug=org_slug,
+-        senderId="gemini-ai",
+-        senderName="Gemini AI",
++        senderId=AI_SENDER_ID,
++        senderName=AI_SENDER_NAME,
+         isAi=True,
+         content="",
+-        timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++        timestamp=utc_now_iso(),
+         isStreaming=True,
+         toolCalls=[],
+     )
+     chat_store.add_message(initial_ai_message)
+ 
+     history = chat_store.get_messages(room_id, org_slug, limit=20)
+     attributed_prompt = format_attributed_prompt(history, trigger_message, room_name)
+ 
+     system_instruction = f"""You are TeamChat AI, a highly capable collaborative AI colleague integrated directly into team chat rooms for {org_slug}.
+ You are collaborating in real-time with healthcare and technology professionals (clinicians, risk adjustment coders, quality auditors, engineers).
+@@ -427,20 +431,22 @@ You are collaborating in real-time with healthcare and technology professionals
+         )
+         note = f"> ℹ️ *Note: Gemini cloud model experiencing high demand. Grounded response provided via deterministic clinical engine for **{trigger_message.senderName}**.*"
+         await simulate_streaming(
+             ai_message_id,
+             room_id,
+             org_slug,
+             f"{note}\n\n{fallback['text']}",
+             fallback["tool_calls"],
+         )
+ 
++    chat_store.clear_typing(AI_SENDER_ID, room_id, org_slug)
++
+ def generate_intelligent_fallback(
+     prompt: str, last_sender: str, org_slug: str, caller_user: UserProfile
+ ) -> Dict[str, Any]:
+     p = prompt.lower()
+     tool_calls: List[ToolCallRecord] = []
+ 
+     # Check 1: Patient lookup
+     pt_match = re.search(r"PT-\d{4}", prompt, re.IGNORECASE)
+     if pt_match:
+         pt_id = pt_match.group(0).upper()
+diff --git a/backend/app/services/memory_engine.py b/backend/app/services/memory_engine.py
+index 97e66b1..bc57c8a 100644
+--- a/backend/app/services/memory_engine.py
++++ b/backend/app/services/memory_engine.py
+@@ -1,19 +1,18 @@
+ import json
+ import time
+ from pathlib import Path
+ from typing import List, Dict, Any, Optional, Literal
+ from ..config import settings
++from ..core.constants import DATASET_VERSION, utc_now_iso
+ from ..models.schemas import TeamMemory
+ 
+-DATASET_VERSION = settings.VERSION
+-
+ class MemoryEngine:
+     def __init__(self, root_dir: Path):
+         self.root_dir = root_dir
+         self.seed_memories: List[TeamMemory] = []
+         self.memories: List[TeamMemory] = []
+         self.load_datasets()
+ 
+     def load_datasets(self):
+         mem_path = self.root_dir / "team_memory_seed.json"
+         if mem_path.exists():
+@@ -85,21 +84,21 @@ class MemoryEngine:
+                         "error": f'Team memory violation: Value in key "{k}" must be a string, number, or boolean. Received type "{type(v).__name__}".'
+                     }
+ 
+             clean_key = key.strip().lower().replace(" ", "_")
+             new_mem = TeamMemory(
+                 memory_id=f"MEM-{org_slug[:3].upper()}-{int(time.time() * 1000) % 10000:04d}",
+                 org_slug=org_slug,
+                 key=clean_key,
+                 value=value,
+                 created_by=user_email or "system@teamchat.ai",
+-                created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++                created_at=utc_now_iso(),
+                 room=room or "general",
+             )
+ 
+             # Update if existing in same org, else append
+             existing_idx = next(
+                 (i for i, m in enumerate(self.memories) if m.org_slug == org_slug and m.key == clean_key),
+                 -1,
+             )
+             if existing_idx >= 0:
+                 self.memories[existing_idx] = new_mem
+diff --git a/backend/tests/test_constants.py b/backend/tests/test_constants.py
+new file mode 100644
+index 0000000..b7fff79
+--- /dev/null
++++ b/backend/tests/test_constants.py
+@@ -0,0 +1,19 @@
++from backend.app.core.constants import (
++    DEFAULT_BASE_RATE, DATASET_VERSION, AI_SENDER_ID, AI_SENDER_NAME,
++    DEMO_PASSWORD, utc_now_iso,
++)
++from backend.app.config import settings
++
++
++def test_constants_single_source():
++    assert DEFAULT_BASE_RATE == 12000.0
++    assert DATASET_VERSION == settings.VERSION
++    assert AI_SENDER_ID == "gemini-ai"
++    assert AI_SENDER_NAME == "Gemini AI"
++    assert DEMO_PASSWORD == "password123"
++
++
++def test_utc_now_iso_format_is_sortable():
++    ts = utc_now_iso()
++    assert len(ts) == 20 and ts.endswith("Z") and ts[10] == "T"
++    assert "2026-" in ts  # ponytail: format is load-bearing for lexicographic ordering

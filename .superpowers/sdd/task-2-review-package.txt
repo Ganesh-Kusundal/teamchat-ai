@@ -1,0 +1,601 @@
+# Task 2 Review Package
+## Commits (base 2eb0441 → HEAD)
+18bd742 refactor: shared SSE event contract for both storage backends
+
+## Diff stat
+ backend/app/api/routes_realtime.py      | 19 ++++++-------
+ backend/app/core/events.py              | 25 +++++++++++++++++
+ backend/app/services/chat_store.py      | 41 ++++++++++++++-------------
+ backend/app/services/firestore_store.py | 50 ++++++++++++++++-----------------
+ backend/tests/test_events.py            | 12 ++++++++
+ 5 files changed, 91 insertions(+), 56 deletions(-)
+
+## Full diff (U10)
+diff --git a/backend/app/api/routes_realtime.py b/backend/app/api/routes_realtime.py
+index 2907939..7aeaee4 100644
+--- a/backend/app/api/routes_realtime.py
++++ b/backend/app/api/routes_realtime.py
+@@ -2,20 +2,21 @@ import json
+ import time
+ import asyncio
+ import uuid
+ from typing import Optional
+ from fastapi import APIRouter, Request, HTTPException, status
+ from fastapi.responses import StreamingResponse
+ from starlette.concurrency import run_in_threadpool
+ from ..services.chat_store import chat_store
+ from ..auth.dependencies import _resolve_user_from_token
+ from ..core.constants import utc_now_iso
++from ..core.events import EventType, event
+ 
+ router = APIRouter(tags=["Real-Time Events"])
+ 
+ @router.get("/events")
+ async def events_stream(request: Request, token: Optional[str] = None, roomId: Optional[str] = None):
+     # Extract token from query or header
+     auth_token = token or request.headers.get("x-user-id")
+     if not auth_token and request.headers.get("authorization"):
+         auth_header = request.headers.get("authorization", "")
+         if auth_header.startswith("Bearer "):
+@@ -31,49 +32,47 @@ async def events_stream(request: Request, token: Optional[str] = None, roomId: O
+     client_id = f"client-{uuid.uuid4().hex}"
+     if roomId:
+         room = chat_store.get_room_by_id(roomId, user.orgSlug)
+         if not room or user.id not in room.memberIds:
+             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room.")
+     sse_client = chat_store.register_sse_client(client_id, user.id, user.orgSlug, roomId)
+ 
+     async def event_generator():
+         try:
+             # 1. Initial Connection Event
+-            init_payload = {
+-                "type": "CONNECTED",
+-                "payload": {
++            init_payload = event(
++                EventType.CONNECTED,
++                {
+                     "clientId": client_id,
+                     "userId": user.id,
+                     "orgSlug": user.orgSlug,
+                     "serverTime": utc_now_iso(),
+                 },
+-            }
++                user.orgSlug,
++            )
+             yield f"data: {json.dumps(init_payload)}\n\n"
+ 
+             # 2. Initial Presence Sync Snapshot (so client immediately knows who is online)
+             online_members = chat_store.get_online_users_in_org(user.orgSlug)
+-            presence_sync_payload = {
+-                "type": "PRESENCE_SYNC",
+-                "payload": [m.model_dump() for m in online_members],
+-            }
++            presence_sync_payload = event(EventType.PRESENCE_SYNC, [m.model_dump() for m in online_members], user.orgSlug)
+             yield f"data: {json.dumps(presence_sync_payload)}\n\n"
+ 
+             # 3. Main event loop with periodic 15s heartbeat
+             last_heartbeat = time.time()
+             while True:
+                 if await request.is_disconnected():
+                     break
+ 
+                 try:
+                     # Wait for next event or 2s timeout to check heartbeat
+-                    event = await asyncio.wait_for(sse_client.queue.get(), timeout=2.0)
+-                    yield f"data: {json.dumps(event)}\n\n"
++                    sse_event = await asyncio.wait_for(sse_client.queue.get(), timeout=2.0)
++                    yield f"data: {json.dumps(sse_event)}\n\n"
+                 except asyncio.TimeoutError:
+                     pass
+ 
+                 now = time.time()
+                 if now - last_heartbeat >= 15.0:
+                     yield ": heartbeat\n\n"
+                     last_heartbeat = now
+ 
+         except asyncio.CancelledError:
+             pass
+diff --git a/backend/app/core/events.py b/backend/app/core/events.py
+new file mode 100644
+index 0000000..97a9f5d
+--- /dev/null
++++ b/backend/app/core/events.py
+@@ -0,0 +1,25 @@
++"""The ONLY place SSE event names and envelopes are defined."""
++from enum import Enum
++from typing import Any, Dict, Optional
++
++
++class EventType(str, Enum):
++    CONNECTED = "CONNECTED"
++    NEW_MESSAGE = "NEW_MESSAGE"
++    MESSAGES_READ = "MESSAGES_READ"
++    STREAM_CHUNK = "STREAM_CHUNK"
++    TYPING_UPDATE = "TYPING_UPDATE"
++    PRESENCE_SYNC = "PRESENCE_SYNC"
++    PRESENCE_UPDATE = "PRESENCE_UPDATE"
++    ROOM_CREATED = "ROOM_CREATED"
++    MEMBER_ADDED = "MEMBER_ADDED"
++    MEMBER_REMOVED = "MEMBER_REMOVED"
++
++
++def event(ev: EventType, payload: Any, org_slug: str = "", target_user_id: Optional[str] = None) -> Dict[str, Any]:
++    e: Dict[str, Any] = {"type": ev.value, "payload": payload}
++    if org_slug:
++        e["orgSlug"] = org_slug
++    if target_user_id:
++        e["targetUserId"] = target_user_id
++    return e
+diff --git a/backend/app/services/chat_store.py b/backend/app/services/chat_store.py
+index 4a77085..60008f4 100644
+--- a/backend/app/services/chat_store.py
++++ b/backend/app/services/chat_store.py
+@@ -1,19 +1,20 @@
+ import time
+ import asyncio
+ import uuid
+ from typing import List, Dict, Any, Optional, Set
+ from ..config import settings
+ from ..core.constants import (
+     DEFAULT_BASE_RATE, DEMO_PASSWORD, ROOM_SNIPPET_MAX_CHARS,
+     SSE_OFFLINE_GRACE_SECONDS, TYPING_TTL_SECONDS, utc_now_iso,
+ )
++from ..core.events import EventType, event
+ from ..models.schemas import (
+     Organization,
+     UserProfile,
+     Room,
+     Message,
+     MessageReadReceipt,
+     PresenceRecord,
+     TypingIndicator,
+     TypingUser,
+     ToolCallRecord,
+@@ -376,43 +377,43 @@ class ChatStore:
+             orgSlug=org_slug,
+             name=clean_name,
+             description=description.strip(),
+             isPrivate=is_private,
+             memberIds=members,
+             createdAt=utc_now_iso(),
+             createdBy=created_by,
+         )
+         self.rooms.append(new_room)
+         asyncio.create_task(
+-            self.broadcast_to_room(new_room.id, org_slug, {"type": "ROOM_CREATED", "payload": new_room.model_dump()})
++            self.broadcast_to_room(new_room.id, org_slug, event(EventType.ROOM_CREATED, new_room.model_dump(), org_slug))
+         )
+         return new_room
+ 
+     def add_room_member(self, room_id: str, org_slug: str, user_id: str) -> bool:
+         room = self.get_room_by_id(room_id, org_slug)
+         user = self.get_user_by_id(user_id)
+         if not room or not user or user.orgSlug != org_slug:
+             return False
+         if user_id not in room.memberIds:
+             room.memberIds.append(user_id)
+             asyncio.create_task(
+-                self.broadcast_to_room(room_id, org_slug, {"type": "MEMBER_ADDED", "payload": {"roomId": room_id, "userId": user_id, "userName": user.name}})
++                self.broadcast_to_room(room_id, org_slug, event(EventType.MEMBER_ADDED, {"roomId": room_id, "userId": user_id, "userName": user.name}, org_slug))
+             )
+         return True
+ 
+     def remove_room_member(self, room_id: str, org_slug: str, user_id: str) -> bool:
+         room = self.get_room_by_id(room_id, org_slug)
+         if not room or user_id not in room.memberIds:
+             return False
+         room.memberIds.remove(user_id)
+         asyncio.create_task(
+-            self.broadcast_to_room(room_id, org_slug, {"type": "MEMBER_REMOVED", "payload": {"roomId": room_id, "userId": user_id}}, target_user_id=user_id)
++            self.broadcast_to_room(room_id, org_slug, event(EventType.MEMBER_REMOVED, {"roomId": room_id, "userId": user_id}, org_slug, target_user_id=user_id), target_user_id=user_id)
+         )
+         return True
+ 
+     # --- Messages ---
+     def claim_ai_invocation(self, trigger_message_id: str) -> bool:
+         if trigger_message_id in self.claimed_ai_invocations:
+             return False
+         self.claimed_ai_invocations.add(trigger_message_id)
+         return True
+ 
+@@ -440,21 +441,21 @@ class ChatStore:
+         if message.clientMessageId:
+             dedupe_key = (message.orgSlug, message.roomId, message.clientMessageId)
+             if dedupe_key in self.processed_client_message_ids:
+                 existing = next((m for m in self.messages if m.orgSlug == message.orgSlug and m.roomId == message.roomId and m.clientMessageId == message.clientMessageId), None)
+                 if existing:
+                     return existing
+             self.processed_client_message_ids.add(dedupe_key)
+ 
+         self.messages.append(message)
+         asyncio.create_task(
+-            self.broadcast_to_room(message.roomId, message.orgSlug, {"type": "NEW_MESSAGE", "payload": message.model_dump()})
++            self.broadcast_to_room(message.roomId, message.orgSlug, event(EventType.NEW_MESSAGE, message.model_dump(), message.orgSlug))
+         )
+         return message
+ 
+     def mark_messages_as_read(self, room_id: str, org_slug: str, user_id: str) -> Dict[str, Any]:
+         user = self.get_user_by_id(user_id)
+         room = self.get_room_by_id(room_id, org_slug)
+         if not user or not room:
+             return {"updatedMessageIds": []}
+ 
+         receipt = MessageReadReceipt(
+@@ -470,31 +471,32 @@ class ChatStore:
+                     msg.readBy = []
+                 if not any(r.userId == user_id for r in msg.readBy):
+                     msg.readBy.append(receipt)
+                     updated_ids.append(msg.id)
+ 
+         if updated_ids:
+             asyncio.create_task(
+                 self.broadcast_to_room(
+                     room_id,
+                     org_slug,
+-                    {
+-                        "type": "MESSAGES_READ",
+-                        "payload": {
++                    event(
++                        EventType.MESSAGES_READ,
++                        {
+                             "roomId": room_id,
+                             "userId": user.id,
+                             "userName": user.name,
+                             "readAt": receipt.readAt,
+                             "messageIds": updated_ids,
+                             "receipt": receipt.model_dump(),
+                         },
+-                    },
++                        org_slug,
++                    ),
+                 )
+             )
+ 
+         return {"updatedMessageIds": updated_ids, "receipt": receipt.model_dump()}
+ 
+     def update_streaming_message(
+         self,
+         message_id: str,
+         room_id: str,
+         org_slug: str,
+@@ -508,52 +510,53 @@ class ChatStore:
+             if is_complete:
+                 msg.content = re.sub(r"<\/?tool_code>", "", msg.content)
+             msg.isStreaming = not is_complete
+             if tool_calls is not None:
+                 msg.toolCalls = tool_calls
+ 
+         asyncio.create_task(
+             self.broadcast_to_room(
+                 room_id,
+                 org_slug,
+-                {
+-                    "type": "STREAM_CHUNK",
+-                    "payload": {
++                event(
++                    EventType.STREAM_CHUNK,
++                    {
+                         "messageId": message_id,
+                         "roomId": room_id,
+                         "chunk": content_chunk,
+                         "fullContent": msg.content if msg else None,
+                         "isComplete": is_complete,
+                         "toolCalls": [tc.model_dump() for tc in tool_calls] if tool_calls else None,
+                     },
+-                },
++                    org_slug,
++                ),
+             )
+         )
+ 
+     # --- Presence ---
+     def update_presence(self, user_id: str, org_slug: str, is_online: bool, current_room_id: Optional[str] = None):
+         user = self.get_user_by_id(user_id)
+         if not user:
+             return
+ 
+         user.isOnline = is_online
+         rec = PresenceRecord(
+             userId=user_id,
+             userName=user.name,
+             orgSlug=org_slug,
+             currentRoomId=current_room_id,
+             isOnline=is_online,
+             lastActive=utc_now_iso(),
+         )
+         self.presence[user_id] = rec
+         asyncio.create_task(
+-            self.broadcast_to_org(org_slug, {"type": "PRESENCE_UPDATE", "payload": rec.model_dump()})
++            self.broadcast_to_org(org_slug, event(EventType.PRESENCE_UPDATE, rec.model_dump(), org_slug))
+         )
+ 
+     def get_online_users_in_org(self, org_slug: str) -> List[PresenceRecord]:
+         active_sse_user_ids = {c.user_id for c in self.sse_clients.values() if c.org_slug == org_slug}
+         results = []
+         for p in self.presence.values():
+             if p.orgSlug == org_slug:
+                 # Online if actively connected via SSE or explicitly flagged online
+                 if p.userId in active_sse_user_ids or p.isOnline:
+                     results.append(p)
+@@ -587,27 +590,25 @@ class ChatStore:
+         active = [
+             {"userId": v.userId, "userName": v.userName}
+             for v in self.typing.values()
+             if v.roomId == room_id and v.orgSlug == org_slug
+         ]
+ 
+         asyncio.create_task(
+             self.broadcast_to_room(
+                 room_id,
+                 org_slug,
+-                {
+-                    "type": "TYPING_UPDATE",
+-                    "payload": {
+-                        "roomId": room_id,
+-                        "typingUsers": active,
+-                    },
+-                },
++                event(
++                    EventType.TYPING_UPDATE,
++                    {"roomId": room_id, "typingUsers": active},
++                    org_slug,
++                ),
+             )
+         )
+ 
+     # --- SSE Connection Engine ---
+     def register_sse_client(self, client_id: str, user_id: str, org_slug: str, room_id: Optional[str] = None) -> SSEClient:
+         client = SSEClient(client_id, user_id, org_slug, room_id)
+         self.sse_clients[client_id] = client
+         self.update_presence(user_id, org_slug, True, room_id)
+         return client
+ 
+diff --git a/backend/app/services/firestore_store.py b/backend/app/services/firestore_store.py
+index ae99e5c..d6935e4 100644
+--- a/backend/app/services/firestore_store.py
++++ b/backend/app/services/firestore_store.py
+@@ -18,20 +18,21 @@ from ..models.schemas import (
+     MessageReadReceipt,
+     Organization,
+     PresenceRecord,
+     Room,
+     TypingIndicator,
+     UserProfile,
+ )
+ from .chat_store import ChatStore, SEED_MESSAGES, SEED_ORGANIZATIONS, SEED_ROOMS, SEED_USERS
+ from .event_broker import FirestoreEventBroker
+ from ..core.constants import TYPING_TTL_SECONDS, utc_now_iso
++from ..core.events import EventType, event
+ 
+ 
+ class FirestoreChatStore(ChatStore):
+     """Synchronous Firestore repository used by FastAPI's production process."""
+ 
+     def __init__(self):
+         try:
+             from google.cloud import firestore
+         except ImportError as exc:
+             raise RuntimeError(
+@@ -174,60 +175,61 @@ class FirestoreChatStore(ChatStore):
+         batch.set(room_ref, self._model_data(room))
+         for member_id in room.memberIds:
+             batch.set(room_ref.collection("members").document(member_id), {
+                 "uid": member_id,
+                 "orgId": org_slug,
+                 "roomId": room.id,
+                 "joinedAt": room.createdAt,
+                 "addedBy": created_by,
+             })
+         batch.commit()
+-        event = {"type": "ROOM_CREATED", "orgSlug": org_slug, "payload": self._model_data(room)}
+-        self._emit_room(room.id, org_slug, event)
++        self._emit_room(room.id, org_slug, event(EventType.ROOM_CREATED, self._model_data(room), org_slug))
+         return room
+ 
+     def add_room_member(self, room_id: str, org_slug: str, user_id: str) -> bool:
+         room = self.get_room_by_id(room_id, org_slug)
+         user = self.get_user_by_id(user_id)
+         if not room or not user or user.orgSlug != org_slug:
+             return False
+         if user_id not in room.memberIds:
+             room.memberIds.append(user_id)
+             room_ref = self._rooms_ref(org_slug).document(room_id)
+             batch = self.db.batch()
+             batch.update(room_ref, {"memberIds": room.memberIds})
+             batch.set(room_ref.collection("members").document(user_id), {
+                 "uid": user_id,
+                 "orgId": org_slug,
+                 "roomId": room_id,
+                 "joinedAt": utc_now_iso(),
+                 "addedBy": room.createdBy,
+             })
+             batch.commit()
+-            self._emit_room(room_id, org_slug, {"type": "MEMBER_ADDED", "orgSlug": org_slug, "payload": {
++            self._emit_room(room_id, org_slug, event(EventType.MEMBER_ADDED, {
+                 "roomId": room_id, "userId": user_id, "userName": user.name,
+-            }})
++            }, org_slug))
+         return True
+ 
+     def remove_room_member(self, room_id: str, org_slug: str, user_id: str) -> bool:
+         room = self.get_room_by_id(room_id, org_slug)
+         if not room or user_id not in room.memberIds:
+             return False
+         room.memberIds.remove(user_id)
+         room_ref = self._rooms_ref(org_slug).document(room_id)
+         batch = self.db.batch()
+         batch.update(room_ref, {"memberIds": room.memberIds})
+         batch.delete(room_ref.collection("members").document(user_id))
+         batch.commit()
+-        self._emit_room(room_id, org_slug, {"type": "MEMBER_REMOVED", "orgSlug": org_slug, "payload": {
+-                "roomId": room_id, "userId": user_id,
+-            }}, target_user_id=user_id)
++        self._emit_room(
++            room_id, org_slug,
++            event(EventType.MEMBER_REMOVED, {"roomId": room_id, "userId": user_id}, org_slug, target_user_id=user_id),
++            target_user_id=user_id,
++        )
+ 
+         return True
+ 
+     def claim_ai_invocation(self, trigger_message_id: str) -> bool:
+         claim_ref = self._rooms_ref("__global__").document("ai_claims").collection("claims").document(trigger_message_id)
+         # Claims are stored outside tenant data only as an implementation marker; the
+         # trigger ID is a random server-generated message ID and carries no tenant input.
+         transaction = self.db.transaction()
+         try:
+             transaction.create(claim_ref, {"triggerMessageId": trigger_message_id, "claimedAt": time.time()})
+@@ -278,76 +280,76 @@ class FirestoreChatStore(ChatStore):
+             except Exception:
+                 existing = dedupe_ref.get()
+                 if existing.exists:
+                     saved = messages_ref.document(existing.to_dict()["messageId"]).get()
+                     if saved.exists:
+                         return self._message_from_doc(saved)
+                 raise
+         else:
+             messages_ref.document(message.id).create(self._model_data(message))
+ 
+-        self._emit_room(message.roomId, message.orgSlug, {
+-            "type": "NEW_MESSAGE", "orgSlug": message.orgSlug, "payload": self._model_data(message),
+-        })
++        self._emit_room(message.roomId, message.orgSlug, event(
++            EventType.NEW_MESSAGE, self._model_data(message), message.orgSlug,
++        ))
+         return message
+ 
+     def mark_messages_as_read(self, room_id: str, org_slug: str, user_id: str) -> Dict[str, Any]:
+         user = self.get_user_by_id(user_id)
+         room = self.get_room_by_id(room_id, org_slug)
+         if not user or not room:
+             return {"updatedMessageIds": []}
+         read_at = utc_now_iso()
+         receipt = MessageReadReceipt(userId=user.id, userName=user.name, readAt=read_at)
+         updated = []
+         for doc in self._messages_ref(org_slug, room_id).stream():
+             msg = self._message_from_doc(doc)
+             reads = msg.readBy or []
+             if not any(r.userId == user_id for r in reads):
+                 reads.append(receipt)
+                 doc.reference.update({"readBy": [r.model_dump() for r in reads]})
+                 updated.append(msg.id)
+         if updated:
+-            self._emit_room(room_id, org_slug, {"type": "MESSAGES_READ", "orgSlug": org_slug, "payload": {
++            self._emit_room(room_id, org_slug, event(EventType.MESSAGES_READ, {
+                 "roomId": room_id, "userId": user.id, "userName": user.name,
+                 "readAt": read_at, "messageIds": updated, "receipt": receipt.model_dump(),
+-            }})
++            }, org_slug))
+         return {"updatedMessageIds": updated, "receipt": receipt.model_dump()}
+ 
+     def update_streaming_message(self, message_id: str, room_id: str, org_slug: str,
+                                  content_chunk: str, is_complete: bool,
+                                  tool_calls=None):
+         ref = self._messages_ref(org_slug, room_id).document(message_id)
+         doc = ref.get()
+         if not doc.exists:
+             return
+         msg = self._message_from_doc(doc)
+         data = {"content": msg.content + content_chunk, "isStreaming": not is_complete}
+         if tool_calls is not None:
+             data["toolCalls"] = [tc.model_dump() for tc in tool_calls]
+         ref.update(data)
+-        self._emit_room(room_id, org_slug, {"type": "STREAM_CHUNK", "orgSlug": org_slug, "payload": {
++        self._emit_room(room_id, org_slug, event(EventType.STREAM_CHUNK, {
+             "messageId": message_id, "roomId": room_id, "chunk": content_chunk,
+             "fullContent": data["content"], "isComplete": is_complete,
+             "toolCalls": data.get("toolCalls"),
+-        }})
++        }, org_slug))
+ 
+     def update_presence(self, user_id: str, org_slug: str, is_online: bool, current_room_id: Optional[str] = None):
+         user = self.get_user_by_id(user_id)
+         if not user:
+             return
+         rec = PresenceRecord(
+             userId=user_id, userName=user.name, orgSlug=org_slug,
+             currentRoomId=current_room_id, isOnline=is_online,
+             lastActive=utc_now_iso(),
+         )
+         self._presence_ref(org_slug, user_id).set(self._model_data(rec))
+-        self._emit_org(org_slug, {"type": "PRESENCE_UPDATE", "orgSlug": org_slug, "payload": rec.model_dump()})
++        self._emit_org(org_slug, event(EventType.PRESENCE_UPDATE, rec.model_dump(), org_slug))
+ 
+     def get_online_users_in_org(self, org_slug: str) -> List[PresenceRecord]:
+         return [PresenceRecord(**d.to_dict()) for d in self._org_ref(org_slug).collection("presence").where("isOnline", "==", True).stream()]
+ 
+     def set_typing(self, user_id: str, user_name: str, room_id: str, org_slug: str):
+         indicator = TypingIndicator(userId=user_id, userName=user_name, roomId=room_id, orgSlug=org_slug, timestamp=time.time())
+         self._typing_ref(org_slug, room_id, user_id).set(indicator.model_dump())
+         self._broadcast_typing(room_id, org_slug)
+ 
+     def clear_typing(self, user_id: str, room_id: str, org_slug: str):
+@@ -356,43 +358,39 @@ class FirestoreChatStore(ChatStore):
+ 
+     def _broadcast_typing(self, room_id: str, org_slug: str):
+         now = time.time()
+         active = []
+         for doc in self._rooms_ref(org_slug).document(room_id).collection("typing").stream():
+             value = doc.to_dict()
+             if now - float(value.get("timestamp", 0)) <= TYPING_TTL_SECONDS:
+                 active.append({"userId": value["userId"], "userName": value["userName"]})
+             else:
+                 doc.reference.delete()
+-        self._emit_room(room_id, org_slug, {"type": "TYPING_UPDATE", "orgSlug": org_slug, "payload": {"roomId": room_id, "typingUsers": active}})
++        self._emit_room(room_id, org_slug, event(EventType.TYPING_UPDATE, {"roomId": room_id, "typingUsers": active}, org_slug))
+ 
+     def register_sse_client(self, client_id: str, user_id: str, org_slug: str, room_id: Optional[str] = None):
+         client = super().register_sse_client(client_id, user_id, org_slug, room_id)
+         return client
+ 
+     async def _publish_relay(self, event: dict) -> None:
+         try:
+             await self._broker.publish(event)
+         except Exception as exc:
+             # Local SSE remains available even if the cross-instance relay is temporarily down.
+             print(f"[Realtime] Failed to publish cross-instance event: {exc}")
+ 
+-    def _emit_room(self, room_id: str, org_slug: str, event: dict, target_user_id: Optional[str] = None):
+-        relay_event = dict(event)
+-        relay_event["orgSlug"] = org_slug
+-        relay_payload = dict(relay_event.get("payload") or {})
+-        relay_payload.setdefault("roomId", room_id)
+-        relay_event["payload"] = relay_payload
+-        if target_user_id:
+-            relay_event["targetUserId"] = target_user_id
+-        asyncio.create_task(self.broadcast_to_room(room_id, org_slug, relay_event, target_user_id=target_user_id))
+-        asyncio.create_task(self._publish_relay(relay_event))
++    def _emit_room(self, room_id: str, org_slug: str, event_dict: dict, target_user_id: Optional[str] = None):
++        payload = dict(event_dict.get("payload") or {})
++        payload.setdefault("roomId", room_id)
++        event_dict["payload"] = payload
++        asyncio.create_task(self.broadcast_to_room(room_id, org_slug, event_dict, target_user_id=target_user_id))
++        asyncio.create_task(self._publish_relay(event_dict))
+ 
+     def _emit_org(self, org_slug: str, event: dict):
+         asyncio.create_task(self.broadcast_to_org(org_slug, event))
+         asyncio.create_task(self._publish_relay(event))
+ 
+     async def _receive_remote_event(self, event: dict):
+         payload = event.get("payload", {})
+         room_id = payload.get("roomId")
+         org_slug = event.get("orgSlug") or payload.get("orgSlug", "")
+         target_user_id = event.get("targetUserId")
+diff --git a/backend/tests/test_events.py b/backend/tests/test_events.py
+new file mode 100644
+index 0000000..17089ec
+--- /dev/null
++++ b/backend/tests/test_events.py
+@@ -0,0 +1,12 @@
++from backend.app.core.events import EventType, event
++
++
++def test_event_envelope_is_uniform():
++    e = event(EventType.NEW_MESSAGE, {"id": "m1"}, org_slug="northside-health")
++    assert e == {"type": "NEW_MESSAGE", "payload": {"id": "m1"}, "orgSlug": "northside-health"}
++
++
++def test_target_user_and_empty_org():
++    e = event(EventType.MEMBER_REMOVED, {"roomId": "r"}, target_user_id="usr-mike")
++    assert e["targetUserId"] == "usr-mike" and "orgSlug" not in e
++    assert EventType.TYPING_UPDATE.value == "TYPING_UPDATE"

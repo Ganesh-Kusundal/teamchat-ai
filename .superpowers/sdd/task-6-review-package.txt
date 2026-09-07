@@ -1,0 +1,236 @@
+# Task 6 Review Package
+## Commits (base 657e530 → HEAD)
+2781eda refactor: delete dead symbols, dedup streaming loop, drop duplicate npm scripts
+
+## Diff stat
+ backend/app/models/schemas.py          | 10 -----
+ backend/app/services/gemini_service.py | 79 +++++++++-------------------------
+ package.json                           |  2 -
+ src/types.ts                           |  1 -
+ 4 files changed, 21 insertions(+), 71 deletions(-)
+
+## Full diff (U10)
+diff --git a/backend/app/models/schemas.py b/backend/app/models/schemas.py
+index 87e3208..129c693 100644
+--- a/backend/app/models/schemas.py
++++ b/backend/app/models/schemas.py
+@@ -53,21 +53,20 @@ class Room(BaseModel):
+     orgSlug: str
+     name: str
+     description: Optional[str] = ""
+     isPrivate: Optional[bool] = False
+     memberIds: List[str] = Field(default_factory=list)
+     createdAt: str
+     createdBy: str
+     lastMessage: Optional[str] = None
+     lastMessageTimestamp: Optional[str] = None
+     unreadCount: Optional[int] = 0
+-    aiPersona: Optional[str] = None
+ 
+ class CreateRoomRequest(BaseModel):
+     name: str
+     description: Optional[str] = ""
+     isPrivate: Optional[bool] = False
+     memberIds: Optional[List[str]] = None
+ 
+ class AddMemberRequest(BaseModel):
+     userId: str
+ 
+@@ -226,19 +225,10 @@ class RAFCalculationResult(BaseModel):
+     dataset_version: str
+     model_segment: str
+     demographic_factor: DemographicFactorResult
+     mapped_conditions: List[MappedConditionResult]
+     unmapped_conditions: List[UnmappedConditionResult]
+     demographic_coefficient: float
+     hcc_coefficient_sum: float
+     raf_total: float
+     base_rate: float
+     estimated_annual_payment: int
+-
+-class GroundingRecord(BaseModel):
+-    id: str
+-    requestId: str
+-    sourceType: Literal["patient", "condition", "risk", "memory"]
+-    sourceId: str
+-    toolName: str
+-    datasetVersion: str = "teamchat-seed-2026.1"
+-    createdAt: str
+diff --git a/backend/app/services/gemini_service.py b/backend/app/services/gemini_service.py
+index b7ec144..2becb2b 100644
+--- a/backend/app/services/gemini_service.py
++++ b/backend/app/services/gemini_service.py
+@@ -123,20 +123,36 @@ def execute_tool(name: str, args: Dict[str, Any], caller_org_slug: str, caller_u
+         return memory_engine.team_memory_tool(
+             org_slug=caller_org_slug,
+             action=act,
+             key=key,
+             query=query,
+             value=val,
+             user_email=caller_user.email,
+         )
+     return {"error": f'Unknown tool "{name}".'}
+ 
++
++async def _stream_response(client, model_name, contents, system_instruction, ai_message_id, room_id, org_slug, tool_calls, strip_tool_tags=False):
++    stream = client.models.generate_content_stream(
++        model=model_name,
++        contents=contents,
++        config=types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.3),
++    )
++    for chunk in stream:
++        text_chunk = chunk.text or ""
++        if strip_tool_tags:
++            text_chunk = re.sub(r"</?tool_code>", "", text_chunk)
++        if text_chunk:
++            chat_store.update_streaming_message(ai_message_id, room_id, org_slug, text_chunk, False, tool_calls)
++            await asyncio.sleep(0.02)
++    chat_store.update_streaming_message(ai_message_id, room_id, org_slug, "", True, tool_calls)
++
+ # Declarations for Gemini Function Calling
+ lookup_decl = {
+     "name": "lookup_condition_code",
+     "description": "Lookup ICD-10 diagnosis code details, description, chronic flag, specificity, and CMS-HCC V28 payment category mapping.",
+     "parameters": {
+         "type": "OBJECT",
+         "properties": {
+             "code_or_query": {
+                 "type": "STRING",
+                 "description": 'ICD-10 code (e.g. "I50.32" or "I5032") or diagnosis search keyword.',
+@@ -347,79 +363,26 @@ You are collaborating in real-time with healthcare and technology professionals
+ 
+                 if tool_results_payload:
+                     followup_prompt = (
+                         f"{attributed_prompt}\n\n"
+                         f"Official Tool Results:\n{json.dumps(tool_results_payload, indent=2)}\n\n"
+                         f"Now synthesize a complete, beautifully formatted clinical response addressing {trigger_message.senderName} and the team. "
+                         f"Synthesize the calculations and condition mappings directly in clean Markdown prose and tables. "
+                         f"Do NOT output raw `<tool_code>` or raw JSON dumps."
+                     )
+ 
+-                    stream_res = client.models.generate_content_stream(
+-                        model=model_name,
+-                        contents=followup_prompt,
+-                        config=types.GenerateContentConfig(
+-                            system_instruction=system_instruction,
+-                            temperature=0.3,
+-                        ),
+-                    )
+-
+-                    for chunk in stream_res:
+-                        raw_chunk = chunk.text or ""
+-                        # Sanitize any accidental internal tool tags
+-                        text_chunk = re.sub(r"</?tool_code>", "", raw_chunk)
+-                        if text_chunk:
+-                            chat_store.update_streaming_message(
+-                                ai_message_id,
+-                                room_id,
+-                                org_slug,
+-                                text_chunk,
+-                                False,
+-                                tool_calls_executed,
+-                            )
+-                            await asyncio.sleep(0.02)
+-
+-                    chat_store.update_streaming_message(
+-                        ai_message_id,
+-                        room_id,
+-                        org_slug,
+-                        "",
+-                        True,
+-                        tool_calls_executed,
+-                    )
++                    await _stream_response(client, model_name, followup_prompt, system_instruction,
++                                           ai_message_id, room_id, org_slug, tool_calls_executed,
++                                           strip_tool_tags=True)
+                 else:
+-                    # No tool calls, stream content
+-                    stream_res = client.models.generate_content_stream(
+-                        model=model_name,
+-                        contents=attributed_prompt,
+-                        config=types.GenerateContentConfig(
+-                            system_instruction=system_instruction,
+-                            temperature=0.3,
+-                        ),
+-                    )
+-
+-                    for chunk in stream_res:
+-                        text_chunk = chunk.text or ""
+-                        if text_chunk:
+-                            chat_store.update_streaming_message(
+-                                ai_message_id,
+-                                room_id,
+-                                org_slug,
+-                                text_chunk,
+-                                False,
+-                                [],
+-                            )
+-                            await asyncio.sleep(0.02)
+-
+-                    chat_store.update_streaming_message(
+-                        ai_message_id, room_id, org_slug, "", True, []
+-                    )
++                    await _stream_response(client, model_name, attributed_prompt, system_instruction,
++                                           ai_message_id, room_id, org_slug, [])
+ 
+                 success = True
+                 break
+             except Exception as e:
+                 last_err = e
+                 print(f"[Gemini API] Failed on model {model_name} (attempt {attempt+1}): {e}")
+                 await asyncio.sleep(0.5)
+ 
+     if not success:
+         print(f"[Gemini API] Falling back to deterministic clinical engine. Error: {last_err}")
+diff --git a/package.json b/package.json
+index ed78666..20bd959 100644
+--- a/package.json
++++ b/package.json
+@@ -1,21 +1,19 @@
+ {
+   "name": "teamchat-ai",
+   "private": true,
+   "version": "1.0.0",
+   "type": "module",
+   "scripts": {
+     "dev": "vite",
+     "dev:backend": "./.venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8002 --reload",
+-    "dev:python": "./.venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8002 --reload",
+     "test": "PYTHONPATH=. ./.venv/bin/pytest backend/tests/ -v",
+-    "test:python": "PYTHONPATH=. ./.venv/bin/pytest backend/tests/ -v",
+     "seed:firestore": "PYTHONPATH=. python3 scripts/seed_firestore.py --seed-auth",
+     "build": "vite build",
+     "preview": "vite preview",
+     "lint": "tsc --noEmit"
+   },
+   "dependencies": {
+     "@tailwindcss/vite": "^4.1.14",
+     "@vitejs/plugin-react": "^5.0.4",
+     "lucide-react": "^0.546.0",
+     "motion": "^12.23.24",
+diff --git a/src/types.ts b/src/types.ts
+index eeb36d7..a8186ff 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -35,21 +35,20 @@ export interface Room {
+   orgSlug: string;
+   name: string;
+   description?: string;
+   isPrivate?: boolean;
+   memberIds: string[];
+   createdAt: string;
+   createdBy: string;
+   unreadCount?: number;
+   lastMessage?: string;
+   lastMessageTimestamp?: string;
+-  aiPersona?: string;
+ }
+ 
+ export interface ToolCallRecord {
+   id: string;
+   toolName: string;
+   args: Record<string, unknown>;
+   result?: unknown;
+   status: 'running' | 'completed' | 'error';
+   error?: string;
+ }

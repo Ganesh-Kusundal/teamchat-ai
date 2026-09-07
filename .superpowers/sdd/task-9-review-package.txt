@@ -1,0 +1,382 @@
+# Task 9 Review Package
+## Commits (base b426c4e → HEAD)
+ebbd9d7 refactor: structured logging replaces print statements
+
+## Diff stat
+ backend/app/auth/firebase.py            | 13 ++++++++-----
+ backend/app/main.py                     |  2 ++
+ backend/app/services/event_broker.py    |  5 ++++-
+ backend/app/services/firestore_store.py |  5 ++++-
+ backend/app/services/gemini_service.py  | 17 ++++++++++-------
+ 5 files changed, 28 insertions(+), 14 deletions(-)
+
+## Full diff (U10)
+diff --git a/backend/app/auth/firebase.py b/backend/app/auth/firebase.py
+index 625e599..cbee03e 100644
+--- a/backend/app/auth/firebase.py
++++ b/backend/app/auth/firebase.py
+@@ -5,75 +5,78 @@ Behavior:
+   - When FIREBASE_PROJECT_ID env var is set: initializes firebase_admin and exposes
+     `verify_firebase_token(id_token)` for real Firebase Auth verification.
+   - When FIREBASE_PROJECT_ID is not set: all functions are no-ops that return None,
+     preserving the demo-token fallback mode for local evaluation.
+ 
+ On Cloud Run the SDK authenticates automatically via workload identity (no service
+ account key file needed).
+ """
+ from typing import Optional
+ import json
++import logging
+ import urllib.error
+ import urllib.request
+ import urllib.parse
+ from ..config import settings
+ 
++logger = logging.getLogger(__name__)
++
+ _firebase_initialized = False
+ 
+ def _ensure_initialized() -> bool:
+     global _firebase_initialized
+     if _firebase_initialized:
+         return True
+     if not settings.FIREBASE_PROJECT_ID:
+         return False
+     try:
+         import firebase_admin
+         from firebase_admin import credentials
+         if not firebase_admin._apps:
+             # On Cloud Run: uses Application Default Credentials automatically.
+             # Locally: set GOOGLE_APPLICATION_CREDENTIALS env var pointing to a service account JSON.
+             cred = credentials.ApplicationDefault()
+             firebase_admin.initialize_app(cred, {"projectId": settings.FIREBASE_PROJECT_ID})
+         _firebase_initialized = True
+-        print(f"[Firebase] Admin SDK initialized — project={settings.FIREBASE_PROJECT_ID}")
++        logger.info(f"Admin SDK initialized — project={settings.FIREBASE_PROJECT_ID}")
+         return True
+     except ImportError:
+-        print("[Firebase] firebase-admin not installed. Falling back to demo-token mode.")
++        logger.warning("firebase-admin not installed. Falling back to demo-token mode.")
+         return False
+     except Exception as e:
+-        print(f"[Firebase] Admin SDK initialization failed: {e}. Falling back to demo-token mode.")
++        logger.warning(f"Admin SDK initialization failed: {e}. Falling back to demo-token mode.")
+         return False
+ 
+ 
+ def sign_in_with_password(email: str, password: str) -> Optional[dict]:
+     """Authenticate through Firebase Auth REST and return the ID-token payload."""
+     if not settings.FIREBASE_WEB_API_KEY:
+         return None
+     request = urllib.request.Request(
+         "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
+         + urllib.parse.quote(settings.FIREBASE_WEB_API_KEY),
+         data=json.dumps({"email": email.strip(), "password": password, "returnSecureToken": True}).encode(),
+         headers={"Content-Type": "application/json"},
+         method="POST",
+     )
+     try:
+         with urllib.request.urlopen(request, timeout=10) as response:
+             return json.loads(response.read().decode("utf-8"))
+     except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as exc:
+-        print(f"[Firebase] Password sign-in failed: {exc}")
++        logger.warning(f"Password sign-in failed: {exc}")
+         return None
+ 
+ 
+ def verify_firebase_token(id_token: str) -> Optional[dict]:
+     """
+     Verify a Firebase ID token and return the decoded claims dict.
+     Returns None if Firebase Admin is not configured or verification fails.
+     """
+     if not _ensure_initialized():
+         return None
+     try:
+         from firebase_admin import auth as fb_auth
+         decoded = fb_auth.verify_id_token(id_token)
+         return decoded
+     except Exception as e:
+-        print(f"[Firebase] Token verification failed: {e}")
++        logger.warning(f"Token verification failed: {e}")
+         return None
+diff --git a/backend/app/main.py b/backend/app/main.py
+index 76508aa..b65b514 100644
+--- a/backend/app/main.py
++++ b/backend/app/main.py
+@@ -1,31 +1,33 @@
+ import asyncio
++import logging
+ import os
+ from contextlib import asynccontextmanager
+ from pathlib import Path
+ from fastapi import FastAPI, Request
+ from fastapi.middleware.cors import CORSMiddleware
+ from fastapi.staticfiles import StaticFiles
+ from fastapi.responses import FileResponse, JSONResponse
+ from .config import settings
+ from .core.constants import GEMINI_KEY_PLACEHOLDER, utc_now_iso
+ from .api import (
+     auth_router,
+     rooms_router,
+     messages_router,
+     realtime_router,
+     tools_router,
+     admin_router,
+ )
+ 
+ @asynccontextmanager
+ async def lifespan(_app: FastAPI):
++    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
+     if settings.FIREBASE_PROJECT_ID and settings.STORAGE_BACKEND != "firestore":
+         raise RuntimeError("FIREBASE_PROJECT_ID requires STORAGE_BACKEND=firestore")
+     if settings.FIREBASE_PROJECT_ID and not settings.FIREBASE_WEB_API_KEY:
+         raise RuntimeError("FIREBASE_WEB_API_KEY is required when Firebase Auth is enabled")
+     if settings.STORAGE_BACKEND == "firestore":
+         from .services.chat_store import chat_store
+         chat_store.start_broker(asyncio.get_running_loop())
+     yield
+     if settings.STORAGE_BACKEND == "firestore":
+         from .services.chat_store import chat_store
+diff --git a/backend/app/services/event_broker.py b/backend/app/services/event_broker.py
+index 9f813d7..bb9f256 100644
+--- a/backend/app/services/event_broker.py
++++ b/backend/app/services/event_broker.py
+@@ -2,27 +2,30 @@
+ 
+ Each Cloud Run instance keeps its own SSE connections, so a process-local queue is
+ not enough. Events are written to a short-lived Firestore log; every instance polls
+ that log with its own cursor and forwards events to its local clients. This avoids
+ Firestore listeners in the browser and avoids Pub/Sub subscription load-balancing,
+ which would deliver an event to only one Cloud Run instance.
+ """
+ from __future__ import annotations
+ 
+ import asyncio
++import logging
+ import time
+ import uuid
+ from collections import deque
+ from typing import Awaitable, Callable, Optional
+ 
+ from ..config import settings
+ 
++logger = logging.getLogger(__name__)
++
+ 
+ class FirestoreEventBroker:
+     def __init__(self, db, on_event: Callable[[dict], Awaitable[None]]):
+         self.db = db
+         self.on_event = on_event
+         self._task: Optional[asyncio.Task] = None
+         self._closed = False
+         self._cursor = time.time()
+         self._seen_ids: set[str] = set()
+         self._seen_order = deque(maxlen=10000)
+@@ -69,21 +72,21 @@ class FirestoreEventBroker:
+                     if event_id in self._seen_ids:
+                         continue
+                     if len(self._seen_order) == self._seen_order.maxlen:
+                         self._seen_ids.discard(self._seen_order.popleft())
+                     self._seen_ids.add(event_id)
+                     self._seen_order.append(event_id)
+                     if data.get("source") != settings.INSTANCE_ID:
+                         await self.on_event(data.get("event", {}))
+             except Exception as exc:
+                 # A transient Firestore/network failure should not kill SSE forever.
+-                print(f"[Realtime] Firestore event relay poll failed: {exc}")
++                logger.warning(f"Firestore event relay poll failed: {exc}")
+             await asyncio.sleep(0.5)
+ 
+     async def close(self) -> None:
+         self._closed = True
+         if self._task:
+             self._task.cancel()
+             try:
+                 await self._task
+             except asyncio.CancelledError:
+                 pass
+diff --git a/backend/app/services/firestore_store.py b/backend/app/services/firestore_store.py
+index 5ba5e16..15da72d 100644
+--- a/backend/app/services/firestore_store.py
++++ b/backend/app/services/firestore_store.py
+@@ -1,39 +1,42 @@
+ """Firestore-backed implementation of the chat repository.
+ 
+ All application documents are nested below an organization document.  The backend
+ still performs authorization before calling this repository; the nested paths add a
+ second tenant boundary and make accidental cross-organization queries impossible.
+ """
+ from __future__ import annotations
+ 
+ import asyncio
+ import hashlib
++import logging
+ import time
+ from typing import Any, Dict, List, Optional
+ 
+ from ..config import settings
+ from ..models.schemas import (
+     Message,
+     MessageReadReceipt,
+     Organization,
+     PresenceRecord,
+     Room,
+     TypingIndicator,
+     UserProfile,
+ )
+ from .chat_store import ChatStore, SEED_MESSAGES, SEED_ORGANIZATIONS, SEED_ROOMS, SEED_USERS
+ from .event_broker import FirestoreEventBroker
+ from ..core.constants import TYPING_TTL_SECONDS, utc_now_iso
+ from ..core.events import EventType, event
+ from ..core.formatting import make_room_id, room_snippet, slugify_room_name
+ 
++logger = logging.getLogger(__name__)
++
+ 
+ class FirestoreChatStore(ChatStore):
+     """Synchronous Firestore repository used by FastAPI's production process."""
+ 
+     def __init__(self):
+         try:
+             from google.cloud import firestore
+         except ImportError as exc:
+             raise RuntimeError(
+                 "google-cloud-firestore is required when STORAGE_BACKEND=firestore"
+@@ -372,21 +375,21 @@ class FirestoreChatStore(ChatStore):
+ 
+     def register_sse_client(self, client_id: str, user_id: str, org_slug: str, room_id: Optional[str] = None):
+         client = super().register_sse_client(client_id, user_id, org_slug, room_id)
+         return client
+ 
+     async def _publish_relay(self, event: dict) -> None:
+         try:
+             await self._broker.publish(event)
+         except Exception as exc:
+             # Local SSE remains available even if the cross-instance relay is temporarily down.
+-            print(f"[Realtime] Failed to publish cross-instance event: {exc}")
++            logger.warning(f"Failed to publish cross-instance event: {exc}")
+ 
+     def _emit_room(self, room_id: str, org_slug: str, event_dict: dict, target_user_id: Optional[str] = None):
+         payload = dict(event_dict.get("payload") or {})
+         payload.setdefault("roomId", room_id)
+         event_dict["payload"] = payload
+         asyncio.create_task(self.broadcast_to_room(room_id, org_slug, event_dict, target_user_id=target_user_id))
+         asyncio.create_task(self._publish_relay(event_dict))
+ 
+     def _emit_org(self, org_slug: str, event: dict):
+         asyncio.create_task(self.broadcast_to_org(org_slug, event))
+diff --git a/backend/app/services/gemini_service.py b/backend/app/services/gemini_service.py
+index 2becb2b..c95fc87 100644
+--- a/backend/app/services/gemini_service.py
++++ b/backend/app/services/gemini_service.py
+@@ -1,15 +1,16 @@
+ import os
+ import re
+ import json
+ import time
+ import asyncio
++import logging
+ import uuid
+ from typing import List, Dict, Any, Optional
+ from ..config import settings
+ from ..core.constants import (
+     AI_SENDER_ID, AI_SENDER_NAME, DEFAULT_BASE_RATE,
+     GEMINI_KEY_PLACEHOLDER, utc_now_iso,
+ )
+ from ..models.schemas import Message, UserProfile, ToolCallRecord
+ from .clinical_engine import clinical_engine
+ from .memory_engine import memory_engine
+@@ -18,20 +19,22 @@ from .chat_store import chat_store
+ # Try importing google-genai SDK
+ try:
+     from google import genai
+     from google.genai import types
+     HAS_GENAI = True
+ except ImportError:
+     genai = None
+     types = None
+     HAS_GENAI = False
+ 
++logger = logging.getLogger(__name__)
++
+ _genai_client_cache: object = None
+ 
+ def get_genai_client():
+     """
+     Returns a configured Google Gen AI client.
+ 
+     Mode selection (checked in order):
+       1. Vertex AI mode  — when GOOGLE_CLOUD_PROJECT env var is set.
+                            Uses workload identity on Cloud Run (no API key needed).
+                            Endpoint: us-central1-aiplatform.googleapis.com
+@@ -48,37 +51,37 @@ def get_genai_client():
+ 
+     # --- Mode 1: Vertex AI (Cloud Run / GCP production) ---
+     if settings.GOOGLE_CLOUD_PROJECT:
+         try:
+             client = genai.Client(
+                 vertexai=True,
+                 project=settings.GOOGLE_CLOUD_PROJECT,
+                 location=settings.GOOGLE_CLOUD_LOCATION,
+             )
+             _genai_client_cache = client
+-            print(f"[Gemini] Vertex AI mode — project={settings.GOOGLE_CLOUD_PROJECT}, location={settings.GOOGLE_CLOUD_LOCATION}")
++            logger.info(f"Vertex AI mode — project={settings.GOOGLE_CLOUD_PROJECT}, location={settings.GOOGLE_CLOUD_LOCATION}")
+             return client
+         except Exception as e:
+-            print(f"[Gemini] Vertex AI init failed: {e}. Attempting API key fallback.")
++            logger.warning(f"Vertex AI init failed: {e}. Attempting API key fallback.")
+ 
+     # --- Mode 2: API key (local dev / AI Studio) ---
+     api_key = settings.GEMINI_API_KEY
+     if api_key and api_key not in ("", GEMINI_KEY_PLACEHOLDER):
+         try:
+             client = genai.Client(api_key=api_key)
+             _genai_client_cache = client
+-            print("[Gemini] API key mode (local dev).")
++            logger.info("API key mode (local dev).")
+             return client
+         except Exception as e:
+-            print(f"[Gemini] API key init failed: {e}")
++            logger.warning(f"API key init failed: {e}")
+ 
+-    print("[Gemini] No credentials configured — deterministic fallback engine will handle all AI requests.")
++    logger.info("No credentials configured — deterministic fallback engine will handle all AI requests.")
+     return None
+ 
+ def format_attributed_prompt(history: List[Message], last_message: Message, room_name: str) -> str:
+     recent = history[-15:]
+     participants = list(set(m.senderName for m in recent if not m.isAi))
+ 
+     formatted = f"[Conversation History in #{room_name}]\n"
+     for m in recent:
+         # Extract HH:MM
+         time_str = m.timestamp[11:16] if len(m.timestamp) >= 16 else "12:00"
+@@ -374,25 +377,25 @@ You are collaborating in real-time with healthcare and technology professionals
+                                            ai_message_id, room_id, org_slug, tool_calls_executed,
+                                            strip_tool_tags=True)
+                 else:
+                     await _stream_response(client, model_name, attributed_prompt, system_instruction,
+                                            ai_message_id, room_id, org_slug, [])
+ 
+                 success = True
+                 break
+             except Exception as e:
+                 last_err = e
+-                print(f"[Gemini API] Failed on model {model_name} (attempt {attempt+1}): {e}")
++                logger.warning(f"Failed on model {model_name} (attempt {attempt+1}): {e}")
+                 await asyncio.sleep(0.5)
+ 
+     if not success:
+-        print(f"[Gemini API] Falling back to deterministic clinical engine. Error: {last_err}")
++        logger.warning(f"Falling back to deterministic clinical engine. Error: {last_err}")
+         fallback = generate_intelligent_fallback(
+             prompt=trigger_message.content,
+             last_sender=trigger_message.senderName,
+             org_slug=org_slug,
+             caller_user=caller_user,
+         )
+         note = f"> ℹ️ *Note: Gemini cloud model experiencing high demand. Grounded response provided via deterministic clinical engine for **{trigger_message.senderName}**.*"
+         await simulate_streaming(
+             ai_message_id,
+             room_id,

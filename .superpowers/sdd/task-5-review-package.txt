@@ -1,0 +1,305 @@
+# Task 5 Review Package
+## Commits (base 8270966 → HEAD)
+99b82ae refactor: public token-resolution API; realtime uses shared extraction; engine encapsulation
+
+## Diff stat
+ backend/app/api/routes_realtime.py          | 13 ++------
+ backend/app/api/routes_tools.py             |  2 +-
+ backend/app/auth/dependencies.py            | 21 ++++++++-----
+ backend/app/services/clinical_engine.py     |  3 ++
+ backend/tests/test_production_boundaries.py |  6 ++--
+ backend/tests/test_token_extraction.py      | 49 +++++++++++++++++++++++++++++
+ 6 files changed, 73 insertions(+), 21 deletions(-)
+
+## Full diff (U10)
+diff --git a/backend/app/api/routes_realtime.py b/backend/app/api/routes_realtime.py
+index 7aeaee4..96d9f42 100644
+--- a/backend/app/api/routes_realtime.py
++++ b/backend/app/api/routes_realtime.py
+@@ -1,38 +1,31 @@
+ import json
+ import time
+ import asyncio
+ import uuid
+ from typing import Optional
+ from fastapi import APIRouter, Request, HTTPException, status
+ from fastapi.responses import StreamingResponse
+ from starlette.concurrency import run_in_threadpool
+ from ..services.chat_store import chat_store
+-from ..auth.dependencies import _resolve_user_from_token
++from ..auth.dependencies import resolve_user_from_token, token_from_request
+ from ..core.constants import utc_now_iso
+ from ..core.events import EventType, event
+ 
+ router = APIRouter(tags=["Real-Time Events"])
+ 
+ @router.get("/events")
+ async def events_stream(request: Request, token: Optional[str] = None, roomId: Optional[str] = None):
+-    # Extract token from query or header
+-    auth_token = token or request.headers.get("x-user-id")
+-    if not auth_token and request.headers.get("authorization"):
+-        auth_header = request.headers.get("authorization", "")
+-        if auth_header.startswith("Bearer "):
+-            auth_token = auth_header[7:]
+-
++    auth_token = token_from_request(request, token)
+     if not auth_token:
+         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token required for real-time events.")
+-
+-    user = await run_in_threadpool(_resolve_user_from_token, auth_token)
++    user = await run_in_threadpool(resolve_user_from_token, auth_token)
+     if not user:
+         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user session.")
+ 
+     client_id = f"client-{uuid.uuid4().hex}"
+     if roomId:
+         room = chat_store.get_room_by_id(roomId, user.orgSlug)
+         if not room or user.id not in room.memberIds:
+             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room.")
+     sse_client = chat_store.register_sse_client(client_id, user.id, user.orgSlug, roomId)
+ 
+diff --git a/backend/app/api/routes_tools.py b/backend/app/api/routes_tools.py
+index 4c4ca6f..c30f978 100644
+--- a/backend/app/api/routes_tools.py
++++ b/backend/app/api/routes_tools.py
+@@ -16,21 +16,21 @@ class CalculateRafRequest(BaseModel):
+     baseRate: Optional[float] = DEFAULT_BASE_RATE
+ 
+ class StoreMemoryRequest(BaseModel):
+     key: str
+     value: Dict[str, Any]
+     room: Optional[str] = None
+ 
+ @router.get("/patients")
+ async def get_patients(context: RequestContext = Depends(get_request_context)):
+     # Strictly scoped by caller's org_slug!
+-    org_patients = [p.model_dump() for p in clinical_engine.patients if p.org_slug == context.org_slug]
++    org_patients = [p.model_dump() for p in clinical_engine.get_patients_for_org(context.org_slug)]
+     return org_patients
+ 
+ @router.get("/patients/{patient_id}")
+ async def get_patient_profile(
+     patient_id: str,
+     context: RequestContext = Depends(get_request_context),
+ ):
+     result = clinical_engine.get_patient_risk_profile(context.org_slug, patient_id)
+     if "error" in result:
+         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"error": result["error"]})
+diff --git a/backend/app/auth/dependencies.py b/backend/app/auth/dependencies.py
+index 3eaf660..bd1b3c2 100644
+--- a/backend/app/auth/dependencies.py
++++ b/backend/app/auth/dependencies.py
+@@ -18,21 +18,21 @@ from fastapi import Request, HTTPException, Security, status
+ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+ from starlette.concurrency import run_in_threadpool
+ from ..models.schemas import RequestContext, UserProfile
+ from ..services.chat_store import chat_store
+ from ..config import settings
+ from .firebase import verify_firebase_token
+ 
+ security = HTTPBearer(auto_error=False)
+ 
+ 
+-def _resolve_user_from_token(token: str) -> Optional[UserProfile]:
++def resolve_user_from_token(token: str) -> Optional[UserProfile]:
+     """
+     Resolve a UserProfile from a bearer token.
+ 
+     1. If FIREBASE_PROJECT_ID is set, verify the Firebase ID token and map its
+        email or UID to the server-side organization user record.
+     2. Otherwise resolve the local demo token (token == user.id).
+     """
+     # --- Mode 1: Firebase Auth ---
+     if settings.FIREBASE_PROJECT_ID:
+         claims = verify_firebase_token(token)
+@@ -52,39 +52,46 @@ def _resolve_user_from_token(token: str) -> Optional[UserProfile]:
+                 return user
+             # Firebase token is valid but user not in our seed — reject.
+             return None
+         # Production authentication must never fall through to demo tokens.
+         return None
+ 
+     # --- Mode 2: Demo token (user.id as Bearer) ---
+     return chat_store.get_user_by_id(token)
+ 
+ 
++def token_from_request(request: Request, query_token: Optional[str] = None) -> Optional[str]:
++    auth_header = request.headers.get("authorization", "")
++    if auth_header.startswith("Bearer "):
++        return auth_header[7:]
++    if "x-user-id" in request.headers:
++        return request.headers.get("x-user-id")
++    return query_token
++
++
+ async def get_request_context(
+     request: Request,
+     auth: Optional[HTTPAuthorizationCredentials] = Security(security),
+ ) -> RequestContext:
+-    token: Optional[str] = None
++    token = None
+     if auth and auth.credentials:
+         token = auth.credentials
+-    elif "x-user-id" in request.headers:
+-        token = request.headers.get("x-user-id")
+-    elif "token" in request.query_params:
+-        token = request.query_params.get("token")
++    if not token:
++        token = token_from_request(request)
+ 
+     if not token:
+         raise HTTPException(
+             status_code=status.HTTP_401_UNAUTHORIZED,
+             detail={"error": {"code": "UNAUTHENTICATED", "message": "Missing authentication token."}},
+         )
+ 
+-    user = await run_in_threadpool(_resolve_user_from_token, token)
++    user = await run_in_threadpool(resolve_user_from_token, token)
+     if not user:
+         raise HTTPException(
+             status_code=status.HTTP_401_UNAUTHORIZED,
+             detail={"error": {"code": "UNAUTHENTICATED", "message": "Invalid or expired session token."}},
+         )
+ 
+     # org_slug is ALWAYS derived from the authenticated server-side user record.
+     # It is never read from client headers, query params, or LLM tool arguments.
+     return RequestContext(
+         uid=user.id,
+diff --git a/backend/app/services/clinical_engine.py b/backend/app/services/clinical_engine.py
+index a590c75..d3c5e39 100644
+--- a/backend/app/services/clinical_engine.py
++++ b/backend/app/services/clinical_engine.py
+@@ -149,20 +149,23 @@ class ClinicalEngine:
+                     }
+                     for c in matches
+                 ],
+             }
+ 
+         return {
+             "dataset_version": DATASET_VERSION,
+             "error": f'No condition code or diagnosis found matching "{code_or_query}" in {DATASET_VERSION}.',
+         }
+ 
++    def get_patients_for_org(self, org_slug: str) -> List[Patient]:
++        return [p for p in self.patients if p.org_slug == org_slug]
++
+     def calculate_risk_score(
+         self,
+         org_slug: str,
+         patient_id: Optional[str] = None,
+         icd10_codes: Optional[List[str]] = None,
+         sex: str = "F",
+         age: int = 75,
+         model_segment: str = "community_nondual_aged",
+         base_rate: float = DEFAULT_BASE_RATE,
+     ) -> Dict[str, Any]:
+diff --git a/backend/tests/test_production_boundaries.py b/backend/tests/test_production_boundaries.py
+index fbe99d3..14a662c 100644
+--- a/backend/tests/test_production_boundaries.py
++++ b/backend/tests/test_production_boundaries.py
+@@ -1,47 +1,47 @@
+ from backend.app.auth import dependencies
+ from backend.app.config import settings
+ from backend.app.main import app
+ from fastapi.testclient import TestClient
+ 
+ 
+ def test_firebase_mode_rejects_demo_tokens(monkeypatch):
+     monkeypatch.setattr(settings, "FIREBASE_PROJECT_ID", "test-project")
+     monkeypatch.setattr(dependencies, "verify_firebase_token", lambda _token: None)
+ 
+-    assert dependencies._resolve_user_from_token("usr-sarah") is None
++    assert dependencies.resolve_user_from_token("usr-sarah") is None
+ 
+ 
+ def test_firebase_claim_requires_tenant(monkeypatch):
+     monkeypatch.setattr(settings, "FIREBASE_PROJECT_ID", "test-project")
+     monkeypatch.setattr(
+         dependencies,
+         "verify_firebase_token",
+         lambda _token: {"uid": "firebase-sarah", "email": "sarah@northside-health.test"},
+     )
+ 
+-    assert dependencies._resolve_user_from_token("firebase-token") is None
++    assert dependencies.resolve_user_from_token("firebase-token") is None
+ 
+ 
+ def test_firebase_claim_must_match_provisioned_tenant(monkeypatch):
+     monkeypatch.setattr(settings, "FIREBASE_PROJECT_ID", "test-project")
+     monkeypatch.setattr(
+         dependencies,
+         "verify_firebase_token",
+         lambda _token: {
+             "uid": "firebase-sarah",
+             "email": "sarah@northside-health.test",
+             "orgId": "valley-primary-care",
+         },
+     )
+ 
+-    assert dependencies._resolve_user_from_token("firebase-token") is None
++    assert dependencies.resolve_user_from_token("firebase-token") is None
+ 
+ 
+ def test_org_metadata_requires_authentication(client):
+     response = client.get("/api/orgs")
+     assert response.status_code == 401
+ 
+ 
+ def test_org_metadata_is_tenant_scoped(client, northside_headers):
+     response = client.get("/api/orgs", headers=northside_headers)
+     assert response.status_code == 200
+diff --git a/backend/tests/test_token_extraction.py b/backend/tests/test_token_extraction.py
+new file mode 100644
+index 0000000..678de10
+--- /dev/null
++++ b/backend/tests/test_token_extraction.py
+@@ -0,0 +1,49 @@
++import anyio
++from fastapi import Request
++from backend.app.auth.dependencies import token_from_request
++from backend.app.main import app
++
++
++def _req(headers=None, query=""):
++    scope = {"type": "http", "headers": [(k.lower().encode(), v.encode()) for k, v in (headers or {}).items()],
++             "query_string": query.encode(), "method": "GET", "path": "/"}
++    return Request(scope)
++
++
++def test_bearer_wins_over_everything():
++    r = _req({"authorization": "Bearer abc", "x-user-id": "usr-1"}, "token=q")
++    assert token_from_request(r, "q") == "abc"
++
++
++def test_x_user_id_then_query():
++    assert token_from_request(_req({"x-user-id": "usr-1"})) == "usr-1"
++    assert token_from_request(_req({}, "token=q"), "q") == "q"
++    assert token_from_request(_req()) is None
++
++
++async def _sse_start_status():
++    scope = {
++        "type": "http", "asgi": {"version": "3.0", "spec_version": "2.3"},
++        "http_version": "1.1", "method": "GET", "scheme": "http",
++        "path": "/api/events", "raw_path": b"/api/events", "query_string": b"",
++        "root_path": "", "headers": [(b"authorization", b"Bearer usr-sarah")],
++        "client": ("testclient", 123), "server": ("testserver", 80),
++    }
++    started = {}
++
++    async def receive():
++        await anyio.sleep(0.2)
++        return {"type": "http.disconnect"}
++
++    async def send(message):
++        if message["type"] == "http.response.start":
++            started["status"] = message["status"]
++
++    with anyio.move_on_after(2.0):
++        await app(scope, receive, send)
++    return started.get("status")
++
++
++def test_realtime_stream_accepts_bearer():
++    # TestClient buffers infinite SSE bodies (starlette 1.6.0), so drive the ASGI app directly.
++    assert anyio.run(_sse_start_status) == 200

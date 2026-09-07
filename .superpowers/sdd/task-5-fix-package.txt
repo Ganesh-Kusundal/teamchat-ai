@@ -1,0 +1,63 @@
+# Task 5 Fix Re-Review Package (query-token parity)
+657e530 fix: preserve query-token auth input on regular routes
+diff --git a/backend/app/auth/dependencies.py b/backend/app/auth/dependencies.py
+index bd1b3c2..eea84c9 100644
+--- a/backend/app/auth/dependencies.py
++++ b/backend/app/auth/dependencies.py
+@@ -69,21 +69,21 @@ def token_from_request(request: Request, query_token: Optional[str] = None) -> O
+ 
+ 
+ async def get_request_context(
+     request: Request,
+     auth: Optional[HTTPAuthorizationCredentials] = Security(security),
+ ) -> RequestContext:
+     token = None
+     if auth and auth.credentials:
+         token = auth.credentials
+     if not token:
+-        token = token_from_request(request)
++        token = token_from_request(request, request.query_params.get("token"))
+ 
+     if not token:
+         raise HTTPException(
+             status_code=status.HTTP_401_UNAUTHORIZED,
+             detail={"error": {"code": "UNAUTHENTICATED", "message": "Missing authentication token."}},
+         )
+ 
+     user = await run_in_threadpool(resolve_user_from_token, token)
+     if not user:
+         raise HTTPException(
+diff --git a/backend/tests/test_token_extraction.py b/backend/tests/test_token_extraction.py
+index 678de10..2a4efd5 100644
+--- a/backend/tests/test_token_extraction.py
++++ b/backend/tests/test_token_extraction.py
+@@ -1,12 +1,13 @@
+ import anyio
+ from fastapi import Request
++from starlette.testclient import TestClient
+ from backend.app.auth.dependencies import token_from_request
+ from backend.app.main import app
+ 
+ 
+ def _req(headers=None, query=""):
+     scope = {"type": "http", "headers": [(k.lower().encode(), v.encode()) for k, v in (headers or {}).items()],
+              "query_string": query.encode(), "method": "GET", "path": "/"}
+     return Request(scope)
+ 
+ 
+@@ -40,10 +41,15 @@ async def _sse_start_status():
+             started["status"] = message["status"]
+ 
+     with anyio.move_on_after(2.0):
+         await app(scope, receive, send)
+     return started.get("status")
+ 
+ 
+ def test_realtime_stream_accepts_bearer():
+     # TestClient buffers infinite SSE bodies (starlette 1.6.0), so drive the ASGI app directly.
+     assert anyio.run(_sse_start_status) == 200
++
++
++def test_query_token_still_authenticates_regular_routes(client: TestClient):
++    res = client.get("/api/orgs", params={"token": "usr-sarah"})
++    assert res.status_code == 200
