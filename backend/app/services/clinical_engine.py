@@ -156,6 +156,9 @@ class ClinicalEngine:
             "error": f'No condition code or diagnosis found matching "{code_or_query}" in {DATASET_VERSION}.',
         }
 
+    def get_patients_for_org(self, org_slug: str) -> List[Patient]:
+        return [p for p in self.patients if p.org_slug == org_slug]
+
     def calculate_risk_score(
         self,
         org_slug: str,

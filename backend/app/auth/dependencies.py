@@ -25,7 +25,7 @@ from .firebase import verify_firebase_token
 security = HTTPBearer(auto_error=False)
 
 
-def _resolve_user_from_token(token: str) -> Optional[UserProfile]:
+def resolve_user_from_token(token: str) -> Optional[UserProfile]:
     """
     Resolve a UserProfile from a bearer token.
 
@@ -59,17 +59,24 @@ def _resolve_user_from_token(token: str) -> Optional[UserProfile]:
     return chat_store.get_user_by_id(token)
 
 
+def token_from_request(request: Request, query_token: Optional[str] = None) -> Optional[str]:
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.startswith("Bearer "):
+        return auth_header[7:]
+    if "x-user-id" in request.headers:
+        return request.headers.get("x-user-id")
+    return query_token
+
+
 async def get_request_context(
     request: Request,
     auth: Optional[HTTPAuthorizationCredentials] = Security(security),
 ) -> RequestContext:
-    token: Optional[str] = None
+    token = None
     if auth and auth.credentials:
         token = auth.credentials
-    elif "x-user-id" in request.headers:
-        token = request.headers.get("x-user-id")
-    elif "token" in request.query_params:
-        token = request.query_params.get("token")
+    if not token:
+        token = token_from_request(request)
 
     if not token:
         raise HTTPException(
@@ -77,7 +84,7 @@ async def get_request_context(
             detail={"error": {"code": "UNAUTHENTICATED", "message": "Missing authentication token."}},
         )
 
-    user = await run_in_threadpool(_resolve_user_from_token, token)
+    user = await run_in_threadpool(resolve_user_from_token, token)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

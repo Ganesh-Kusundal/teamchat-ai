@@ -7,7 +7,7 @@ from fastapi import APIRouter, Request, HTTPException, status
 from fastapi.responses import StreamingResponse
 from starlette.concurrency import run_in_threadpool
 from ..services.chat_store import chat_store
-from ..auth.dependencies import _resolve_user_from_token
+from ..auth.dependencies import resolve_user_from_token, token_from_request
 from ..core.constants import utc_now_iso
 from ..core.events import EventType, event
 
@@ -15,17 +15,10 @@ router = APIRouter(tags=["Real-Time Events"])
 
 @router.get("/events")
 async def events_stream(request: Request, token: Optional[str] = None, roomId: Optional[str] = None):
-    # Extract token from query or header
-    auth_token = token or request.headers.get("x-user-id")
-    if not auth_token and request.headers.get("authorization"):
-        auth_header = request.headers.get("authorization", "")
-        if auth_header.startswith("Bearer "):
-            auth_token = auth_header[7:]
-
+    auth_token = token_from_request(request, token)
     if not auth_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token required for real-time events.")
-
-    user = await run_in_threadpool(_resolve_user_from_token, auth_token)
+    user = await run_in_threadpool(resolve_user_from_token, auth_token)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user session.")
 

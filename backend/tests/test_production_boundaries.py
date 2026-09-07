@@ -8,7 +8,7 @@ def test_firebase_mode_rejects_demo_tokens(monkeypatch):
     monkeypatch.setattr(settings, "FIREBASE_PROJECT_ID", "test-project")
     monkeypatch.setattr(dependencies, "verify_firebase_token", lambda _token: None)
 
-    assert dependencies._resolve_user_from_token("usr-sarah") is None
+    assert dependencies.resolve_user_from_token("usr-sarah") is None
 
 
 def test_firebase_claim_requires_tenant(monkeypatch):
@@ -19,7 +19,7 @@ def test_firebase_claim_requires_tenant(monkeypatch):
         lambda _token: {"uid": "firebase-sarah", "email": "sarah@northside-health.test"},
     )
 
-    assert dependencies._resolve_user_from_token("firebase-token") is None
+    assert dependencies.resolve_user_from_token("firebase-token") is None
 
 
 def test_firebase_claim_must_match_provisioned_tenant(monkeypatch):
@@ -34,7 +34,7 @@ def test_firebase_claim_must_match_provisioned_tenant(monkeypatch):
         },
     )
 
-    assert dependencies._resolve_user_from_token("firebase-token") is None
+    assert dependencies.resolve_user_from_token("firebase-token") is None
 
 
 def test_org_metadata_requires_authentication(client):

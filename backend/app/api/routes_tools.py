@@ -23,7 +23,7 @@ class StoreMemoryRequest(BaseModel):
 @router.get("/patients")
 async def get_patients(context: RequestContext = Depends(get_request_context)):
     # Strictly scoped by caller's org_slug!
-    org_patients = [p.model_dump() for p in clinical_engine.patients if p.org_slug == context.org_slug]
+    org_patients = [p.model_dump() for p in clinical_engine.get_patients_for_org(context.org_slug)]
     return org_patients
 
 @router.get("/patients/{patient_id}")
