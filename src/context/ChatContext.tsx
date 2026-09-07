@@ -469,8 +469,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return [...prev, sentMsg];
       });
 
-      // ponytail: backend startswith semantics; codegen would share this — deferred
-      const mentionsAi = /@(?:gemini|ai)\b|^\/(?:gemini|ai|ask)/i.test(content);
+      const cleanContent = content.trim();
+      const mentionsAi = /@(?:gemini|ai)\b|^\/(?:gemini|ai|ask)/i.test(cleanContent);
       if (mentionsAi) {
         setIsAiThinking(true);
         if (aiThinkingTimeoutRef.current) clearTimeout(aiThinkingTimeoutRef.current);
@@ -491,12 +491,24 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           try {
             const pollRes = await api(`/api/rooms/${targetRoomId}/messages`);
+            if (currentRoomIdRef.current !== targetRoomId) {
+              clearInterval(pollTimer);
+              return;
+            }
             if (pollRes.ok) {
               const msgs: Message[] = await pollRes.json();
+              if (currentRoomIdRef.current !== targetRoomId) {
+                clearInterval(pollTimer);
+                return;
+              }
               setMessages(msgs);
               const aiMsg = msgs.find((m) => m.isAi && !m.isStreaming);
-              if (aiMsg && attempts >= 3) {
-                clearInterval(pollTimer);
+              if (aiMsg) {
+                setIsAiThinking(false);
+                if (aiThinkingTimeoutRef.current) clearTimeout(aiThinkingTimeoutRef.current);
+                if (attempts >= 3) {
+                  clearInterval(pollTimer);
+                }
               }
             }
           } catch {

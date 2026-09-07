@@ -16,6 +16,12 @@ interface DemoAccount { email: string; name: string; role: string; orgSlug: stri
 const orgLabel = (orgSlug: string) =>
   orgSlug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
+const getOrgBadgeStyle = (slug: string) => {
+  if (slug === 'valley-primary-care') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+  if (slug === 'metro-cardiology') return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+  return 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20';
+};
+
 export const LoginPage: React.FC = () => {
   const { login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
@@ -26,6 +32,11 @@ export const LoginPage: React.FC = () => {
   useEffect(() => {
     api('/api/demo/accounts').then((r) => (r.ok ? r.json() : [])).then(setTestAccounts).catch(() => {});
   }, []);
+
+  const orgCounts = testAccounts.reduce((acc, a) => {
+    acc[a.orgSlug] = (acc[a.orgSlug] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,7 +156,7 @@ export const LoginPage: React.FC = () => {
                     : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
                 }`}
               >
-                All Orgs
+                All Orgs ({testAccounts.length})
               </button>
               <button
                 type="button"
@@ -156,7 +167,7 @@ export const LoginPage: React.FC = () => {
                     : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
                 }`}
               >
-                Northside (4)
+                Northside ({orgCounts['northside-health'] || 0})
               </button>
               <button
                 type="button"
@@ -167,7 +178,7 @@ export const LoginPage: React.FC = () => {
                     : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
                 }`}
               >
-                Valley (3)
+                Valley ({orgCounts['valley-primary-care'] || 0})
               </button>
               <button
                 type="button"
@@ -178,7 +189,7 @@ export const LoginPage: React.FC = () => {
                     : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
                 }`}
               >
-                Metro (1)
+                Metro ({orgCounts['metro-cardiology'] || 0})
               </button>
             </div>
 
@@ -192,7 +203,7 @@ export const LoginPage: React.FC = () => {
                   <div className="min-w-0 pr-2">
                     <div className="font-semibold text-xs text-white flex items-center gap-2 truncate">
                       <span className="truncate">{acc.name}</span>
-                      <span className={`text-[9px] px-1.5 py-0.2 rounded border shrink-0 font-medium ${acc.orgSlug === 'valley-primary-care' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
+                      <span className={`text-[9px] px-1.5 py-0.2 rounded border shrink-0 font-medium ${getOrgBadgeStyle(acc.orgSlug)}`}>
                         {orgLabel(acc.orgSlug)}
                       </span>
                     </div>
