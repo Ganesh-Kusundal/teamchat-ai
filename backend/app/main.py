@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -19,6 +20,7 @@ from .api import (
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
     if settings.FIREBASE_PROJECT_ID and settings.STORAGE_BACKEND != "firestore":
         raise RuntimeError("FIREBASE_PROJECT_ID requires STORAGE_BACKEND=firestore")
     if settings.FIREBASE_PROJECT_ID and not settings.FIREBASE_WEB_API_KEY:

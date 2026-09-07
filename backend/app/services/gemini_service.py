@@ -3,6 +3,7 @@ import re
 import json
 import time
 import asyncio
+import logging
 import uuid
 from typing import List, Dict, Any, Optional
 from ..config import settings
@@ -24,6 +25,8 @@ except ImportError:
     genai = None
     types = None
     HAS_GENAI = False
+
+logger = logging.getLogger(__name__)
 
 _genai_client_cache: object = None
 
@@ -55,10 +58,10 @@ def get_genai_client():
                 location=settings.GOOGLE_CLOUD_LOCATION,
             )
             _genai_client_cache = client
-            print(f"[Gemini] Vertex AI mode — project={settings.GOOGLE_CLOUD_PROJECT}, location={settings.GOOGLE_CLOUD_LOCATION}")
+            logger.info(f"Vertex AI mode — project={settings.GOOGLE_CLOUD_PROJECT}, location={settings.GOOGLE_CLOUD_LOCATION}")
             return client
         except Exception as e:
-            print(f"[Gemini] Vertex AI init failed: {e}. Attempting API key fallback.")
+            logger.warning(f"Vertex AI init failed: {e}. Attempting API key fallback.")
 
     # --- Mode 2: API key (local dev / AI Studio) ---
     api_key = settings.GEMINI_API_KEY
@@ -66,12 +69,12 @@ def get_genai_client():
         try:
             client = genai.Client(api_key=api_key)
             _genai_client_cache = client
-            print("[Gemini] API key mode (local dev).")
+            logger.info("API key mode (local dev).")
             return client
         except Exception as e:
-            print(f"[Gemini] API key init failed: {e}")
+            logger.warning(f"API key init failed: {e}")
 
-    print("[Gemini] No credentials configured — deterministic fallback engine will handle all AI requests.")
+    logger.info("No credentials configured — deterministic fallback engine will handle all AI requests.")
     return None
 
 def format_attributed_prompt(history: List[Message], last_message: Message, room_name: str) -> str:
@@ -381,11 +384,11 @@ You are collaborating in real-time with healthcare and technology professionals 
                 break
             except Exception as e:
                 last_err = e
-                print(f"[Gemini API] Failed on model {model_name} (attempt {attempt+1}): {e}")
+                logger.warning(f"Failed on model {model_name} (attempt {attempt+1}): {e}")
                 await asyncio.sleep(0.5)
 
     if not success:
-        print(f"[Gemini API] Falling back to deterministic clinical engine. Error: {last_err}")
+        logger.warning(f"Falling back to deterministic clinical engine. Error: {last_err}")
         fallback = generate_intelligent_fallback(
             prompt=trigger_message.content,
             last_sender=trigger_message.senderName,

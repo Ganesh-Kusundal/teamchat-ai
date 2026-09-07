@@ -12,10 +12,13 @@ account key file needed).
 """
 from typing import Optional
 import json
+import logging
 import urllib.error
 import urllib.request
 import urllib.parse
 from ..config import settings
+
+logger = logging.getLogger(__name__)
 
 _firebase_initialized = False
 
@@ -34,13 +37,13 @@ def _ensure_initialized() -> bool:
             cred = credentials.ApplicationDefault()
             firebase_admin.initialize_app(cred, {"projectId": settings.FIREBASE_PROJECT_ID})
         _firebase_initialized = True
-        print(f"[Firebase] Admin SDK initialized — project={settings.FIREBASE_PROJECT_ID}")
+        logger.info(f"Admin SDK initialized — project={settings.FIREBASE_PROJECT_ID}")
         return True
     except ImportError:
-        print("[Firebase] firebase-admin not installed. Falling back to demo-token mode.")
+        logger.warning("firebase-admin not installed. Falling back to demo-token mode.")
         return False
     except Exception as e:
-        print(f"[Firebase] Admin SDK initialization failed: {e}. Falling back to demo-token mode.")
+        logger.warning(f"Admin SDK initialization failed: {e}. Falling back to demo-token mode.")
         return False
 
 
@@ -59,7 +62,7 @@ def sign_in_with_password(email: str, password: str) -> Optional[dict]:
         with urllib.request.urlopen(request, timeout=10) as response:
             return json.loads(response.read().decode("utf-8"))
     except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as exc:
-        print(f"[Firebase] Password sign-in failed: {exc}")
+        logger.warning(f"Password sign-in failed: {exc}")
         return None
 
 
@@ -75,5 +78,5 @@ def verify_firebase_token(id_token: str) -> Optional[dict]:
         decoded = fb_auth.verify_id_token(id_token)
         return decoded
     except Exception as e:
-        print(f"[Firebase] Token verification failed: {e}")
+        logger.warning(f"Token verification failed: {e}")
         return None

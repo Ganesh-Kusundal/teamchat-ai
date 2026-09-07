@@ -9,12 +9,15 @@ which would deliver an event to only one Cloud Run instance.
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 import uuid
 from collections import deque
 from typing import Awaitable, Callable, Optional
 
 from ..config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class FirestoreEventBroker:
@@ -76,7 +79,7 @@ class FirestoreEventBroker:
                         await self.on_event(data.get("event", {}))
             except Exception as exc:
                 # A transient Firestore/network failure should not kill SSE forever.
-                print(f"[Realtime] Firestore event relay poll failed: {exc}")
+                logger.warning(f"Firestore event relay poll failed: {exc}")
             await asyncio.sleep(0.5)
 
     async def close(self) -> None:

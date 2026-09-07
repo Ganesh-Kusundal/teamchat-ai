@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import logging
 import time
 from typing import Any, Dict, List, Optional
 
@@ -26,6 +27,8 @@ from .event_broker import FirestoreEventBroker
 from ..core.constants import TYPING_TTL_SECONDS, utc_now_iso
 from ..core.events import EventType, event
 from ..core.formatting import make_room_id, room_snippet, slugify_room_name
+
+logger = logging.getLogger(__name__)
 
 
 class FirestoreChatStore(ChatStore):
@@ -379,7 +382,7 @@ class FirestoreChatStore(ChatStore):
             await self._broker.publish(event)
         except Exception as exc:
             # Local SSE remains available even if the cross-instance relay is temporarily down.
-            print(f"[Realtime] Failed to publish cross-instance event: {exc}")
+            logger.warning(f"Failed to publish cross-instance event: {exc}")
 
     def _emit_room(self, room_id: str, org_slug: str, event_dict: dict, target_user_id: Optional[str] = None):
         payload = dict(event_dict.get("payload") or {})
