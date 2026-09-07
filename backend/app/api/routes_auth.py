@@ -74,3 +74,12 @@ async def get_me(context: RequestContext = Depends(get_request_context)):
 async def get_org_users(context: RequestContext = Depends(get_request_context)):
     users = chat_store.get_users_by_org(context.org_slug)
     return [u.to_public() for u in users]  # passwordHash excluded
+
+@router.get("/demo/accounts")
+async def get_demo_accounts():
+    if settings.FIREBASE_PROJECT_ID:
+        raise HTTPException(status_code=404, detail="Demo accounts are only available in demo mode.")
+    return [
+        {"email": u.email, "name": u.name, "role": u.role, "orgSlug": u.orgSlug, "title": u.title}
+        for u in chat_store.get_all_users()
+    ]

@@ -336,6 +336,9 @@ class ChatStore:
     def get_users_by_org(self, org_slug: str) -> List[UserProfile]:
         return [u for u in self.users if u.orgSlug == org_slug]
 
+    def get_all_users(self) -> List[UserProfile]:
+        return self.users
+
     # --- Rooms ---
     def get_rooms_by_org(self, org_slug: str, user_id: Optional[str] = None) -> List[Room]:
         org_rooms = [r for r in self.rooms if r.orgSlug == org_slug]

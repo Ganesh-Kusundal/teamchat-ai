@@ -150,15 +150,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const org = allOrganizations.find((o) => o.slug === orgSlug);
       if (!org) return;
 
-      // Seed email conventions:
-      const defaultEmail =
-        orgSlug === 'northside-health'
-          ? 'sarah@northside-health.test'
-          : orgSlug === 'valley-primary-care'
-          ? 'elena@valley-primary-care.test'
-          : 'marcus@metro-cardiology.test';
-
-      await login(defaultEmail, 'password123');
+      const res = await api('/api/demo/accounts');
+      if (!res.ok) return;
+      const accounts: { email: string; orgSlug: string; role: string }[] = await res.json();
+      const admin = accounts.find((a) => a.orgSlug === orgSlug && a.role === 'admin') ??
+                    accounts.find((a) => a.orgSlug === orgSlug);
+      if (admin) await login(admin.email, 'password123');
     } catch (err) {
       console.error('Failed to switch organization:', err);
     }

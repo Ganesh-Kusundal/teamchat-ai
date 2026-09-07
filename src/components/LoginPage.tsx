@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.js';
+import { api } from '../services/api.js';
 import {
   Sparkles,
   Building2,
@@ -10,11 +11,21 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
+interface DemoAccount { email: string; name: string; role: string; orgSlug: string; title?: string; }
+
+const orgLabel = (orgSlug: string) =>
+  orgSlug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
 export const LoginPage: React.FC = () => {
   const { login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('password123');
   const [error, setError] = useState<string | null>(null);
+  const [testAccounts, setTestAccounts] = useState<DemoAccount[]>([]);
+
+  useEffect(() => {
+    api('/api/demo/accounts').then((r) => (r.ok ? r.json() : [])).then(setTestAccounts).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,78 +41,11 @@ export const LoginPage: React.FC = () => {
     login(testEmail, 'password123');
   };
 
-  const testAccounts = [
-    {
-      org: 'Northside Health',
-      slug: 'northside-health',
-      name: 'Sarah Chen',
-      role: 'Admin / Risk Lead',
-      email: 'sarah@northside-health.test',
-      badgeColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
-    },
-    {
-      org: 'Northside Health',
-      slug: 'northside-health',
-      name: 'Mike Ross',
-      role: 'Senior Risk Specialist',
-      email: 'mike@northside-health.test',
-      badgeColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
-    },
-    {
-      org: 'Northside Health',
-      slug: 'northside-health',
-      name: 'Dr. Marcus Vance',
-      role: 'Internal Medicine',
-      email: 'marcus@northside-health.test',
-      badgeColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
-    },
-    {
-      org: 'Northside Health',
-      slug: 'northside-health',
-      name: 'Lisa Wong',
-      role: 'Clinical Quality Auditor',
-      email: 'lisa@northside-health.test',
-      badgeColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
-    },
-    {
-      org: 'Valley Primary Care',
-      slug: 'valley-primary-care',
-      name: 'Dr. Elena Sorensen',
-      role: 'Admin / Medical Director',
-      email: 'elena@valley-primary-care.test',
-      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    },
-    {
-      org: 'Valley Primary Care',
-      slug: 'valley-primary-care',
-      name: 'David Park',
-      role: 'Risk Adjustment Lead',
-      email: 'david@valley-primary-care.test',
-      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    },
-    {
-      org: 'Valley Primary Care',
-      slug: 'valley-primary-care',
-      name: 'Diego Arriaga',
-      role: 'Lead Risk Coder',
-      email: 'diego@valley-primary-care.test',
-      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    },
-    {
-      org: 'Metro Cardiology',
-      slug: 'metro-cardiology',
-      name: 'Dr. Marcus Brody',
-      role: 'Chief of Cardiology',
-      email: 'marcus@metro-cardiology.test',
-      badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-    },
-  ];
-
   const [selectedOrgFilter, setSelectedOrgFilter] = useState<string>('all');
 
   const filteredAccounts = selectedOrgFilter === 'all'
     ? testAccounts
-    : testAccounts.filter((acc) => acc.slug === selectedOrgFilter);
+    : testAccounts.filter((acc) => acc.orgSlug === selectedOrgFilter);
 
   return (
     <div className="min-h-screen bg-[#0C0D10] relative overflow-hidden flex flex-col justify-center py-10 sm:px-6 lg:px-8 text-zinc-100">
@@ -145,7 +89,7 @@ export const LoginPage: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. sarah@northside-health.test"
+                  placeholder={testAccounts[0] ? `e.g. ${testAccounts[0].email}` : 'e.g. you@example.test'}
                   className="w-full bg-[#0C0D10] border border-white/10 rounded-lg pl-9 pr-3 py-2 text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 text-xs transition-colors"
                 />
               </div>
@@ -248,8 +192,8 @@ export const LoginPage: React.FC = () => {
                   <div className="min-w-0 pr-2">
                     <div className="font-semibold text-xs text-white flex items-center gap-2 truncate">
                       <span className="truncate">{acc.name}</span>
-                      <span className={`text-[9px] px-1.5 py-0.2 rounded border shrink-0 font-medium ${acc.badgeColor}`}>
-                        {acc.org}
+                      <span className={`text-[9px] px-1.5 py-0.2 rounded border shrink-0 font-medium ${acc.orgSlug === 'valley-primary-care' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
+                        {orgLabel(acc.orgSlug)}
                       </span>
                     </div>
                     <div className="text-[11px] text-zinc-400 mt-0.5 truncate font-mono">

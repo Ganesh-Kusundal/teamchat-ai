@@ -193,13 +193,13 @@ const ReadStatusIndicator: React.FC<ReadStatusIndicatorProps> = ({
 };
 
 // Generate consistent vibrant avatar colors matching the theme mockup
+const AVATAR_COLORS = ['bg-indigo-500', 'bg-purple-500', 'bg-pink-500', 'bg-emerald-600', 'bg-amber-500', 'bg-cyan-600'];
+
 export const getAvatarColor = (id?: string) => {
   if (!id) return 'bg-indigo-500';
-  if (id.includes('sarah')) return 'bg-indigo-500';
-  if (id.includes('mike')) return 'bg-purple-500';
-  if (id.includes('lisa')) return 'bg-pink-500';
-  if (id.includes('elena') || id.includes('marcus')) return 'bg-emerald-600';
-  return 'bg-indigo-600';
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 997;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
 };
 
 interface TypingIndicatorProps {

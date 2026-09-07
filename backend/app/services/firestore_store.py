@@ -128,6 +128,12 @@ class FirestoreChatStore(ChatStore):
     def get_users_by_org(self, org_slug: str) -> List[UserProfile]:
         return [UserProfile(**d.to_dict()) for d in self._users_ref(org_slug).stream()]
 
+    def get_all_users(self) -> List[UserProfile]:
+        users: List[UserProfile] = []
+        for org in self.get_organizations():
+            users.extend(self.get_users_by_org(org.slug))
+        return users
+
     def authenticate_user(self, email: str, password: str = "") -> Optional[UserProfile]:
         # Password verification belongs to Firebase Auth in production.
         return None
