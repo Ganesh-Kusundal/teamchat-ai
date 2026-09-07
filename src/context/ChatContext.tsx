@@ -12,6 +12,7 @@ interface ChatContextType {
   unreadMap: Record<string, number>;
   isConnected: boolean;
   isLoadingMessages: boolean;
+  isAiThinking: boolean;
   selectRoom: (roomId: string) => void;
   markRoomAsRead: (roomId: string) => Promise<void>;
   sendMessage: (content: string, replyToMessage?: Message) => Promise<void>;
@@ -34,8 +35,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const [isConnected, setIsConnected] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [isAiThinking, setIsAiThinking] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const messageFetchSequenceRef = useRef(0);
+  const aiThinkingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const eventSourceRef = useRef<EventSource | null>(null);
   const currentRoomIdRef = useRef<string | null>(null);
@@ -488,8 +491,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return [...prev, sentMsg];
       });
 
+      const mentionsAi = /@(?:gemini|ai)\b|\/(?:gemini|ai|ask)\b/i.test(content);
+      if (mentionsAi) {
+        setIsAiThinking(true);
+        if (aiThinkingTimeoutRef.current) clearTimeout(aiThinkingTimeoutRef.current);
+        aiThinkingTimeoutRef.current = setTimeout(() => {
+          setIsAiThinking(false);
+        }, 18000);
+      }
+
       // Active fallback poll if mentioning Gemini to ensure immediate visibility
-      if (content.includes('@Gemini')) {
+      if (mentionsAi) {
         const targetRoomId = currentRoom.id;
         let attempts = 0;
         const pollTimer = setInterval(async () => {
@@ -648,6 +660,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         unreadMap,
         isConnected,
         isLoadingMessages,
+        isAiThinking,
         retryCount,
         selectRoom,
         markRoomAsRead,

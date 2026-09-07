@@ -20,7 +20,77 @@ import {
   Wand2,
   Check,
   CheckCheck,
+  Activity,
+  Loader2,
 } from 'lucide-react';
+
+const AI_THINKING_STEPS = [
+  'Parsing clinical query & patient identifiers...',
+  'Checking active encounter documentation & lab records...',
+  'Evaluating CMS-HCC V28 risk adjustment guidelines...',
+  'Verifying hierarchy rules & unrecaptured care gaps...',
+  'Formulating cross-member clinical recommendations...',
+];
+
+interface AiThinkingProgressProps {
+  toolCalls?: ToolCallRecord[];
+}
+
+export const AiThinkingProgress: React.FC<AiThinkingProgressProps> = ({ toolCalls = [] }) => {
+  const [stepIndex, setStepIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStepIndex((prev) => (prev + 1) % AI_THINKING_STEPS.length);
+    }, 1600);
+    return () => clearInterval(timer);
+  }, []);
+
+  const runningTool = toolCalls.find((t) => t.status === 'running');
+
+  return (
+    <div className="py-2.5 px-3.5 rounded-xl bg-[#141519] border border-indigo-500/30 shadow-lg shadow-indigo-950/40 space-y-2.5 my-1">
+      {/* Header & Status */}
+      <div className="flex items-center justify-between text-xs flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <div className="relative flex items-center justify-center w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-300" />
+          </div>
+          <span className="font-medium bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 bg-clip-text text-transparent">
+            {runningTool
+              ? `Executing ${runningTool.toolName.replace(/_/g, ' ')}...`
+              : 'Gemini AI is analyzing clinical data...'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-950/70 border border-indigo-500/25 text-[10px] text-indigo-300 font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping inline-block" />
+          <span>Processing</span>
+        </div>
+      </div>
+
+      {/* Futuristic Indeterminate Progress Bar */}
+      <div className="relative w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/10">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 rounded-full animate-progress-indeterminate shadow-sm shadow-indigo-500/50" />
+      </div>
+
+      {/* Dynamic Subtext Step */}
+      <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-0.5">
+        <span className="flex items-center gap-1.5 text-zinc-300 italic">
+          <Activity className="w-3 h-3 text-cyan-400 shrink-0 animate-pulse" />
+          <span className="transition-all duration-300">
+            {runningTool
+              ? `Querying ${runningTool.toolName} with parameters...`
+              : AI_THINKING_STEPS[stepIndex]}
+          </span>
+        </span>
+        <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline-block">
+          CMS-HCC V28 Engine
+        </span>
+      </div>
+    </div>
+  );
+};
 
 interface ReadStatusIndicatorProps {
   message: Message;
@@ -227,6 +297,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenInspector, onOpenRoomM
     typingUsers,
     setTypingStatus,
     isLoadingMessages,
+    isAiThinking,
   } = useChat();
   const { user } = useAuth();
 
@@ -237,10 +308,10 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenInspector, onOpenRoomM
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-scroll to bottom on new message or stream chunk
+  // Auto-scroll to bottom on new message, stream chunk, or AI thinking state
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, typingUsers]);
+  }, [messages, typingUsers, isAiThinking]);
 
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -500,9 +571,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenInspector, onOpenRoomM
                   {/* Message Content */}
                   {isAi ? (
                     <div className="text-sm text-zinc-200 leading-relaxed space-y-3 prose prose-invert prose-sm max-w-none prose-p:my-1.5 prose-headings:my-2 prose-headings:text-white prose-ul:my-1 prose-table:my-2">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      {msg.isStreaming && (
-                        <span className="inline-block w-2 h-3 ml-1 bg-indigo-400 animate-pulse align-middle" />
+                      {msg.isStreaming && (!msg.content || !msg.content.trim()) ? (
+                        <AiThinkingProgress toolCalls={msg.toolCalls} />
+                      ) : (
+                        <>
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          {msg.isStreaming && (
+                            <span className="inline-block w-2 h-3 ml-1 bg-indigo-400 animate-pulse align-middle" />
+                          )}
+                        </>
                       )}
 
                       {/* Grounding Provenance Footer */}
@@ -536,6 +613,35 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenInspector, onOpenRoomM
             );
           })
         )}
+
+        {/* Optimistic AI Thinking Card (displayed instantly when user triggers @Gemini before server stream starts) */}
+        {isAiThinking && !messages.some((m) => m.isAi && m.isStreaming) && (
+          <div
+            id="optimistic-ai-thinking"
+            className="group flex gap-4 transition-all bg-gradient-to-r from-indigo-950/20 via-indigo-950/10 to-transparent p-4 rounded-xl border border-indigo-500/25 shadow-lg shadow-indigo-950/20 animate-pulse-glow"
+          >
+            <div className="shrink-0 mt-0.5">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-indigo-600 to-blue-600 flex-shrink-0 flex items-center justify-center text-white shadow-md border border-indigo-400/20">
+                <Bot className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                <span className="text-sm font-semibold tracking-tight text-white flex items-center gap-1.5">
+                  Gemini AI
+                </span>
+                <span className="text-[9px] text-indigo-300 font-medium px-1.5 py-0.2 rounded bg-indigo-500/15 border border-indigo-500/20 tracking-wider font-mono">
+                  CO-PILOT
+                </span>
+                <span className="text-[10px] text-zinc-400 font-mono">
+                  Just now
+                </span>
+              </div>
+              <AiThinkingProgress />
+            </div>
+          </div>
+        )}
+
         {/* Real-time Typing Indicator in message stream */}
         {typingUsers.length > 0 && (
           <div className="pt-2">
