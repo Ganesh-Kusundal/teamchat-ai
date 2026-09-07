@@ -508,6 +508,7 @@ class ChatStore:
             msg.content += content_chunk
             if is_complete:
                 msg.content = re.sub(r"<\/?tool_code>", "", msg.content)
+                msg.content = re.sub(r"\|\s*\|\s*", "|\n|", msg.content)
             msg.isStreaming = not is_complete
             if tool_calls is not None:
                 msg.toolCalls = tool_calls

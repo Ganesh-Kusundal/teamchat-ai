@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'motion/react';
 import { useChat } from '../context/ChatContext.js';
 import { useAuth } from '../context/AuthContext.js';
@@ -31,6 +32,61 @@ const AI_THINKING_STEPS = [
   'Verifying hierarchy rules & unrecaptured care gaps...',
   'Formulating cross-member clinical recommendations...',
 ];
+
+/**
+ * Normalizes Markdown tables by:
+ * 1. Splitting single-line compressed table rows (`| ... | | ... |` -> `|\n|`)
+ * 2. Unsticking table headers concatenated right after a colon on the same line (`Header: | col1 | col2 |`)
+ * 3. Ensuring blank lines precede and follow table blocks for strict CommonMark/GFM compliance
+ */
+export function formatMarkdownTables(content: string): string {
+  if (!content) return '';
+  let formatted = content;
+  // If a table starts immediately after text/colon on the same line (e.g. "Coefficients: | ICD-10 ...")
+  formatted = formatted.replace(/([^\n|]+):[ \t]*(\|[ \t]*[^|\n]+[ \t]*\|)/g, '$1:\n\n$2');
+  // Separate table rows that were joined on a single line with "| |" or "|   |"
+  formatted = formatted.replace(/\|\s*\|\s*/g, '|\n|');
+  // Ensure an empty line before the start of a table if preceded by non-table text
+  formatted = formatted.replace(/([^\n|])\n(\|[^\n]+\|)/g, '$1\n\n$2');
+  // Ensure an empty line after the end of a table if followed directly by non-table text
+  formatted = formatted.replace(/(\|[^\n]+\|)\n([^\n|])/g, '$1\n\n$2');
+  return formatted;
+}
+
+const markdownComponents = {
+  table: ({ children, ...props }: any) => (
+    <div className="my-3.5 w-full overflow-x-auto rounded-xl border border-white/10 bg-[#121318]/90 shadow-lg backdrop-blur-sm not-prose">
+      <table className="min-w-full divide-y divide-white/10 text-left text-xs" {...props}>
+        {children}
+      </table>
+    </div>
+  ),
+  thead: ({ children, ...props }: any) => (
+    <thead className="bg-white/[0.04] text-zinc-300 font-semibold uppercase tracking-wider text-[11px] border-b border-white/10" {...props}>
+      {children}
+    </thead>
+  ),
+  th: ({ children, ...props }: any) => (
+    <th className="px-3.5 py-2.5 text-zinc-200 font-semibold border-r border-white/5 last:border-r-0 whitespace-nowrap" {...props}>
+      {children}
+    </th>
+  ),
+  tbody: ({ children, ...props }: any) => (
+    <tbody className="divide-y divide-white/5 text-zinc-300" {...props}>
+      {children}
+    </tbody>
+  ),
+  tr: ({ children, ...props }: any) => (
+    <tr className="hover:bg-white/[0.04] transition-colors odd:bg-transparent even:bg-white/[0.015]" {...props}>
+      {children}
+    </tr>
+  ),
+  td: ({ children, ...props }: any) => (
+    <td className="px-3.5 py-2 text-zinc-300 border-r border-white/5 last:border-r-0 text-xs font-normal tabular-nums leading-relaxed" {...props}>
+      {children}
+    </td>
+  ),
+};
 
 interface AiThinkingProgressProps {
   toolCalls?: ToolCallRecord[];
@@ -575,7 +631,12 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenInspector, onOpenRoomM
                         <AiThinkingProgress toolCalls={msg.toolCalls} />
                       ) : (
                         <>
-                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={markdownComponents}
+                          >
+                            {formatMarkdownTables(msg.content)}
+                          </ReactMarkdown>
                           {msg.isStreaming && (
                             <span className="inline-block w-2 h-3 ml-1 bg-indigo-400 animate-pulse align-middle" />
                           )}

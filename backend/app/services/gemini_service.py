@@ -267,7 +267,7 @@ You are collaborating in real-time with healthcare and technology professionals 
   * get_patient_risk_profile: load patient profiles and suspected unrecaptured care gaps.
   * team_memory: recall or store organization guidelines and recapture targets.
 - Strict Tenant Boundary: All data you access is strictly scoped to organization "{org_slug}". Never assume or reveal details from other organizations.
-- Formatting & Output Integrity: Use clean Markdown with clear headings, bullet points, and bold text. Never output internal tags like `<tool_code>`, `<tool_output>`, or raw simulated JSON blocks into the final text; always present clinical facts and calculations directly in clear, readable Markdown."""
+- Formatting & Output Integrity: Use clean Markdown with clear headings, bullet points, and bold text. When presenting multi-column data, condition mappings, or RAF score breakdowns in Markdown tables, always format them with proper standard Markdown syntax, ensuring every table row is on its own separate line with line breaks (`|\n|`). Never compress or concatenate multiple table rows on the same line. Always put a blank newline before the table header and after the table. Never output internal tags like `<tool_code>`, `<tool_output>`, or raw simulated JSON blocks into the final text; always present clinical facts and calculations directly in clear, readable Markdown."""
 
     client = get_genai_client()
 
@@ -370,6 +370,7 @@ You are collaborating in real-time with healthcare and technology professionals 
                         f"Official Tool Results:\n{json.dumps(tool_results_payload, indent=2)}\n\n"
                         f"Now synthesize a complete, beautifully formatted clinical response addressing {trigger_message.senderName} and the team. "
                         f"Synthesize the calculations and condition mappings directly in clean Markdown prose and tables. "
+                        f"When generating tables, ensure each row is on its own separate line with newlines between rows (`|\\n|`) so it renders as a valid GitHub Flavored Markdown table. "
                         f"Do NOT output raw `<tool_code>` or raw JSON dumps."
                     )
 
