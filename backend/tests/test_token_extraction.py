@@ -1,5 +1,6 @@
 import anyio
 from fastapi import Request
+from starlette.testclient import TestClient
 from backend.app.auth.dependencies import token_from_request
 from backend.app.main import app
 
@@ -47,3 +48,8 @@ async def _sse_start_status():
 def test_realtime_stream_accepts_bearer():
     # TestClient buffers infinite SSE bodies (starlette 1.6.0), so drive the ASGI app directly.
     assert anyio.run(_sse_start_status) == 200
+
+
+def test_query_token_still_authenticates_regular_routes(client: TestClient):
+    res = client.get("/api/orgs", params={"token": "usr-sarah"})
+    assert res.status_code == 200

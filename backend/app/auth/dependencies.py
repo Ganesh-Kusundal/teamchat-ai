@@ -76,7 +76,7 @@ async def get_request_context(
     if auth and auth.credentials:
         token = auth.credentials
     if not token:
-        token = token_from_request(request)
+        token = token_from_request(request, request.query_params.get("token"))
 
     if not token:
         raise HTTPException(
