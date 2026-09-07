@@ -3,6 +3,10 @@ import asyncio
 import uuid
 from typing import List, Dict, Any, Optional, Set
 from ..config import settings
+from ..core.constants import (
+    DEFAULT_BASE_RATE, DEMO_PASSWORD, ROOM_SNIPPET_MAX_CHARS,
+    SSE_OFFLINE_GRACE_SECONDS, TYPING_TTL_SECONDS, utc_now_iso,
+)
 from ..models.schemas import (
     Organization,
     UserProfile,
@@ -23,7 +27,7 @@ SEED_ORGANIZATIONS = [
         description="Regional integrated delivery network with 4 hospitals and 28 clinics",
         memberCount=4,
         logoColor="emerald",
-        baseRate=12000.0,
+        baseRate=DEFAULT_BASE_RATE,
     ),
     Organization(
         id="org-valley",
@@ -32,7 +36,7 @@ SEED_ORGANIZATIONS = [
         description="Value-based accountable care organization serving 45,000 Medicare Advantage lives",
         memberCount=3,
         logoColor="indigo",
-        baseRate=12000.0,
+        baseRate=DEFAULT_BASE_RATE,
     ),
     Organization(
         id="org-metro",
@@ -41,7 +45,7 @@ SEED_ORGANIZATIONS = [
         description="Specialty cardiovascular network focusing on congestive heart failure and vascular care",
         memberCount=1,
         logoColor="rose",
-        baseRate=12000.0,
+        baseRate=DEFAULT_BASE_RATE,
     ),
 ]
 
@@ -57,7 +61,7 @@ SEED_USERS = [
         statusText="Reviewing Q1 RAF gaps",
         isOnline=False,
         avatar="SC",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
     UserProfile(
         id="usr-mike",
@@ -69,7 +73,7 @@ SEED_USERS = [
         statusText="Auditing CKD progression",
         isOnline=False,
         avatar="MR",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
     UserProfile(
         id="usr-lisa",
@@ -81,7 +85,7 @@ SEED_USERS = [
         statusText="Cross-checking eGFR lab thresholds",
         isOnline=False,
         avatar="LW",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
     UserProfile(
         id="usr-tom",
@@ -93,7 +97,7 @@ SEED_USERS = [
         statusText="Resolving IT-4471 EHR tickets",
         isOnline=False,
         avatar="TC",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
     UserProfile(
         id="usr-marcus-vance",
@@ -105,7 +109,7 @@ SEED_USERS = [
         statusText="Reviewing chronic patient panel",
         isOnline=False,
         avatar="MV",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
     # Valley Primary Care
     UserProfile(
@@ -118,7 +122,7 @@ SEED_USERS = [
         statusText="Evaluating AWV scheduling policy",
         isOnline=False,
         avatar="ES",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
     UserProfile(
         id="usr-david",
@@ -130,7 +134,7 @@ SEED_USERS = [
         statusText="Validating annual wellness audits",
         isOnline=False,
         avatar="DP",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
     UserProfile(
         id="usr-diego",
@@ -142,7 +146,7 @@ SEED_USERS = [
         statusText="Checking cardiology fax queues",
         isOnline=False,
         avatar="DA",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
     UserProfile(
         id="usr-marta",
@@ -154,7 +158,7 @@ SEED_USERS = [
         statusText="Monitoring coder SLA queue",
         isOnline=False,
         avatar="ME",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
     # Metro Cardiology
     UserProfile(
@@ -167,7 +171,7 @@ SEED_USERS = [
         statusText="Evaluating HF inpatient discharges",
         isOnline=False,
         avatar="MB",
-        passwordHash="password123",
+        passwordHash=DEMO_PASSWORD,
     ),
 ]
 
@@ -301,7 +305,7 @@ class ChatStore:
                 userName=u.name,
                 orgSlug=u.orgSlug,
                 isOnline=False,
-                lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                lastActive=utc_now_iso(),
             )
 
     # --- Organizations ---
@@ -312,10 +316,10 @@ class ChatStore:
         return next((o for o in self.organizations if o.slug == slug), None)
 
     # --- Users & Authentication ---
-    def authenticate_user(self, email: str, password: str = "password123") -> Optional[UserProfile]:
+    def authenticate_user(self, email: str, password: str = DEMO_PASSWORD) -> Optional[UserProfile]:
         clean_email = email.strip().lower()
         user = next(
-            (u for u in self.users if u.email.lower() == clean_email and (u.passwordHash == password or password == "password123")),
+            (u for u in self.users if u.email.lower() == clean_email and (u.passwordHash == password or password == DEMO_PASSWORD)),
             None,
         )
         return user
@@ -343,9 +347,9 @@ class ChatStore:
             room_msgs = [m for m in self.messages if m.roomId == room.id]
             last_msg = room_msgs[-1] if room_msgs else None
             last_snippet = (
-                f"Gemini: {last_msg.content[:45]}..."
+                f"Gemini: {last_msg.content[:ROOM_SNIPPET_MAX_CHARS]}..."
                 if last_msg and last_msg.isAi
-                else (f"{last_msg.senderName}: {last_msg.content[:45]}..." if last_msg else None)
+                else (f"{last_msg.senderName}: {last_msg.content[:ROOM_SNIPPET_MAX_CHARS]}..." if last_msg else None)
             )
             r_copy = room.model_copy()
             r_copy.lastMessage = last_snippet
@@ -374,7 +378,7 @@ class ChatStore:
             description=description.strip(),
             isPrivate=is_private,
             memberIds=members,
-            createdAt=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            createdAt=utc_now_iso(),
             createdBy=created_by,
         )
         self.rooms.append(new_room)
@@ -456,7 +460,7 @@ class ChatStore:
         receipt = MessageReadReceipt(
             userId=user.id,
             userName=user.name,
-            readAt=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            readAt=utc_now_iso(),
         )
         updated_ids = []
 
@@ -538,7 +542,7 @@ class ChatStore:
             orgSlug=org_slug,
             currentRoomId=current_room_id,
             isOnline=is_online,
-            lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            lastActive=utc_now_iso(),
         )
         self.presence[user_id] = rec
         asyncio.create_task(
@@ -576,7 +580,7 @@ class ChatStore:
     def _broadcast_typing(self, room_id: str, org_slug: str):
         now = time.time()
         # Prune stale typers > 3s
-        stale_keys = [k for k, v in self.typing.items() if now - v.timestamp > 3.0]
+        stale_keys = [k for k, v in self.typing.items() if now - v.timestamp > TYPING_TTL_SECONDS]
         for k in stale_keys:
             del self.typing[k]
 
@@ -615,7 +619,7 @@ class ChatStore:
             has_other = any(c.user_id == client.user_id for c in self.sse_clients.values())
             if not has_other:
                 async def _delayed_offline(u_id: str, o_slug: str):
-                    await asyncio.sleep(4.0)
+                    await asyncio.sleep(SSE_OFFLINE_GRACE_SECONDS)
                     if not any(c.user_id == u_id for c in self.sse_clients.values()):
                         self.update_presence(u_id, o_slug, False)
                 try:

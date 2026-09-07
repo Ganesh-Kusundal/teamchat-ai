@@ -7,12 +7,13 @@ from ..services.chat_store import chat_store
 from ..auth.dependencies import get_request_context
 from ..auth.firebase import sign_in_with_password
 from ..config import settings
+from ..core.constants import DEMO_PASSWORD
 
 router = APIRouter(tags=["Authentication & Organizations"])
 
 class LoginRequest(BaseModel):
     email: str
-    password: str = "password123"
+    password: str = DEMO_PASSWORD
 
 @router.get("/orgs", response_model=List[Organization])
 async def get_organizations(context: RequestContext = Depends(get_request_context)):

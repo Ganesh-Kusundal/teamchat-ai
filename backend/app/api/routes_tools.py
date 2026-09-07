@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from ..models.schemas import RequestContext
+from ..core.constants import DEFAULT_BASE_RATE
 from ..services.clinical_engine import clinical_engine
 from ..services.memory_engine import memory_engine
 from ..auth.dependencies import get_request_context
@@ -12,7 +13,7 @@ router = APIRouter(tags=["Clinical Tools & Diagnostics"])
 class CalculateRafRequest(BaseModel):
     patientId: Optional[str] = None
     icd10Codes: Optional[List[str]] = None
-    baseRate: Optional[float] = 12000.0
+    baseRate: Optional[float] = DEFAULT_BASE_RATE
 
 class StoreMemoryRequest(BaseModel):
     key: str
@@ -50,7 +51,7 @@ async def calculate_raf(
         org_slug=context.org_slug,
         patient_id=req.patientId,
         icd10_codes=req.icd10Codes,
-        base_rate=req.baseRate or 12000.0,
+        base_rate=req.baseRate or DEFAULT_BASE_RATE,
     )
     if "error" in result:
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"error": result["error"]})

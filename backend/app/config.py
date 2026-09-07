@@ -9,7 +9,6 @@ class Settings(BaseModel):
     PROJECT_NAME: str = "TeamChat AI"
     VERSION: str = "teamchat-seed-2026.1"
     PORT: int = int(os.getenv("PORT", "8000"))
-    DEFAULT_BASE_RATE: float = 12000.0
 
     # --- Gemini / Vertex AI ---
     # API key mode (local dev): set GEMINI_API_KEY

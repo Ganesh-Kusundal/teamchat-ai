@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-import time
 import uuid
 from typing import Any, Dict, Optional
 
 from ..config import settings
+from ..core.constants import utc_now_iso
 from ..models.schemas import TeamMemory
 from .memory_engine import MemoryEngine
 
@@ -102,7 +102,7 @@ class FirestoreMemoryEngine(MemoryEngine):
                 key=clean_key,
                 value=value,
                 created_by=user_email or "system@teamchat.ai",
-                created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                created_at=utc_now_iso(),
                 room=room or "general",
             )
             ref.document(memory_id).set(memory.model_dump())

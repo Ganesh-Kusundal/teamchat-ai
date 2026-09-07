@@ -3,9 +3,8 @@ import time
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Literal
 from ..config import settings
+from ..core.constants import DATASET_VERSION, utc_now_iso
 from ..models.schemas import TeamMemory
-
-DATASET_VERSION = settings.VERSION
 
 class MemoryEngine:
     def __init__(self, root_dir: Path):
@@ -92,7 +91,7 @@ class MemoryEngine:
                 key=clean_key,
                 value=value,
                 created_by=user_email or "system@teamchat.ai",
-                created_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                created_at=utc_now_iso(),
                 room=room or "general",
             )
 

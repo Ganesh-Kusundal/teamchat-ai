@@ -6,6 +6,10 @@ import asyncio
 import uuid
 from typing import List, Dict, Any, Optional
 from ..config import settings
+from ..core.constants import (
+    AI_SENDER_ID, AI_SENDER_NAME, DEFAULT_BASE_RATE,
+    GEMINI_KEY_PLACEHOLDER, utc_now_iso,
+)
 from ..models.schemas import Message, UserProfile, ToolCallRecord
 from .clinical_engine import clinical_engine
 from .memory_engine import memory_engine
@@ -58,7 +62,7 @@ def get_genai_client():
 
     # --- Mode 2: API key (local dev / AI Studio) ---
     api_key = settings.GEMINI_API_KEY
-    if api_key and api_key not in ("", "MY_GEMINI_API_KEY"):
+    if api_key and api_key not in ("", GEMINI_KEY_PLACEHOLDER):
         try:
             client = genai.Client(api_key=api_key)
             _genai_client_cache = client
@@ -101,7 +105,7 @@ def execute_tool(name: str, args: Dict[str, Any], caller_org_slug: str, caller_u
             codes = [str(c) for c in raw_codes]
         else:
             codes = []
-        base_rate = float(args.get("base_rate", 12000.0))
+        base_rate = float(args.get("base_rate", DEFAULT_BASE_RATE))
         return clinical_engine.calculate_risk_score(
             org_slug=caller_org_slug,
             patient_id=p_id,
@@ -222,11 +226,11 @@ async def handle_ai_invocation(
         id=ai_message_id,
         roomId=room_id,
         orgSlug=org_slug,
-        senderId="gemini-ai",
-        senderName="Gemini AI",
+        senderId=AI_SENDER_ID,
+        senderName=AI_SENDER_NAME,
         isAi=True,
         content="",
-        timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        timestamp=utc_now_iso(),
         isStreaming=True,
         toolCalls=[],
     )
@@ -433,6 +437,8 @@ You are collaborating in real-time with healthcare and technology professionals 
             f"{note}\n\n{fallback['text']}",
             fallback["tool_calls"],
         )
+
+    chat_store.clear_typing(AI_SENDER_ID, room_id, org_slug)
 
 def generate_intelligent_fallback(
     prompt: str, last_sender: str, org_slug: str, caller_user: UserProfile

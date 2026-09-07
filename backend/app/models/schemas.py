@@ -1,5 +1,6 @@
 from typing import List, Optional, Dict, Any, Literal
 from pydantic import BaseModel, Field
+from ..core.constants import DEFAULT_BASE_RATE
 
 # -------------------------------------------------------------
 # 1. Identity, Tenant & RequestContext
@@ -35,7 +36,7 @@ class Organization(BaseModel):
     description: str
     memberCount: int
     logoColor: str
-    baseRate: Optional[float] = 12000.0
+    baseRate: Optional[float] = DEFAULT_BASE_RATE
 
 # -------------------------------------------------------------
 # 2. Rooms & Memberships

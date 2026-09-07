@@ -8,6 +8,7 @@ from fastapi.responses import StreamingResponse
 from starlette.concurrency import run_in_threadpool
 from ..services.chat_store import chat_store
 from ..auth.dependencies import _resolve_user_from_token
+from ..core.constants import utc_now_iso
 
 router = APIRouter(tags=["Real-Time Events"])
 
@@ -43,7 +44,7 @@ async def events_stream(request: Request, token: Optional[str] = None, roomId: O
                     "clientId": client_id,
                     "userId": user.id,
                     "orgSlug": user.orgSlug,
-                    "serverTime": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                    "serverTime": utc_now_iso(),
                 },
             }
             yield f"data: {json.dumps(init_payload)}\n\n"

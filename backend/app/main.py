@@ -1,6 +1,5 @@
 import asyncio
 import os
-import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Request
@@ -8,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from .config import settings
+from .core.constants import GEMINI_KEY_PLACEHOLDER, utc_now_iso
 from .api import (
     auth_router,
     rooms_router,
@@ -53,10 +53,10 @@ app.add_middleware(
 # -------------------------------------------------------------
 @app.get("/api/health")
 async def health_check():
-    has_key = bool(settings.GEMINI_API_KEY and settings.GEMINI_API_KEY != "MY_GEMINI_API_KEY")
+    has_key = bool(settings.GEMINI_API_KEY and settings.GEMINI_API_KEY != GEMINI_KEY_PLACEHOLDER)
     return {
         "status": "ok",
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "timestamp": utc_now_iso(),
         "geminiConfigured": has_key or bool(settings.GOOGLE_CLOUD_PROJECT),
         "authMode": "firebase" if settings.FIREBASE_PROJECT_ID else "demo",
         "storageBackend": settings.STORAGE_BACKEND,

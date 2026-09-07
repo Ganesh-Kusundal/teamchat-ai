@@ -1,9 +1,9 @@
-import time
 import asyncio
 import re
 import uuid
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from ..core.constants import AI_SENDER_ID, utc_now_iso
 from ..models.schemas import (
     Message,
     SendMessageRequest,
@@ -89,7 +89,7 @@ async def send_message(
         senderRole=user.role,
         isAi=False,
         content=clean_content,
-        timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        timestamp=utc_now_iso(),
         mentionsAi=mentions_ai,
         replyToId=req.replyToId,
         replyToSnippet=req.replyToSnippet,
@@ -100,6 +100,7 @@ async def send_message(
 
     # If AI mentioned, launch background generation
     if mentions_ai and chat_store.claim_ai_invocation(saved_message.id):
+        chat_store.set_typing(AI_SENDER_ID, "Gemini AI (Thinking...)", room_id, context.org_slug)
         asyncio.create_task(
             handle_ai_invocation(
                 room_id=room_id,

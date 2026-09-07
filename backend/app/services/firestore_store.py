@@ -24,6 +24,7 @@ from ..models.schemas import (
 )
 from .chat_store import ChatStore, SEED_MESSAGES, SEED_ORGANIZATIONS, SEED_ROOMS, SEED_USERS
 from .event_broker import FirestoreEventBroker
+from ..core.constants import TYPING_TTL_SECONDS, utc_now_iso
 
 
 class FirestoreChatStore(ChatStore):
@@ -165,7 +166,7 @@ class FirestoreChatStore(ChatStore):
             description=description.strip(),
             isPrivate=is_private,
             memberIds=member_ids or [u.id for u in self.get_users_by_org(org_slug)],
-            createdAt=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            createdAt=utc_now_iso(),
             createdBy=created_by,
         )
         room_ref = self._rooms_ref(org_slug).document(room.id)
@@ -198,7 +199,7 @@ class FirestoreChatStore(ChatStore):
                 "uid": user_id,
                 "orgId": org_slug,
                 "roomId": room_id,
-                "joinedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "joinedAt": utc_now_iso(),
                 "addedBy": room.createdBy,
             })
             batch.commit()
@@ -294,7 +295,7 @@ class FirestoreChatStore(ChatStore):
         room = self.get_room_by_id(room_id, org_slug)
         if not user or not room:
             return {"updatedMessageIds": []}
-        read_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        read_at = utc_now_iso()
         receipt = MessageReadReceipt(userId=user.id, userName=user.name, readAt=read_at)
         updated = []
         for doc in self._messages_ref(org_slug, room_id).stream():
@@ -336,7 +337,7 @@ class FirestoreChatStore(ChatStore):
         rec = PresenceRecord(
             userId=user_id, userName=user.name, orgSlug=org_slug,
             currentRoomId=current_room_id, isOnline=is_online,
-            lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            lastActive=utc_now_iso(),
         )
         self._presence_ref(org_slug, user_id).set(self._model_data(rec))
         self._emit_org(org_slug, {"type": "PRESENCE_UPDATE", "orgSlug": org_slug, "payload": rec.model_dump()})
@@ -358,7 +359,7 @@ class FirestoreChatStore(ChatStore):
         active = []
         for doc in self._rooms_ref(org_slug).document(room_id).collection("typing").stream():
             value = doc.to_dict()
-            if now - float(value.get("timestamp", 0)) <= 3:
+            if now - float(value.get("timestamp", 0)) <= TYPING_TTL_SECONDS:
                 active.append({"userId": value["userId"], "userName": value["userName"]})
             else:
                 doc.reference.delete()

@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from ..config import settings
+from ..core.constants import DATASET_VERSION, DEFAULT_BASE_RATE
 from ..models.schemas import (
     ConditionCode,
     HCCFactor,
@@ -13,8 +14,6 @@ from ..models.schemas import (
     UnmappedConditionResult,
     DemographicFactorResult,
 )
-
-DATASET_VERSION = settings.VERSION
 
 class ClinicalEngine:
     def __init__(self, root_dir: Path):
@@ -165,7 +164,7 @@ class ClinicalEngine:
         sex: str = "F",
         age: int = 75,
         model_segment: str = "community_nondual_aged",
-        base_rate: float = 12000.0,
+        base_rate: float = DEFAULT_BASE_RATE,
     ) -> Dict[str, Any]:
         codes = icd10_codes or []
         eval_sex = sex.upper()
@@ -206,7 +205,7 @@ class ClinicalEngine:
                     UnmappedConditionResult(
                         icd10_code=raw_code,
                         description="Code not present in seed dataset",
-                        reason="Unknown ICD-10 code in teamchat-seed-2026.1",
+                        reason=f"Unknown ICD-10 code in {DATASET_VERSION}",
                     )
                 )
                 continue
