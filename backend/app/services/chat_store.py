@@ -1,14 +1,14 @@
 import time
 import asyncio
 import re
-import uuid
 from typing import List, Dict, Any, Optional, Set
 from ..config import settings
 from ..core.constants import (
-    DEFAULT_BASE_RATE, DEMO_PASSWORD, ROOM_SNIPPET_MAX_CHARS,
+    DEFAULT_BASE_RATE, DEMO_PASSWORD,
     SSE_OFFLINE_GRACE_SECONDS, TYPING_TTL_SECONDS, utc_now_iso,
 )
 from ..core.events import EventType, event
+from ..core.formatting import make_room_id, room_snippet, slugify_room_name
 from ..models.schemas import (
     Organization,
     UserProfile,
@@ -348,13 +348,8 @@ class ChatStore:
         for room in org_rooms:
             room_msgs = [m for m in self.messages if m.roomId == room.id]
             last_msg = room_msgs[-1] if room_msgs else None
-            last_snippet = (
-                f"Gemini: {last_msg.content[:ROOM_SNIPPET_MAX_CHARS]}..."
-                if last_msg and last_msg.isAi
-                else (f"{last_msg.senderName}: {last_msg.content[:ROOM_SNIPPET_MAX_CHARS]}..." if last_msg else None)
-            )
             r_copy = room.model_copy()
-            r_copy.lastMessage = last_snippet
+            r_copy.lastMessage = room_snippet(last_msg.senderName, last_msg.content, last_msg.isAi) if last_msg else None
             r_copy.lastMessageTimestamp = last_msg.timestamp if last_msg else room.createdAt
             results.append(r_copy)
         return results
@@ -371,10 +366,10 @@ class ChatStore:
         is_private: bool = False,
         member_ids: Optional[List[str]] = None,
     ) -> Room:
-        clean_name = name.strip().lower().replace(" ", "-")
+        clean_name = slugify_room_name(name)
         members = member_ids or [u.id for u in self.get_users_by_org(org_slug)]
         new_room = Room(
-            id=f"room-{org_slug[:3]}-{uuid.uuid4().hex[:12]}",
+            id=make_room_id(org_slug),
             orgSlug=org_slug,
             name=clean_name,
             description=description.strip(),

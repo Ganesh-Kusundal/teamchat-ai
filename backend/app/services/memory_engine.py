@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Literal
 from ..config import settings
 from ..core.constants import DATASET_VERSION, utc_now_iso
+from ..core.memory_query import memory_matches, validate_flat_value
 from ..models.schemas import TeamMemory
 
 class MemoryEngine:
@@ -38,34 +39,15 @@ class MemoryEngine:
         if action == "recall":
             q = (query or key or "").lower().strip()
             org_mems = [m for m in self.memories if m.org_slug == org_slug]
-
-            # Exact key match
             if key:
                 exact = next((m for m in org_mems if m.key.lower() == key.lower().strip()), None)
                 if exact:
-                    return {
-                        "dataset_version": DATASET_VERSION,
-                        "org_slug": org_slug,
-                        "matched_key": exact.key,
-                        "memory": exact.model_dump(),
-                    }
-
-            # Semantic / keyword search over key and values
-            results = []
-            for m in org_mems:
-                val_str = json.dumps(m.value).lower()
-                words = [w for w in q.split() if len(w) > 2]
-                if m.key.lower() in q or any(w in m.key.lower() or w in val_str for w in words):
-                    results.append(m.model_dump())
-
-            return {
-                "dataset_version": DATASET_VERSION,
-                "org_slug": org_slug,
-                "query": query or key,
-                "count": len(results),
-                "memories": results,
-                "isolation_note": f'Results strictly scoped to tenant "{org_slug}". Cross-tenant memories are completely isolated.',
-            }
+                    return {"dataset_version": DATASET_VERSION, "org_slug": org_slug,
+                            "matched_key": exact.key, "memory": exact.model_dump()}
+            results = [m.model_dump() for m in org_mems if memory_matches(m, q)]
+            return {"dataset_version": DATASET_VERSION, "org_slug": org_slug, "query": query or key,
+                    "count": len(results), "memories": results,
+                    "isolation_note": f'Results strictly scoped to tenant "{org_slug}". Cross-tenant memories are completely isolated.'}
 
         elif action == "store":
             if not key:
@@ -73,16 +55,9 @@ class MemoryEngine:
             if not value or not isinstance(value, dict):
                 return {"error": "A value dictionary is required to store a team memory."}
 
-            # Validate flat dictionary rule: 1 level deep only, values must be string | int | float | bool
-            for k, v in value.items():
-                if isinstance(v, (dict, list)):
-                    return {
-                        "error": f'Team memory violation: Value must be a flat dictionary exactly one level deep. Nested object or array in key "{k}" is rejected.'
-                    }
-                if not isinstance(v, (str, int, float, bool)):
-                    return {
-                        "error": f'Team memory violation: Value in key "{k}" must be a string, number, or boolean. Received type "{type(v).__name__}".'
-                    }
+            error = validate_flat_value(value)
+            if error:
+                return {"error": error}
 
             clean_key = key.strip().lower().replace(" ", "_")
             new_mem = TeamMemory(

@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import uuid
 from typing import Any, Dict, Optional
 
 from ..config import settings
 from ..core.constants import utc_now_iso
+from ..core.memory_query import memory_matches, validate_flat_value
 from ..models.schemas import TeamMemory
 from .memory_engine import MemoryEngine
 
@@ -65,14 +65,7 @@ class FirestoreMemoryEngine(MemoryEngine):
                         "matched_key": exact.key,
                         "memory": exact.model_dump(),
                     }
-            words = [word for word in q.split() if len(word) > 2]
-            results = []
-            for memory in memories:
-                value_text = json.dumps(memory.value).lower()
-                if memory.key.lower() in q or any(
-                    word in memory.key.lower() or word in value_text for word in words
-                ):
-                    results.append(memory.model_dump())
+            results = [m.model_dump() for m in memories if memory_matches(m, q)]
             return {
                 "dataset_version": settings.VERSION,
                 "org_slug": org_slug,
@@ -87,11 +80,9 @@ class FirestoreMemoryEngine(MemoryEngine):
                 return {"error": "A valid key string is required to store a team memory."}
             if not value or not isinstance(value, dict):
                 return {"error": "A value dictionary is required to store a team memory."}
-            for field, field_value in value.items():
-                if isinstance(field_value, (dict, list)):
-                    return {"error": f'Team memory violation: nested value in key "{field}" is rejected.'}
-                if not isinstance(field_value, (str, int, float, bool)):
-                    return {"error": f'Team memory violation: key "{field}" must be a scalar value.'}
+            error = validate_flat_value(value)
+            if error:
+                return {"error": error}
 
             clean_key = key.strip().lower().replace(" ", "_")
             existing = next(iter(ref.where("key", "==", clean_key).limit(1).stream()), None)
@@ -114,6 +105,3 @@ class FirestoreMemoryEngine(MemoryEngine):
             }
 
         return {"error": f'Invalid action "{action}". Expected "recall" or "store".'}
-
-
-memory_engine = FirestoreMemoryEngine()

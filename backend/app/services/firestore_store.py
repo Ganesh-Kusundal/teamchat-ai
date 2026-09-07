@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import time
-import uuid
 from typing import Any, Dict, List, Optional
 
 from ..config import settings
@@ -26,6 +25,7 @@ from .chat_store import ChatStore, SEED_MESSAGES, SEED_ORGANIZATIONS, SEED_ROOMS
 from .event_broker import FirestoreEventBroker
 from ..core.constants import TYPING_TTL_SECONDS, utc_now_iso
 from ..core.events import EventType, event
+from ..core.formatting import make_room_id, room_snippet, slugify_room_name
 
 
 class FirestoreChatStore(ChatStore):
@@ -145,10 +145,7 @@ class FirestoreChatStore(ChatStore):
             messages = self.get_messages(room.id, org_slug, limit=1)
             if messages:
                 last = messages[-1]
-                room.lastMessage = (
-                    f"Gemini: {last.content[:45]}..." if last.isAi
-                    else f"{last.senderName}: {last.content[:45]}..."
-                )
+                room.lastMessage = room_snippet(last.senderName, last.content, last.isAi)
                 room.lastMessageTimestamp = last.timestamp
             else:
                 room.lastMessageTimestamp = room.createdAt
@@ -161,9 +158,9 @@ class FirestoreChatStore(ChatStore):
     def create_room(self, org_slug: str, name: str, description: str, created_by: str,
                     is_private: bool = False, member_ids: Optional[List[str]] = None) -> Room:
         room = Room(
-            id=f"room-{org_slug[:3]}-{uuid.uuid4().hex[:12]}",
+            id=make_room_id(org_slug),
             orgSlug=org_slug,
-            name=name.strip().lower().replace(" ", "-"),
+            name=slugify_room_name(name),
             description=description.strip(),
             isPrivate=is_private,
             memberIds=member_ids or [u.id for u in self.get_users_by_org(org_slug)],
@@ -256,8 +253,8 @@ class FirestoreChatStore(ChatStore):
         messages_ref = self._messages_ref(message.orgSlug, message.roomId)
         if message.clientMessageId:
             key = hashlib.sha256(
-                f"{message.senderId}:{message.clientMessageId}".encode("utf-8")
-            ).hexdigest()
+                f"{message.orgSlug}:{message.roomId}:{message.clientMessageId}".encode("utf-8")
+            ).hexdigest()  # ponytail: room-scoped to match in-memory chat_store key
             dedupe_ref = self._rooms_ref(message.orgSlug).document(message.roomId).collection("message_idempotency").document(key)
             existing = dedupe_ref.get()
             if existing.exists:
