@@ -2,10 +2,11 @@ import asyncio
 import re
 import uuid
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from ..core.constants import AI_SENDER_ID, utc_now_iso
 from ..models.schemas import (
     Message,
+    Room,
     SendMessageRequest,
     TypingStatusRequest,
     PresenceUpdateRequest,
@@ -14,6 +15,7 @@ from ..models.schemas import (
 from ..services.chat_store import chat_store
 from ..services.gemini_service import handle_ai_invocation
 from ..auth.dependencies import get_request_context
+from .dependencies import require_room_member
 
 router = APIRouter(tags=["Messages & Collaboration"])
 
@@ -23,13 +25,8 @@ async def get_messages(
     limit: int = Query(50, ge=1, le=100),
     before: Optional[str] = None,
     context: RequestContext = Depends(get_request_context),
+    room: Room = Security(require_room_member),
 ):
-    room = chat_store.get_room_by_id(room_id, context.org_slug)
-    if not room:
-        raise HTTPException(status_code=404, detail="Room not found or access denied.")
-    if context.uid not in room.memberIds:
-        raise HTTPException(status_code=403, detail="You are not a member of this room.")
-
     # Mark read
     chat_store.mark_messages_as_read(room_id, context.org_slug, context.uid)
     return chat_store.get_messages(room_id, context.org_slug, limit=limit, before=before)
@@ -38,13 +35,8 @@ async def get_messages(
 async def mark_room_read(
     room_id: str,
     context: RequestContext = Depends(get_request_context),
+    room: Room = Security(require_room_member),
 ):
-    room = chat_store.get_room_by_id(room_id, context.org_slug)
-    if not room:
-        raise HTTPException(status_code=404, detail="Room not found or access denied.")
-    if context.uid not in room.memberIds:
-        raise HTTPException(status_code=403, detail="You are not a member of this room.")
-
     res = chat_store.mark_messages_as_read(room_id, context.org_slug, context.uid)
     return {"ok": True, "result": res}
 
@@ -53,15 +45,10 @@ async def send_message(
     room_id: str,
     req: SendMessageRequest,
     context: RequestContext = Depends(get_request_context),
+    room: Room = Security(require_room_member),
 ):
     if not req.content or not req.content.strip():
         raise HTTPException(status_code=400, detail="Message content cannot be empty.")
-
-    room = chat_store.get_room_by_id(room_id, context.org_slug)
-    if not room:
-        raise HTTPException(status_code=404, detail="Room not found or access denied.")
-    if context.uid not in room.memberIds:
-        raise HTTPException(status_code=403, detail="You cannot send messages to this room.")
 
     user = chat_store.get_user_by_id(context.uid)
     if not user:
@@ -118,12 +105,8 @@ async def set_typing_status(
     room_id: str,
     req: TypingStatusRequest,
     context: RequestContext = Depends(get_request_context),
+    room: Room = Security(require_room_member),
 ):
-    room = chat_store.get_room_by_id(room_id, context.org_slug)
-    if not room:
-        raise HTTPException(status_code=404, detail="Room not found or access denied.")
-    if context.uid not in room.memberIds:
-        raise HTTPException(status_code=403, detail="You are not a member of this room.")
     user = chat_store.get_user_by_id(context.uid)
     if user:
         if req.isTyping:

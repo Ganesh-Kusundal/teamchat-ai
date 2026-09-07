@@ -1,8 +1,9 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Security, status
 from ..models.schemas import Room, CreateRoomRequest, AddMemberRequest, RequestContext
 from ..services.chat_store import chat_store
 from ..auth.dependencies import get_request_context, require_admin
+from .dependencies import require_room_member
 
 router = APIRouter(prefix="/rooms", tags=["Rooms & Membership"])
 
@@ -40,24 +41,16 @@ async def create_room(
 async def get_room_details(
     room_id: str,
     context: RequestContext = Depends(get_request_context),
+    room: Room = Security(require_room_member),
 ):
-    room = chat_store.get_room_by_id(room_id, context.org_slug)
-    if not room:
-        raise HTTPException(status_code=404, detail="Room not found or access denied.")
-    if context.uid not in room.memberIds:
-        raise HTTPException(status_code=403, detail="You are not a member of this room.")
     return room
 
 @router.get("/{room_id}/members")
 async def get_room_members(
     room_id: str,
     context: RequestContext = Depends(get_request_context),
+    room: Room = Security(require_room_member),
 ):
-    room = chat_store.get_room_by_id(room_id, context.org_slug)
-    if not room:
-        raise HTTPException(status_code=404, detail="Room not found or access denied.")
-    if context.uid not in room.memberIds:
-        raise HTTPException(status_code=403, detail="You are not a member of this room.")
     members = [chat_store.get_user_by_id(uid) for uid in room.memberIds]
     return [m.to_public() for m in members if m]
 
