@@ -205,7 +205,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const connect = () => {
       if (!sseMountedRef.current) return;
 
-      const sseUrl = `${API_BASE}/api/events?token=${encodeURIComponent(token)}`;
+      const isFirebaseHosting =
+        typeof window !== 'undefined' &&
+        (window.location.hostname.includes('web.app') ||
+          window.location.hostname.includes('firebaseapp.com'));
+      const sseBase = isFirebaseHosting
+        ? (API_BASE || 'https://teamchat-ai-872402492611.us-central1.run.app')
+        : API_BASE;
+
+      const sseUrl = `${sseBase}/api/events?token=${encodeURIComponent(token)}`;
 
       const es = new EventSource(sseUrl);
       eventSourceRef.current = es;
