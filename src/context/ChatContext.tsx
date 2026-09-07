@@ -234,6 +234,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             case 'NEW_MESSAGE': {
               const newMsg: Message = payload;
+              if (newMsg.isAi) setIsAiThinking(false);
               if (newMsg.roomId === currentRoomIdRef.current) {
                 setMessages((prev) => {
                   if (prev.some((m) => m.id === newMsg.id)) {
@@ -460,8 +461,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return [...prev, sentMsg];
       });
 
-      // ponytail: mirrors backend AI_MENTION regex; codegen would share it — deferred
-      const mentionsAi = /@(?:gemini|ai)\b|\/(?:gemini|ai|ask)\b/i.test(content);
+      // ponytail: backend startswith semantics; codegen would share this — deferred
+      const mentionsAi = /@(?:gemini|ai)\b|^\/(?:gemini|ai|ask)/i.test(content);
       if (mentionsAi) {
         setIsAiThinking(true);
         if (aiThinkingTimeoutRef.current) clearTimeout(aiThinkingTimeoutRef.current);
