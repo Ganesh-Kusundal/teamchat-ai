@@ -25,6 +25,7 @@ This document contains pre-seeded evaluator credentials and structured verificat
 | **Mike Ross** | `member` | `mike@northside-health.test` | `password123` | Multi-speaker chat, asking Gemini clinical questions |
 | **Lisa Wong** | `member` | `lisa@northside-health.test` | `password123` | Collaborative diagnosis verification |
 | **Tom Castellanos** | `member` | `tom@northside-health.test` | `password123` | Real-time presence & concurrent typing |
+| **Dr. Marcus Vance** | `member` | `marcus@northside-health.test` | `password123` | Chronic patient panel review |
 
 ### Tenant 2: Valley Primary Care (`valley-primary-care`)
 *Independent primary care medical group with isolated patient populations and independent quality targets.*
@@ -32,6 +33,7 @@ This document contains pre-seeded evaluator credentials and structured verificat
 | User Name | Role | Email | Password | Suggested Focus |
 | :--- | :--- | :--- | :--- | :--- |
 | **Dr. Elena Sorensen** | `admin` | `elena@valley-primary-care.test` | `password123` | Cross-tenant isolation verification |
+| **David Park** | `member` | `david@valley-primary-care.test` | `password123` | Annual wellness audit testing |
 | **Diego Arriaga** | `member` | `diego@valley-primary-care.test` | `password123` | Local room interaction |
 | **Marta Escalante** | `member` | `marta@valley-primary-care.test` | `password123` | Typing and presence testing |
 

@@ -18,7 +18,7 @@
 - **Role**: Staff/Principal Full-Stack Engineer Technical Assessment
 - **Tech Stack**: Python 3.11+ (FastAPI), React 19 (TypeScript), Vertex AI (Gemini), Cloud Run, Server-Sent Events (SSE), Firestore
 - **Automated Tests**: 35/35 Pytest tests passing (`PYTHONPATH=. ./.venv/bin/pytest backend/tests/ -v`)
-- **Evaluation Guide**: Pre-seeded with 3 organizations, 8 users, and 1-click test credentials switcher.
+- **Evaluation Guide**: Pre-seeded with 3 organizations, 10 users, and 1-click test credentials switcher.
 
 ---
 
@@ -85,6 +85,7 @@ graph TD
 3. **Strict Tenant Boundaries**: `org_slug` is derived exclusively from authenticated server-side sessions. Tool arguments from the LLM cannot override tenant identity.
 4. **Deterministic Clinical Calculations**: The 6-step CMS-HCC V28 Risk Adjustment Factor (RAF) calculation, demographic weighting, and hierarchy supersession are computed deterministically in code—never delegated to LLM hallucination.
 5. **Multi-Speaker Attribution**: Context injected into Gemini explicitly attributes each message with sender name and timestamp (`The last message is from Sarah. Participants: Sarah, Mike. Address them by name.`).
+6. **Rich Clinical Presentation**: Gemini synthesizes condition mappings and RAF breakdowns in GitHub Flavored Markdown tables (`remark-gfm`) with responsive scrolling, custom headers, and tabular number formatting.
 
 ---
 
@@ -96,7 +97,9 @@ graph TD
 | **Northside Health System** | `northside-health` | Mike Ross | `member` | `mike@northside-health.test` | `password123` |
 | **Northside Health System** | `northside-health` | Lisa Wong | `member` | `lisa@northside-health.test` | `password123` |
 | **Northside Health System** | `northside-health` | Tom Castellanos | `member` | `tom@northside-health.test` | `password123` |
+| **Northside Health System** | `northside-health` | Dr. Marcus Vance | `member` | `marcus@northside-health.test` | `password123` |
 | **Valley Primary Care** | `valley-primary-care` | Dr. Elena Sorensen | `admin` | `elena@valley-primary-care.test` | `password123` |
+| **Valley Primary Care** | `valley-primary-care` | David Park | `member` | `david@valley-primary-care.test` | `password123` |
 | **Valley Primary Care** | `valley-primary-care` | Diego Arriaga | `member` | `diego@valley-primary-care.test` | `password123` |
 | **Valley Primary Care** | `valley-primary-care` | Marta Escalante | `member` | `marta@valley-primary-care.test` | `password123` |
 | **Metro Cardiology** | `metro-cardiology` | Dr. Marcus Brody | `admin` | `marcus@metro-cardiology.test` | `password123` |
@@ -154,17 +157,17 @@ cp .env.example .env
 
 ### 3. Run Automated Pytest Suite
 ```bash
-npm run test:python
+npm test
 # Or directly:
 PYTHONPATH=. ./.venv/bin/pytest backend/tests/ -v
 ```
 
 ### 4. Start Development Servers
 ```bash
-# Start FastAPI backend (Port 8000)
-npm run dev:python
+# Start FastAPI backend (Port 8002)
+npm run dev:backend
 
-# In a separate terminal, start Vite frontend (Port 5173 with proxy)
+# In a separate terminal, start Vite frontend (Port 5173 with proxy to 8002)
 npm run dev
 ```
 Open `http://localhost:5173` in your browser.
@@ -178,8 +181,8 @@ Local mode is intentionally deterministic and uses the seeded in-memory reposito
 Deploy as a unified, single-container production image using the included multi-stage `Dockerfile`:
 
 ```bash
-# 1. Build and submit image to Google Container Registry
-gcloud builds submit --tag gcr.io/[PROJECT_ID]/teamchat-ai:latest
+# 1. Build and submit image to Google Artifact Registry
+gcloud builds submit --tag us-central1-docker.pkg.dev/[PROJECT_ID]/teamchat/teamchat-ai:latest
 
 # Recommended: run the complete deployment helper.
 export GOOGLE_CLOUD_PROJECT=[PROJECT_ID]
@@ -203,6 +206,7 @@ teamchat-ai/
 │   ├── app/
 │   │   ├── api/                 # Modular FastAPI routers (Auth, Rooms, Messages, Realtime, Tools, Admin)
 │   │   ├── auth/                # RequestContext & Dependency-injected RBAC
+│   │   ├── core/                # Constants, Event envelopes, Formatting, Memory queries
 │   │   ├── models/              # Pydantic domain models & schemas
 │   │   ├── services/
 │   │   │   ├── chat_store.py    # Local repository and SSE engine
@@ -212,14 +216,16 @@ teamchat-ai/
 │   │   │   ├── memory_engine.py # Local team memory repository
 │   │   │   ├── firestore_memory.py # Durable team memory repository
 │   │   │   └── gemini_service.py# Gen AI SDK, multi-model fallback & attributed prompts
-│   ├── config.py              # Environment configuration
-│   ├── main.py                # FastAPI application gateway & static SPA serving
-│   ├── scripts/seed_firestore.py # Idempotent Firestore + Firebase Auth seed
-│   ├── tests/                   # Pytest test suite (Tenant isolation, RAF, Memory, Lookup)
+│   │   ├── config.py            # Environment configuration
+│   │   └── main.py              # FastAPI application gateway & static SPA serving
+│   ├── tests/                   # 35 Pytest unit & integration tests
 │   └── requirements.txt
+├── scripts/
+│   └── seed_firestore.py        # Idempotent Firestore + Firebase Auth seed
 ├── src/                         # React 19 Frontend
-│   ├── components/              # ChatArea, Sidebar, Navbar, LoginPage, TenantInspectorModal
+│   ├── components/              # ChatArea, LoginPage, Navbar, NewRoomModal, RoomMembersModal, Sidebar, SimulateMessageModal, TenantInspectorModal, Toast
 │   ├── context/                 # AuthContext, ChatContext (SSE listener)
+│   ├── services/api.ts          # Unified HTTP client & token management
 │   └── types.ts                 # TypeScript domain types
 ├── data/                        # Seed fixtures & datasets (teamchat-seed-2026.1)
 │   ├── condition_codes.csv      # 1,000 ICD-10 diagnosis codes fixture
