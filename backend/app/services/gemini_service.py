@@ -130,6 +130,22 @@ def execute_tool(name: str, args: Dict[str, Any], caller_org_slug: str, caller_u
         )
     return {"error": f'Unknown tool "{name}".'}
 
+
+async def _stream_response(client, model_name, contents, system_instruction, ai_message_id, room_id, org_slug, tool_calls, strip_tool_tags=False):
+    stream = client.models.generate_content_stream(
+        model=model_name,
+        contents=contents,
+        config=types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.3),
+    )
+    for chunk in stream:
+        text_chunk = chunk.text or ""
+        if strip_tool_tags:
+            text_chunk = re.sub(r"</?tool_code>", "", text_chunk)
+        if text_chunk:
+            chat_store.update_streaming_message(ai_message_id, room_id, org_slug, text_chunk, False, tool_calls)
+            await asyncio.sleep(0.02)
+    chat_store.update_streaming_message(ai_message_id, room_id, org_slug, "", True, tool_calls)
+
 # Declarations for Gemini Function Calling
 lookup_decl = {
     "name": "lookup_condition_code",
@@ -354,65 +370,12 @@ You are collaborating in real-time with healthcare and technology professionals 
                         f"Do NOT output raw `<tool_code>` or raw JSON dumps."
                     )
 
-                    stream_res = client.models.generate_content_stream(
-                        model=model_name,
-                        contents=followup_prompt,
-                        config=types.GenerateContentConfig(
-                            system_instruction=system_instruction,
-                            temperature=0.3,
-                        ),
-                    )
-
-                    for chunk in stream_res:
-                        raw_chunk = chunk.text or ""
-                        # Sanitize any accidental internal tool tags
-                        text_chunk = re.sub(r"</?tool_code>", "", raw_chunk)
-                        if text_chunk:
-                            chat_store.update_streaming_message(
-                                ai_message_id,
-                                room_id,
-                                org_slug,
-                                text_chunk,
-                                False,
-                                tool_calls_executed,
-                            )
-                            await asyncio.sleep(0.02)
-
-                    chat_store.update_streaming_message(
-                        ai_message_id,
-                        room_id,
-                        org_slug,
-                        "",
-                        True,
-                        tool_calls_executed,
-                    )
+                    await _stream_response(client, model_name, followup_prompt, system_instruction,
+                                           ai_message_id, room_id, org_slug, tool_calls_executed,
+                                           strip_tool_tags=True)
                 else:
-                    # No tool calls, stream content
-                    stream_res = client.models.generate_content_stream(
-                        model=model_name,
-                        contents=attributed_prompt,
-                        config=types.GenerateContentConfig(
-                            system_instruction=system_instruction,
-                            temperature=0.3,
-                        ),
-                    )
-
-                    for chunk in stream_res:
-                        text_chunk = chunk.text or ""
-                        if text_chunk:
-                            chat_store.update_streaming_message(
-                                ai_message_id,
-                                room_id,
-                                org_slug,
-                                text_chunk,
-                                False,
-                                [],
-                            )
-                            await asyncio.sleep(0.02)
-
-                    chat_store.update_streaming_message(
-                        ai_message_id, room_id, org_slug, "", True, []
-                    )
+                    await _stream_response(client, model_name, attributed_prompt, system_instruction,
+                                           ai_message_id, room_id, org_slug, [])
 
                 success = True
                 break

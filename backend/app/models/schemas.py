@@ -60,7 +60,6 @@ class Room(BaseModel):
     lastMessage: Optional[str] = None
     lastMessageTimestamp: Optional[str] = None
     unreadCount: Optional[int] = 0
-    aiPersona: Optional[str] = None
 
 class CreateRoomRequest(BaseModel):
     name: str
@@ -233,12 +232,3 @@ class RAFCalculationResult(BaseModel):
     raf_total: float
     base_rate: float
     estimated_annual_payment: int
-
-class GroundingRecord(BaseModel):
-    id: str
-    requestId: str
-    sourceType: Literal["patient", "condition", "risk", "memory"]
-    sourceId: str
-    toolName: str
-    datasetVersion: str = "teamchat-seed-2026.1"
-    createdAt: str

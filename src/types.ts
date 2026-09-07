@@ -42,7 +42,6 @@ export interface Room {
   unreadCount?: number;
   lastMessage?: string;
   lastMessageTimestamp?: string;
-  aiPersona?: string;
 }
 
 export interface ToolCallRecord {
