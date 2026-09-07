@@ -272,14 +272,26 @@ git add -A && git commit -m "refactor: shared SSE event contract for both storag
 from fastapi.testclient import TestClient
 
 
-def test_guard_blocks_non_member(client: TestClient, northside_headers, valley_headers):
-    # usr-elena (Valley admin) is NOT in Northside rooms -> 403 via the shared guard
-    res = client.get("/api/rooms/room-nor-001/messages", headers=valley_headers)
+def test_guard_blocks_same_org_non_member(client: TestClient, northside_headers):
+    # Sarah creates a private room containing only herself.
+    res = client.post("/api/rooms", headers=northside_headers,
+                      json={"name": "solo", "description": "", "isPrivate": True, "memberIds": []})
+    assert res.status_code == 201
+    room_id = res.json()["id"]
+    # Mike is in the same org but NOT a member of this room -> 403 via the shared guard.
+    mike_headers = {"Authorization": "Bearer usr-mike"}
+    res = client.get(f"/api/rooms/{room_id}/messages", headers=mike_headers)
     assert res.status_code == 403
 
 
 def test_guard_404_for_missing_room(client: TestClient, northside_headers):
     res = client.get("/api/rooms/room-does-not-exist/messages", headers=northside_headers)
+    assert res.status_code == 404
+
+
+def test_guard_404_cross_tenant_room_id(client: TestClient, valley_headers):
+    # Room IDs are org-scoped: a Valley user asking for a Northside room gets 404, not 403.
+    res = client.get("/api/rooms/room-nor-001/messages", headers=valley_headers)
     assert res.status_code == 404
 ```
 
@@ -333,7 +345,7 @@ Sites: routes_messages `get_messages`, `mark_room_read`, `send_message`, `set_ty
 - [ ] **Step 4: Verify**
 
 Run: `npm test`
-Expected: 23 passed
+Expected: 24 passed (21 + 3 new)
 
 Run: `grep -rn "memberIds" backend/app/api/routes_messages.py backend/app/api/routes_rooms.py`
 Expected: no output (guard owns membership checks)
@@ -624,7 +636,7 @@ org_patients = [p.model_dump() for p in clinical_engine.get_patients_for_org(con
 - [ ] **Step 4: Verify**
 
 Run: `npm test`
-Expected: 31 passed (28 + 3 new)
+Expected: 32 passed (29 + 3 new)
 
 Run: `grep -rn "_resolve_user_from_token\|clinical_engine.patients" backend/app backend/tests`
 Expected: empty
@@ -894,7 +906,7 @@ export const getAvatarColor = (id?: string) => {
 - [ ] **Step 5: Verify**
 
 Run: `npm test && npm run lint`
-Expected: 32 passed; tsc exit 0
+Expected: 33 passed; tsc exit 0
 
 Run: `grep -rn "northside-health.test" src`
 Expected: empty (README keeps its table — docs, not code)
@@ -931,7 +943,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname
 - [ ] **Step 2: Verify**
 
 Run: `npm test`
-Expected: 32 passed
+Expected: 33 passed
 
 Run: `grep -rn "print(" backend/app | grep -v "core\|__main__"`
 Expected: empty
@@ -946,7 +958,7 @@ git add -A && git commit -m "refactor: structured logging replaces print stateme
 
 ## Final verification (end of plan)
 
-1. `npm test` → all tests pass (17 baseline + 15 new = 32)
+1. `npm test` → all tests pass (17 baseline + 16 new = 33)
 2. `npm run lint` → exit 0
 3. `grep -rn '12000\|password123\|%Y-%m-%dT%H\|gemini-ai\|MY_GEMINI_API_KEY' backend/app | grep -v core/constants.py` → empty
 4. `grep -rn "fetch(" src | grep -v services/api.ts` → empty
