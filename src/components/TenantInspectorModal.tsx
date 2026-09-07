@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { RAFCalculationResult } from '../types.js';
+import { api } from '../services/api.js';
 
 interface TenantInspectorModalProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ interface TenantInspectorModalProps {
 }
 
 export const TenantInspectorModal: React.FC<TenantInspectorModalProps> = ({ isOpen, onClose }) => {
-  const { organization, token, allOrganizations, switchOrganization } = useAuth();
+  const { organization, allOrganizations, switchOrganization } = useAuth();
   const [activeTab, setActiveTab] = useState<'isolation' | 'raf' | 'architecture'>('isolation');
 
   // Isolation test state
@@ -45,9 +46,7 @@ export const TenantInspectorModal: React.FC<TenantInspectorModalProps> = ({ isOp
     setPatientLookupLoading(true);
     setPatientLookupResult(null);
     try {
-      const res = await fetch(`/api/patients/${pId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api(`/api/patients/${pId}`);
       const data = await res.json();
       setPatientLookupResult(data);
     } catch (err: any) {
@@ -62,9 +61,7 @@ export const TenantInspectorModal: React.FC<TenantInspectorModalProps> = ({ isOp
     setMemoryLoading(true);
     setMemoryResult(null);
     try {
-      const res = await fetch(`/api/memories?q=${encodeURIComponent(memoryKey)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api(`/api/memories?q=${encodeURIComponent(memoryKey)}`);
       const data = await res.json();
       setMemoryResult(data);
     } catch (err: any) {
@@ -83,12 +80,8 @@ export const TenantInspectorModal: React.FC<TenantInspectorModalProps> = ({ isOp
         .split(/[,\s]+/)
         .map((c) => c.trim())
         .filter(Boolean);
-      const res = await fetch('/api/tools/calculate-raf', {
+      const res = await api('/api/tools/calculate-raf', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           icd10Codes: codes,
           baseRate: rafBaseRate,

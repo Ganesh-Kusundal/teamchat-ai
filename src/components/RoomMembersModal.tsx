@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useChat } from '../context/ChatContext.js';
 import { useAuth } from '../context/AuthContext.js';
+import { api } from '../services/api.js';
 import { Users, UserPlus, UserMinus, X, Shield, Lock } from 'lucide-react';
 
 interface RoomMembersModalProps {
@@ -23,17 +24,10 @@ export const RoomMembersModal: React.FC<RoomMembersModalProps> = ({ isOpen, onCl
     setLoading(true);
     try {
       if (isCurrentlyMember) {
-        await fetch(`/api/rooms/${currentRoom.id}/members/${targetUserId}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api(`/api/rooms/${currentRoom.id}/members/${targetUserId}`, { method: 'DELETE' });
       } else {
-        await fetch(`/api/rooms/${currentRoom.id}/members`, {
+        await api(`/api/rooms/${currentRoom.id}/members`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({ userId: targetUserId }),
         });
       }

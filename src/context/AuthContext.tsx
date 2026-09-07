@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import { User, Organization } from '../types.js';
+import { api, setAuthToken } from '../services/api.js';
 
 interface AuthContextType {
   user: User | null;
@@ -25,6 +26,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('teamchat_token'));
   const [isLoading, setIsLoading] = useState(true);
 
+  useLayoutEffect(() => {
+    setAuthToken(token);
+  }, [token]);
+
   // Fetch organizations for authenticated session (tenant-scoped)
   const fetchOrganizations = useCallback(async (sessionToken?: string) => {
     if (!sessionToken) {
@@ -32,9 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     try {
-      const res = await fetch('/api/orgs', {
-        headers: { Authorization: `Bearer ${sessionToken}` },
-      });
+      const res = await api('/api/orgs', { token: sessionToken });
       if (res.ok) {
         const orgs = await res.json();
         setAllOrganizations(orgs);
@@ -47,9 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch current user and organization details
   const fetchMe = useCallback(async (sessionToken: string) => {
     try {
-      const res = await fetch('/api/auth/me', {
-        headers: { Authorization: `Bearer ${sessionToken}` },
-      });
+      const res = await api('/api/auth/me', { token: sessionToken });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
@@ -58,9 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('teamchat_token', sessionToken);
 
         // Fetch users in this org
-        const usersRes = await fetch('/api/org/users', {
-          headers: { Authorization: `Bearer ${sessionToken}` },
-        });
+        const usersRes = await api('/api/org/users', { token: sessionToken });
         if (usersRes.ok) {
           const usersList = await usersRes.json();
           setOrgUsers(usersList);
@@ -95,9 +94,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password = 'password123'): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await api('/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
@@ -113,9 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('teamchat_token', data.token);
 
       // Fetch org users
-      const usersRes = await fetch('/api/org/users', {
-        headers: { Authorization: `Bearer ${data.token}` },
-      });
+      const usersRes = await api('/api/org/users', { token: data.token });
       if (usersRes.ok) {
         setOrgUsers(await usersRes.json());
       }
@@ -132,12 +128,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     if (token) {
       // Notify server offline
-      fetch('/api/presence', {
+      api('/api/presence', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ isOnline: false }),
       }).catch(() => {});
     }

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { Room, Message, PresenceRecord, ToolCallRecord, TypingUser } from '../types.js';
 import { useAuth } from './AuthContext.js';
 import { useToast } from '../components/Toast.js';
+import { api, API_BASE } from '../services/api.js';
 
 interface ChatContextType {
   rooms: Room[];
@@ -53,9 +54,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchRooms = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('/api/rooms', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api('/api/rooms');
       if (res.ok) {
         const data: Room[] = await res.json();
         setRooms(data);
@@ -76,9 +75,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const sequence = ++messageFetchSequenceRef.current;
       setIsLoadingMessages(true);
       try {
-        const res = await fetch(`/api/rooms/${roomId}/messages`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api(`/api/rooms/${roomId}/messages`);
         if (res.ok) {
           const data: Message[] = await res.json();
           if (sequence === messageFetchSequenceRef.current && currentRoomIdRef.current === roomId) {
@@ -99,10 +96,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     async (roomId: string) => {
       if (!token) return;
       try {
-        await fetch(`/api/rooms/${roomId}/read`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api(`/api/rooms/${roomId}/read`, { method: 'POST' });
         setUnreadMap((prev) => ({ ...prev, [roomId]: 0 }));
       } catch (err) {
         console.error('Failed to mark room as read:', err);
@@ -123,12 +117,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Notify presence of current room
       if (token) {
-        fetch('/api/presence', {
+        api('/api/presence', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({ isOnline: true, currentRoomId: roomId }),
         }).catch(() => {});
       }
@@ -138,9 +128,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchPresence = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('/api/presence', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api('/api/presence');
       if (res.ok) {
         const records: PresenceRecord[] = await res.json();
         setOnlineUsers(records.filter((p) => p.isOnline));
@@ -170,12 +158,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user || !token) return;
     const interval = setInterval(() => {
       fetchPresence();
-      fetch('/api/presence', {
+      api('/api/presence', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ isOnline: true, currentRoomId: currentRoomIdRef.current }),
       }).catch(() => {});
     }, 20_000);
@@ -221,15 +205,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const connect = () => {
       if (!sseMountedRef.current) return;
 
-      const isFirebaseHosting =
-        typeof window !== 'undefined' &&
-        (window.location.hostname.includes('web.app') ||
-          window.location.hostname.includes('firebaseapp.com'));
-      const sseOrigin = isFirebaseHosting
-        ? 'https://teamchat-ai-872402492611.us-central1.run.app'
-        : '';
-
-      const sseUrl = `${sseOrigin}/api/events?token=${encodeURIComponent(token)}`;
+      const sseUrl = `${API_BASE}/api/events?token=${encodeURIComponent(token)}`;
 
       const es = new EventSource(sseUrl);
       eventSourceRef.current = es;
@@ -266,10 +242,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   return [...prev, newMsg];
                 });
                 if (token && newMsg.senderId !== user.id) {
-                  fetch(`/api/rooms/${newMsg.roomId}/read`, {
-                    method: 'POST',
-                    headers: { Authorization: `Bearer ${token}` },
-                  }).catch(() => {});
+                  api(`/api/rooms/${newMsg.roomId}/read`, { method: 'POST' }).catch(() => {});
                 }
               } else {
                 setUnreadMap((prev) => ({
@@ -465,12 +438,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const clientMessageId = `client-msg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
     try {
-      const res = await fetch(`/api/rooms/${currentRoom.id}/messages`, {
+      const res = await api(`/api/rooms/${currentRoom.id}/messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           content: content.trim(),
           clientMessageId,
@@ -491,6 +460,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return [...prev, sentMsg];
       });
 
+      // ponytail: mirrors backend AI_MENTION regex; codegen would share it — deferred
       const mentionsAi = /@(?:gemini|ai)\b|\/(?:gemini|ai|ask)\b/i.test(content);
       if (mentionsAi) {
         setIsAiThinking(true);
@@ -511,9 +481,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
           }
           try {
-            const pollRes = await fetch(`/api/rooms/${targetRoomId}/messages`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
+            const pollRes = await api(`/api/rooms/${targetRoomId}/messages`);
             if (pollRes.ok) {
               const msgs: Message[] = await pollRes.json();
               setMessages(msgs);
@@ -541,23 +509,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearTimeout(typingTimeoutRef.current);
     }
 
-    fetch(`/api/rooms/${currentRoom.id}/typing`, {
+    api(`/api/rooms/${currentRoom.id}/typing`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify({ isTyping }),
     }).catch(() => {});
 
     if (isTyping) {
       typingTimeoutRef.current = setTimeout(() => {
-        fetch(`/api/rooms/${currentRoom.id}/typing`, {
+        api(`/api/rooms/${currentRoom.id}/typing`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({ isTyping: false }),
         }).catch(() => {});
       }, 3000);
@@ -568,12 +528,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const createRoom = async (name: string, description: string, isPrivate = false): Promise<Room | null> => {
     if (!token) return null;
     try {
-      const res = await fetch('/api/rooms', {
+      const res = await api('/api/rooms', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ name, description, isPrivate }),
       });
       if (res.ok) {
@@ -597,12 +553,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!currentRoom) return;
     try {
       // 1. Broadcast typing active
-      await fetch(`/api/rooms/${currentRoom.id}/typing`, {
+      await api(`/api/rooms/${currentRoom.id}/typing`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${coUserId}`,
-        },
+        token: coUserId,
         body: JSON.stringify({ isTyping: true }),
       }).catch(() => {});
 
@@ -610,21 +563,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await new Promise((resolve) => setTimeout(resolve, 1400));
 
       // 3. Clear typing and send message
-      await fetch(`/api/rooms/${currentRoom.id}/typing`, {
+      await api(`/api/rooms/${currentRoom.id}/typing`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${coUserId}`,
-        },
+        token: coUserId,
         body: JSON.stringify({ isTyping: false }),
       }).catch(() => {});
 
-      await fetch(`/api/rooms/${currentRoom.id}/messages`, {
+      await api(`/api/rooms/${currentRoom.id}/messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${coUserId}`, // Using coUserId as bearer token
-        },
+        token: coUserId,
         body: JSON.stringify({ content }),
       });
     } catch (err) {
@@ -636,10 +583,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetDemoData = async () => {
     if (!token) return;
     try {
-      await fetch('/api/admin/reset-demo', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api('/api/admin/reset-demo', { method: 'POST' });
       await fetchRooms();
       if (currentRoom) {
         await fetchMessages(currentRoom.id);
